@@ -2,7 +2,7 @@
   "speakers": [
     {
       "id": 0,
-      "name": "Le chien",
+      "name": "blablalib.speaker.dog",
       "color": "FFFFFFFF",
       "sounds": []
     }

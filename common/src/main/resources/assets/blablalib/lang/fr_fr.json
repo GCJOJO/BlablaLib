@@ -1,0 +1,6 @@
+{
+  "blablalib.commands.invalid_dialogue": "Dialogue invalide: %s",
+  "blablalib.commands.updated_dialogue": "Dialogue mis à jour vers: %s",
+
+  "blablalib.speaker.dog": "Le chien :D"
+}
