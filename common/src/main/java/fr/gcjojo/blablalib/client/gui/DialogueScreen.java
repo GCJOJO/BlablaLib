@@ -1,7 +1,7 @@
 package fr.gcjojo.blablalib.client.gui;
 
 import dev.architectury.networking.NetworkManager;
-import fr.gcjojo.blablalib.ModEntry;
+import fr.gcjojo.blablalib.BlablaLib;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import fr.gcjojo.blablalib.dialogues.*;
@@ -123,7 +123,7 @@ public class DialogueScreen extends Screen {
 
     public static List<DialogueAction> loadSet(String setPath) {
         try {
-            String namespace = ModEntry.MOD_ID;
+            String namespace = BlablaLib.MOD_ID;
             String setName = setPath;
             if(setPath.contains(":")) {
                 namespace = setPath.split(":")[0];
@@ -162,8 +162,8 @@ public class DialogueScreen extends Screen {
                 }
             }
         } catch (Exception e) {
-            ModEntry.getLogger().error(e.getMessage());
-            Arrays.stream(e.getStackTrace()).forEach(stackTraceElement -> ModEntry.getLogger().error(stackTraceElement.toString()));
+            BlablaLib.getLogger().error(e.getMessage());
+            Arrays.stream(e.getStackTrace()).forEach(stackTraceElement -> BlablaLib.getLogger().error(stackTraceElement.toString()));
             return null;
         }
         return null;
@@ -171,7 +171,7 @@ public class DialogueScreen extends Screen {
 
     public static List<DialogueSpeaker> loadSpeakers(String setPath){
         try {
-            String namespace = ModEntry.MOD_ID;
+            String namespace = BlablaLib.MOD_ID;
             if (setPath.contains(":"))
                 namespace = setPath.split(":")[0];
 
@@ -191,7 +191,7 @@ public class DialogueScreen extends Screen {
                 return speakers;
             }
         } catch (Exception e) {
-            ModEntry.getLogger().warn("Oopsie cannot load speakers !");
+            BlablaLib.getLogger().warn("Oopsie cannot load speakers !");
         }
 
         return null;

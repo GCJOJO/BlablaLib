@@ -1,7 +1,7 @@
 package fr.gcjojo.blablalib.dialogues.actions;
 
 import com.google.gson.JsonObject;
-import fr.gcjojo.blablalib.ModEntry;
+import fr.gcjojo.blablalib.BlablaLib;
 import fr.gcjojo.blablalib.dialogues.DialogueAction;
 import fr.gcjojo.blablalib.utils.MathUtils;
 import net.minecraft.client.gui.GuiGraphics;
@@ -35,7 +35,7 @@ public class DialogueFading extends DialogueAction
                 this.toColor = FastColor.ARGB32.color(alpha, red, green, blue);
             }
         } catch (Exception e) {
-            ModEntry.getLogger().error(e.getMessage());
+            BlablaLib.getLogger().error(e.getMessage());
         }
     }
 
@@ -62,7 +62,7 @@ public class DialogueFading extends DialogueAction
                 }
             }
         } catch (Exception e) {
-            ModEntry.getLogger().error(e.getMessage());
+            BlablaLib.getLogger().error(e.getMessage());
         }
 
         if(object.has("time"))

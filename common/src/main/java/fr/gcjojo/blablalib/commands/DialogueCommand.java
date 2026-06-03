@@ -3,7 +3,7 @@ package fr.gcjojo.blablalib.commands;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import dev.architectury.networking.NetworkManager;
-import fr.gcjojo.blablalib.ModEntry;
+import fr.gcjojo.blablalib.BlablaLib;
 import fr.gcjojo.blablalib.network.ModNetwork;
 import io.netty.buffer.Unpooled;
 import net.minecraft.ChatFormatting;
@@ -20,12 +20,9 @@ public class DialogueCommand {
                 .then(Commands.literal("play")
                         .executes(context -> {
                             ServerPlayer player = context.getSource().getPlayerOrException();
-                            String currentChapter = ModEntry.getPlayerDataManager().getPlayerCurrentChapter(player);
+                            String currentChapter = BlablaLib.getPlayerDataManager().getPlayerCurrentChapter(player);
                             if(!currentChapter.isEmpty()) {
-                                FriendlyByteBuf buf = new FriendlyByteBuf(Unpooled.buffer());
-                                buf.writeUtf(currentChapter);
-                                NetworkManager.sendToPlayer(player, ModNetwork.OPEN_DIALOGUE_PACKET_ID, buf);
-
+                                BlablaLib.OpenDialogue(player, currentChapter);
                                 return 1;
                             }
 
@@ -38,8 +35,7 @@ public class DialogueCommand {
                                     ServerPlayer player = context.getSource().getPlayerOrException();
                                     String chapterName = StringArgumentType.getString(context, "chapterName");
 
-                                    //player.getPersistentData().putString("CurrentChapter", chapterName);
-                                    ModEntry.getPlayerDataManager().setPlayerCurrentChapter(player, chapterName);
+                                    BlablaLib.getPlayerDataManager().setPlayerCurrentChapter(player, chapterName);
                                     context.getSource().sendSuccess(() -> Component.translatable("blablalib.commands.updated_dialogue", chapterName).withStyle(ChatFormatting.GREEN), true);
                                     return 1;
                                 })))

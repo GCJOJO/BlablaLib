@@ -3,7 +3,7 @@ package fr.gcjojo.blablalib.dialogues.actions;
 import com.google.gson.JsonObject;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
-import fr.gcjojo.blablalib.ModEntry;
+import fr.gcjojo.blablalib.BlablaLib;
 import fr.gcjojo.blablalib.dialogues.DialogueAction;
 import fr.gcjojo.blablalib.utils.MathUtils;
 import net.minecraft.client.Minecraft;
@@ -61,7 +61,7 @@ public class DialogueCredit extends DialogueAction {
                 int blue = Integer.parseInt(color.substring(4, 6), 16);
                 this.color = new Vec3i(red, green, blue);
             }
-        } catch (Exception e) { ModEntry.getLogger().error(e.getMessage()); }
+        } catch (Exception e) { BlablaLib.getLogger().error(e.getMessage()); }
 
         this.alignment = TextAlignment.CENTER;
         this.alpha = 0;
@@ -105,7 +105,7 @@ public class DialogueCredit extends DialogueAction {
                     int blue = Integer.parseInt(color.substring(4, 6), 16);
                     this.color = new Vec3i(red, green, blue);
                 }
-            } catch (Exception e) { ModEntry.getLogger().error(e.getMessage()); }
+            } catch (Exception e) { BlablaLib.getLogger().error(e.getMessage()); }
         }
 
         if(object.has("alignment"))

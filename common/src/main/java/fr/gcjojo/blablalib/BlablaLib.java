@@ -2,14 +2,16 @@ package fr.gcjojo.blablalib;
 
 import com.mojang.logging.LogUtils;
 import dev.architectury.event.EventResult;
-import dev.architectury.event.events.common.EntityEvent;
+import dev.architectury.networking.NetworkManager;
 import fr.gcjojo.blablalib.client.SoundPlayer;
 import fr.gcjojo.blablalib.events.BlablalibEvents;
 import fr.gcjojo.blablalib.network.ModNetwork;
+import io.netty.buffer.Unpooled;
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.level.ServerPlayer;
 import org.slf4j.Logger;
 
-public final class ModEntry {
+public final class BlablaLib {
     public static final String MOD_ID = "blablalib";
     private static SoundPlayer SOUND_PLAYER;
     private static PlayerDataManager PLAYER_DATA_MANAGER;
@@ -33,4 +35,10 @@ public final class ModEntry {
     public static void setPlayerDataManager(PlayerDataManager newPlayerDataManager) { PLAYER_DATA_MANAGER = newPlayerDataManager; }
 
     public static Logger getLogger() { return LOGGER; }
+
+    public static void OpenDialogue(ServerPlayer player, String dialogue){
+        FriendlyByteBuf buf = new FriendlyByteBuf(Unpooled.buffer());
+        buf.writeUtf(dialogue);
+        NetworkManager.sendToPlayer(player, ModNetwork.OPEN_DIALOGUE_PACKET_ID, buf);
+    }
 }

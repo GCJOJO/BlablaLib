@@ -1,16 +1,10 @@
 package fr.gcjojo.blablalib.dialogues;
 
-import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
-import fr.gcjojo.blablalib.ModEntry;
-import fr.gcjojo.blablalib.client.SoundPlayer;
-import net.minecraft.core.registries.Registries;
-import net.minecraft.resources.ResourceLocation;
+import fr.gcjojo.blablalib.BlablaLib;
 import net.minecraft.sounds.SoundEvent;
-import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.FastColor;
-import dev.architectury.registry.registries.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -35,7 +29,7 @@ public class DialogueSpeaker {
                 this.color = FastColor.ARGB32.color(alpha, red, green, blue);
             }
         } catch (Exception e) {
-            ModEntry.getLogger().warn("Unable to parse color {}", colorStr);
+            BlablaLib.getLogger().warn("Unable to parse color {}", colorStr);
         }
 
         JsonArray soundsArray = obj.get("sounds").getAsJsonArray();
@@ -67,7 +61,7 @@ public class DialogueSpeaker {
         for(int i = 0; i <= soundNames.length - 1; i++)
         {
             String soundName = soundNames[i];
-            SoundEvent soundEvent = ModEntry.getSoundPlayer().loadSound(soundName);
+            SoundEvent soundEvent = BlablaLib.getSoundPlayer().loadSound(soundName);
             if(soundEvent == null) continue;
             loadedSounds.add(soundEvent);
         }
