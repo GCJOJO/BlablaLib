@@ -6,19 +6,39 @@ import io.github.gcjojo.blablalib.BlablaLib;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
+import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class DialogueCommand {
 
+    public interface DialogueTransformation {
+        String transformDialogue(String dialogue);
+
+        public static final DialogueTransformation DEFAULT_TRANSFORMATION = (String dialogue) -> { return dialogue; };
+    }
+
     public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
-        dispatcher.register(Commands.literal("dialogue").requires(commandSourceStack -> commandSourceStack.hasPermission(2))
+        register(dispatcher, new ArrayList<>(), DialogueTransformation.DEFAULT_TRANSFORMATION);
+    }
+
+    public static void register(CommandDispatcher<CommandSourceStack> dispatcher, List<String> dialogues){
+        register(dispatcher, dialogues, DialogueTransformation.DEFAULT_TRANSFORMATION);
+    }
+
+    public static void register(CommandDispatcher<CommandSourceStack> dispatcher, List<String> dialogues, DialogueTransformation transformation)
+    {
+        dispatcher.register(Commands.literal("dialogue")
+                .requires(commandSourceStack -> commandSourceStack.hasPermission(2))
                 .then(Commands.literal("play")
                         .executes(context -> {
                             ServerPlayer player = context.getSource().getPlayerOrException();
                             String currentChapter = BlablaLib.getPlayerDataManager().getPlayerCurrentChapter(player);
                             if(!currentChapter.isEmpty()) {
-                                BlablaLib.OpenDialogue(player, currentChapter);
+                                BlablaLib.openDialogue(player, currentChapter);
                                 return 1;
                             }
 
@@ -27,12 +47,16 @@ public class DialogueCommand {
                         }))
                 .then(Commands.literal("set")
                         .then(Commands.argument("chapterName", StringArgumentType.string())
+                                .suggests((context, builder) -> SharedSuggestionProvider.suggest(dialogues, builder))
                                 .executes(context -> {
                                     ServerPlayer player = context.getSource().getPlayerOrException();
                                     String chapterName = StringArgumentType.getString(context, "chapterName");
 
+                                    chapterName = transformation.transformDialogue(chapterName);
+
                                     BlablaLib.getPlayerDataManager().setPlayerCurrentChapter(player, chapterName);
-                                    context.getSource().sendSuccess(() -> Component.translatable("blablalib.commands.updated_dialogue", chapterName).withStyle(ChatFormatting.GREEN), true);
+                                    String finalChapterName = chapterName;
+                                    context.getSource().sendSuccess(() -> Component.translatable("blablalib.commands.updated_dialogue", finalChapterName).withStyle(ChatFormatting.GREEN), true);
                                     return 1;
                                 })))
         );

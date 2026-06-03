@@ -18,8 +18,11 @@ public final class ModEntryFabric implements ModInitializer {
         BlablaLib.setSoundPlayer(new FabricSoundPlayer());
         BlablaLib.setPlayerDataManager(new FabricPlayerDataManager());
 
-        CommandRegistrationEvent.EVENT.register(((dispatcher, registry, selection) -> {
-            DialogueCommand.register(dispatcher);
-        }));
+        ConfigManager.load();
+        if(ConfigManager.config.enableCommand) {
+            CommandRegistrationEvent.EVENT.register(((dispatcher, registry, selection) -> {
+                DialogueCommand.register(dispatcher);
+            }));
+        }
     }
 }

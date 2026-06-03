@@ -2,6 +2,7 @@ package io.github.gcjojo.blablalib.forge.commands;
 
 import io.github.gcjojo.blablalib.BlablaLib;
 import io.github.gcjojo.blablalib.commands.DialogueCommand;
+import io.github.gcjojo.blablalib.forge.ForgeConfig;
 import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
@@ -11,6 +12,7 @@ public class ForgeCommandRegister {
 
     @SubscribeEvent
     public static void onRegisterCommands(RegisterCommandsEvent event) {
-        DialogueCommand.register(event.getDispatcher());
+        if(ForgeConfig.enableCommand)
+            DialogueCommand.register(event.getDispatcher());
     }
 }

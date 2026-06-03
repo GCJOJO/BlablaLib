@@ -19,7 +19,6 @@ public final class BlablaLib {
     private static final Logger LOGGER = LogUtils.getLogger();
 
     public static void init() {
-        // Write common init code here.
         ModNetwork.registerPackets();
 
         BlablalibEvents.DIALOGUE_COMPLETED.register((ServerPlayer player, String completedDialogue) -> {
@@ -36,9 +35,36 @@ public final class BlablaLib {
 
     public static Logger getLogger() { return LOGGER; }
 
-    public static void OpenDialogue(ServerPlayer player, String dialogue){
+    public static void openDialogue(ServerPlayer player){
+        String currentDialogue = PLAYER_DATA_MANAGER.getPlayerCurrentChapter(player);
+        if(currentDialogue.isEmpty()) return;
+
+        openDialogue(player, currentDialogue);
+    }
+
+    public static void openDialogue(ServerPlayer player, String dialogue) {
+        if (PLAYER_DATA_MANAGER.getPlayerInDialogue(player)) return;
+
+        PLAYER_DATA_MANAGER.setPlayerCurrentChapter(player, dialogue);
         FriendlyByteBuf buf = new FriendlyByteBuf(Unpooled.buffer());
         buf.writeUtf(dialogue);
         NetworkManager.sendToPlayer(player, ModNetwork.OPEN_DIALOGUE_PACKET_ID, buf);
     }
+
+    public static void setPlayerDialogue(ServerPlayer player, String dialogue){
+        PLAYER_DATA_MANAGER.setPlayerCurrentChapter(player, dialogue);
+    }
+
+    public static boolean isPlayerInDialogue(ServerPlayer player){
+        return PLAYER_DATA_MANAGER.getPlayerInDialogue(player);
+    }
+
+    public static String getPlayerDialogue(ServerPlayer player){
+        return PLAYER_DATA_MANAGER.getPlayerCurrentChapter(player);
+    }
+
+    public static String getPlayerLastReadDialogue(ServerPlayer player){
+        return PLAYER_DATA_MANAGER.getPlayerLastReadChapter(player);
+    }
+
 }
