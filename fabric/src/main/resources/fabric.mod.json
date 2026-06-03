@@ -15,12 +15,14 @@
   "environment": "*",
   "entrypoints": {
     "main": [
-      "fr.gcjojo.blablalib.fabric.ModEntryFabric"
+      "io.github.gcjojo.blablalib.fabric.ModEntryFabric"
     ],
     "client": [
-      "fr.gcjojo.blablalib.fabric.client.ModEntryFabricClient"
+      "io.github.gcjojo.blablalib.fabric.client.ModEntryFabricClient"
     ],
-    "cardinal-components-entity": ["fr.gcjojo.blablalib.fabric.data_components.ModComponents"]
+    "cardinal-components-entity": [
+      "io.github.gcjojo.blablalib.fabric.data_components.ModComponents"
+    ]
   },
   "mixins": [
     "blablalib.mixins.json"
