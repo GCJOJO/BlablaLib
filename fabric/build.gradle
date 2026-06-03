@@ -1,5 +1,5 @@
 plugins {
-    id 'com.github.johnrengelman.shadow'
+    id 'com.github.johnrengelman.shadow' apply true
 }
 
 architectury {
@@ -58,10 +58,14 @@ processResources {
     }
 }
 
+jar {
+    exclude 'META-INF/**'
+}
+
 shadowJar {
     configurations = [project.configurations.shadowBundle]
     archiveClassifier = 'dev-shadow'
-    exclude 'META-INF/**'
+    exclude'META-INF/**'
 }
 
 remapJar {
