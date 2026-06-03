@@ -10,6 +10,7 @@
 
 name: Publish package to GitHub Packages
 on:
+  workflow_dispatch:
   release:
     types: [created]
 jobs:
@@ -33,4 +34,6 @@ jobs:
       - name: Publish package
         run: gradle publish
         env:
+          MAVEN_USERNAME: ${{ secrets.OSSRH_USERNAME }}
+          MAVEN_PASSWORD: ${{ secrets.OSSRH_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
