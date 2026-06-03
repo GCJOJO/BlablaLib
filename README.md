@@ -4,6 +4,25 @@ This library add a dialogue system.<br>
 You can use commands like `/dialogue play` and `/dialogue set "my_mod:my_cool_dialogue"` to use this library.<br>
 You can also use the `BlablaLib.OpenDialogue()` function.<br><br>
 
+## How to use as a library for another mod
+First add the dependency to your build.gradle
+```groovy
+repositories{
+    maven {
+        url "https://cursemaven.com"
+    }
+    
+    dependencies{
+        // Fabric
+        modImplementation "curse.maven:blablalib-1563558:<file_id>"
+        
+        // Forge
+        implementation fg.deobf("curse.maven:blablalib-1563558:<file_id>")
+    }
+}
+```
+
+
 ## How to use the dialogue system<br>
 First create a resource pack using this folder structure
 ```

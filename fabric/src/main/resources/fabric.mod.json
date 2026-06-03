@@ -8,7 +8,8 @@
     "GCJOJO"
   ],
   "contact": {
-    "homepage": "https://github.com/GCJOJO/BlablaLib"
+    "homepage": "https://github.com/GCJOJO/BlablaLib",
+    "issues": "https://github.com/GCJOJO/BlablaLib/issues"
   },
   "license": "MIT",
   "icon": "assets/blablalib/icon.png",
