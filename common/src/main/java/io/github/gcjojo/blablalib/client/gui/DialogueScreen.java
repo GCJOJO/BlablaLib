@@ -4,12 +4,10 @@ import dev.architectury.networking.NetworkManager;
 import io.github.gcjojo.blablalib.BlablaLib;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
-import io.github.gcjojo.blablalib.dialogues.*;
 import io.github.gcjojo.blablalib.dialogues.actions.*;
 import io.github.gcjojo.blablalib.dialogues.DialogueAction;
 import io.github.gcjojo.blablalib.dialogues.DialogueSpeaker;
-import io.github.gcjojo.blablalib.dialogues.actions.*;
-import io.github.gcjojo.blablalib.network.ModNetwork;
+import io.github.gcjojo.blablalib.network.BlablaLibNetwork;
 import io.netty.buffer.Unpooled;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
@@ -73,7 +71,7 @@ public class DialogueScreen extends Screen {
         this.dialogueActions = actions;
         this.dialogueSpeakers = speakers;
         if(!actions.isEmpty())
-            NetworkManager.sendToServer(ModNetwork.DIALOGUE_SCREEN_OPENED_PACKET_ID, new FriendlyByteBuf(Unpooled.buffer()));
+            NetworkManager.sendToServer(BlablaLibNetwork.DIALOGUE_SCREEN_OPENED_PACKET_ID, new FriendlyByteBuf(Unpooled.buffer()));
     }
 
     @Override
@@ -92,7 +90,7 @@ public class DialogueScreen extends Screen {
     }
 
     public void handleChoiceSelection(String nextSet, String saveSet, String action) {
-        //ModNetwork.sendToServer(new ModNetwork.ChoiceSelectedPacket(nextSet, saveSet, action));
+        //BlablaLibNetwork.sendToServer(new BlablaLibNetwork.ChoiceSelectedPacket(nextSet, saveSet, action));
         CompoundTag choiceNbt = new CompoundTag();
         choiceNbt.putString("NextSet", nextSet);
         choiceNbt.putString("SaveSet", saveSet);
@@ -100,7 +98,7 @@ public class DialogueScreen extends Screen {
 
         FriendlyByteBuf buf = new FriendlyByteBuf(Unpooled.buffer());
         buf.writeNbt(choiceNbt);
-        NetworkManager.sendToServer(ModNetwork.CHOICE_PACKET_ID, buf);
+        NetworkManager.sendToServer(BlablaLibNetwork.CHOICE_PACKET_ID, buf);
 
         changeSet(nextSet);
     }
@@ -359,7 +357,7 @@ public class DialogueScreen extends Screen {
 
         FriendlyByteBuf buf = new FriendlyByteBuf(Unpooled.buffer());
         buf.writeUtf(currentSet);
-        NetworkManager.sendToServer(ModNetwork.DIALOGUE_COMPLETED_PACKET_ID, buf);
+        NetworkManager.sendToServer(BlablaLibNetwork.DIALOGUE_COMPLETED_PACKET_ID, buf);
     }
 
     public List<DialogueAction> getCurrentActions() {

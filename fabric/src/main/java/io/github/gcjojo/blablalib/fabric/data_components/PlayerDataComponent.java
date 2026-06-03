@@ -8,6 +8,8 @@ public class PlayerDataComponent implements ComponentV3 {
     private String currentDialogue = "";
     private String lastReadDialogue = "";
 
+    private CompoundTag additionalData = new CompoundTag();
+
     public boolean getIsInDialogue() { return this.isInDialogue; }
     public void setIsInDialogue(boolean value) { this.isInDialogue = value; }
 
@@ -16,11 +18,14 @@ public class PlayerDataComponent implements ComponentV3 {
     public String getLastReadDialogue() { return this.lastReadDialogue; }
     public void setLastReadDialogue(String value) { this.lastReadDialogue = value; }
 
+    public CompoundTag getAdditionalData() { return this.additionalData; }
+
     @Override
     public void readFromNbt(CompoundTag tag) {
         this.isInDialogue = tag.getBoolean("IsInDialogue");
         this.currentDialogue = tag.getString("CurrentDialogue");
         this.lastReadDialogue = tag.getString("LastReadDialogue");
+        this.additionalData = tag.getCompound("AdditionalData");
     }
 
     @Override
@@ -28,5 +33,6 @@ public class PlayerDataComponent implements ComponentV3 {
         tag.putBoolean("IsInDialogue", this.isInDialogue);
         tag.putString("CurrentDialogue", this.currentDialogue);
         tag.putString("LastReadDialogue", this.currentDialogue);
+        tag.put("AdditionalData", this.additionalData);
     }
 }

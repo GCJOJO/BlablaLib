@@ -5,7 +5,7 @@ import dev.architectury.event.EventResult;
 import dev.architectury.networking.NetworkManager;
 import io.github.gcjojo.blablalib.client.SoundPlayer;
 import io.github.gcjojo.blablalib.events.BlablalibEvents;
-import io.github.gcjojo.blablalib.network.ModNetwork;
+import io.github.gcjojo.blablalib.network.BlablaLibNetwork;
 import io.netty.buffer.Unpooled;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.level.ServerPlayer;
@@ -19,11 +19,11 @@ public final class BlablaLib {
     private static final Logger LOGGER = LogUtils.getLogger();
 
     public static void init() {
-        ModNetwork.registerPackets();
+        BlablaLibNetwork.registerPackets();
 
         BlablalibEvents.DIALOGUE_COMPLETED.register((ServerPlayer player, String completedDialogue) -> {
             LOGGER.warn("Player {} has completed dialogue {}", player.getName().getString(), completedDialogue);
-            return EventResult.interruptDefault();
+            return EventResult.pass();
         });
     }
 
@@ -48,7 +48,7 @@ public final class BlablaLib {
         PLAYER_DATA_MANAGER.setPlayerCurrentChapter(player, dialogue);
         FriendlyByteBuf buf = new FriendlyByteBuf(Unpooled.buffer());
         buf.writeUtf(dialogue);
-        NetworkManager.sendToPlayer(player, ModNetwork.OPEN_DIALOGUE_PACKET_ID, buf);
+        NetworkManager.sendToPlayer(player, BlablaLibNetwork.OPEN_DIALOGUE_PACKET_ID, buf);
     }
 
     public static void setPlayerDialogue(ServerPlayer player, String dialogue){

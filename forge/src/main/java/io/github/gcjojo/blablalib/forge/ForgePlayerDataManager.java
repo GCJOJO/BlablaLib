@@ -41,4 +41,12 @@ public class ForgePlayerDataManager extends PlayerDataManager {
     public String getPlayerCurrentChapter(Player player) {
         return getBlablalibTag(player).getString("CurrentChapter");
     }
+
+    @Override
+    public CompoundTag getAdditionalData(Player player) {
+        CompoundTag blablalibTag = getBlablalibTag(player);
+        if(!blablalibTag.contains("AdditionalData"))
+            blablalibTag.put("AdditionalData", new CompoundTag());
+        return blablalibTag.getCompound("AdditionalData");
+    }
 }

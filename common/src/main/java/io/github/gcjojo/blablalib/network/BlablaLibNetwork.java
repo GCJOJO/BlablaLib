@@ -12,7 +12,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 
-public class ModNetwork {
+public class BlablaLibNetwork {
     public static final ResourceLocation OPEN_DIALOGUE_PACKET_ID = new ResourceLocation(BlablaLib.MOD_ID, "open_dialogue");
     public static final ResourceLocation DIALOGUE_SCREEN_OPENED_PACKET_ID = new ResourceLocation(BlablaLib.MOD_ID, "dialogue_screen_opened");
     public static final ResourceLocation CHOICE_PACKET_ID = new ResourceLocation(BlablaLib.MOD_ID, "choice");

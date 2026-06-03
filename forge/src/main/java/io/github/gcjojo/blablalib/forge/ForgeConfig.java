@@ -19,7 +19,7 @@ public class ForgeConfig {
     public static boolean enableCommand;
 
     @SubscribeEvent
-    public void onLoad(final ModConfigEvent event){
+    public static void onLoad(final ModConfigEvent event){
         enableCommand = ENABLE_COMMAND.get();
     }
 }

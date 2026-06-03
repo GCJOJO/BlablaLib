@@ -66,11 +66,16 @@ subprojects {
             // Notice: This block does NOT have the same function as the block in the top level.
             // The repositories here will be used for publishing your artifact, not for
             // retrieving dependencies.
-            repositories {
-                maven {
-                    url = layout.buildDirectory.dir('staging-deploy')
-                }
+            maven {
+                name = "StagingDeploy"
+                url = layout.buildDirectory.dir('staging-deploy')
             }
+            maven {
+                name = "Libs"
+                url "file://${project.projectDir}/libs"
+            }
+
+
             /*maven {
                 name = "OSSRH"
                 url = "https://ossrh-staging-api.central.sonatype.com/service/local/staging/deploy/maven2/"

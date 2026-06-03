@@ -4,7 +4,7 @@ import com.google.gson.JsonObject;
 import dev.architectury.networking.NetworkManager;
 import io.github.gcjojo.blablalib.client.gui.DialogueScreen;
 import io.github.gcjojo.blablalib.dialogues.DialogueAction;
-import io.github.gcjojo.blablalib.network.ModNetwork;
+import io.github.gcjojo.blablalib.network.BlablaLibNetwork;
 import io.netty.buffer.Unpooled;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
@@ -28,7 +28,7 @@ public class DialogueExecuteCommand extends DialogueAction {
 
             FriendlyByteBuf buf = new FriendlyByteBuf(Unpooled.buffer());
             buf.writeUtf(command);
-            NetworkManager.sendToServer(ModNetwork.DIALOGUE_COMMAND_PACKET_ID, buf);
+            NetworkManager.sendToServer(BlablaLibNetwork.DIALOGUE_COMMAND_PACKET_ID, buf);
         }
         screen.queueAdvanceDialogue();
     }

@@ -1,5 +1,6 @@
 package io.github.gcjojo.blablalib;
 
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.entity.player.Player;
 
 public abstract class PlayerDataManager {
@@ -11,4 +12,6 @@ public abstract class PlayerDataManager {
 
     public abstract void setPlayerCurrentChapter(Player player, String currentChapter);
     public abstract String getPlayerCurrentChapter(Player player);
+
+    public abstract CompoundTag getAdditionalData(Player player);
 }

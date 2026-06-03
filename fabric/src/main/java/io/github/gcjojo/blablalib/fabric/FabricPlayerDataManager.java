@@ -3,6 +3,7 @@ package io.github.gcjojo.blablalib.fabric;
 import io.github.gcjojo.blablalib.PlayerDataManager;
 import io.github.gcjojo.blablalib.fabric.data_components.ModComponents;
 import io.github.gcjojo.blablalib.fabric.data_components.PlayerDataComponent;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.entity.player.Player;
 
 public class FabricPlayerDataManager extends PlayerDataManager {
@@ -39,4 +40,11 @@ public class FabricPlayerDataManager extends PlayerDataManager {
     public String getPlayerCurrentChapter(Player player) {
         return getPlayerDataComponent(player).getCurrentDialogue();
     }
+
+    @Override
+    public CompoundTag getAdditionalData(Player player) {
+        return getPlayerDataComponent(player).getAdditionalData();
+    }
+
+
 }
