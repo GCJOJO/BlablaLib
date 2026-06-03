@@ -2,5 +2,7 @@
   "blablalib.commands.invalid_dialogue": "Invalid dialogue: %s",
   "blablalib.commands.updated_dialogue": "Updated dialogue to %s",
 
-  "blablalib.speaker.dog": "Dog :D"
+  "blablalib.speaker.dog": "Dog :D",
+  "blablalib.dogcheck.woof": "Woof",
+  "blablalib.dogcheck.jumpscare": "Woof jumpscare !"
 }

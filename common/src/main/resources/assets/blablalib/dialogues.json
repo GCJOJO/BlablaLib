@@ -32,7 +32,7 @@
     {
       "action": "message",
       "speaker": 0,
-      "text": "woof"
+      "text": "blablalib.dogcheck.woof"
     },
     {
       "action": "image_move",
@@ -82,7 +82,7 @@
     {
       "action": "message",
       "speaker": 0,
-      "text": "woof jumpscare !"
+      "text": "blablalib.dogcheck.jumpscare"
     },
     {
       "action": "clear",

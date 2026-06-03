@@ -63,9 +63,9 @@ public class ModNetwork {
                 MinecraftServer server = player.getServer();
                 if(server == null) return;
 
-                //String formattedCommand = "execute positioned as %s run %s".formatted(player.getName().getString(), command);
+                String formattedCommand = "execute positioned as %s run %s".formatted(player.getName().getString(), command);
                 try {
-                    int success = server.getCommands().getDispatcher().execute(command, server.createCommandSourceStack().withEntity(player).withLevel((ServerLevel) player.level()));
+                    int success = server.getCommands().getDispatcher().execute(formattedCommand, server.createCommandSourceStack().withEntity(player).withLevel((ServerLevel) player.level()));
                     BlablaLib.getLogger().warn(String.valueOf(success));
                 } catch (CommandSyntaxException e) {
                     throw new RuntimeException(e);
