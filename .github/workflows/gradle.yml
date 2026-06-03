@@ -35,10 +35,8 @@ jobs:
       with:
         cache-provider: basic
 
-    - name: Run Data and Build
-      run: |
-        chmod +x ./gradlew
-        ./gradlew build
+    - name: Build
+      run: gradle build
 
     - name: Upload a Build Artifact
       uses: actions/upload-artifact@v7.0.1
