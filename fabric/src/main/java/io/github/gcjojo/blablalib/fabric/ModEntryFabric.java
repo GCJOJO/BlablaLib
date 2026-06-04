@@ -19,7 +19,7 @@ public final class ModEntryFabric implements ModInitializer {
         BlablaLib.setPlayerDataManager(new FabricPlayerDataManager());
 
         ConfigManager.load();
-        if(ConfigManager.config.enableCommand) {
+        if(ConfigManager.config.enable_command) {
             CommandRegistrationEvent.EVENT.register(((dispatcher, registry, selection) -> {
                 DialogueCommand.register(dispatcher);
             }));

@@ -12,7 +12,7 @@ public class ForgeConfig {
 
     private static final ForgeConfigSpec.BooleanValue ENABLE_COMMAND = BUILDER
             .comment("Whether or not the Blabla Lib mod should register it's default dialogue command.")
-            .define("enable_command", true);
+            .define("enable_command", false);
 
     static final ForgeConfigSpec SPEC = BUILDER.build();
 

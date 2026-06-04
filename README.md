@@ -2,26 +2,74 @@
 
 This library add a dialogue system.<br>
 You can use commands like `/dialogue play` and `/dialogue set "my_mod:my_cool_dialogue"` to use this library.<br>
-You can also use the `BlablaLib.OpenDialogue()` function.<br><br>
+You can also use the `BlablaLib.openDialogue()` function.<br><br>
+
+To enable the `/dialogue` command modify the config and set the `enable_command` field to true
 
 ## How to use as a library for another mod
-First add the dependency to your build.gradle
+### Declare Dependencies
+First add the dependency to your build.gradle.
+You will also need Architectury api as a dependency
 ```groovy
+plugins {
+    //...
+    id 'architectury-plugin' version '3.4-SNAPSHOT'
+}
+
+architectury {
+    minecraft = project.minecraft_version
+}
+
 repositories{
     maven {
         url "https://cursemaven.com"
     }
-    
-    dependencies{
-        // Fabric
-        modImplementation "curse.maven:blablalib-1563558:<file_id>"
-        
-        // Forge
-        implementation fg.deobf("curse.maven:blablalib-1563558:<file_id>")
-    }
+}
+
+dependencies {
+    // Fabric
+    modImplementation "dev.architectury:architectury-fabric:${architectury_api_version}"
+    modImplementation "curse.maven:blablalib-1563558:<file_id>"
+
+    // Forge
+    implementation fg.deobf("dev.architectury:architectury-forge:${architectury_api_version}")
+    implementation fg.deobf("curse.maven:blablalib-1563558:<file_id>")
 }
 ```
 
+### Implement Library
+To use this library you can use the functions in the BlablaLib class.
+```JAVA
+import io.github.gcjojo.blablalib.BlablaLib;    
+//
+//...
+//
+// Opens the dialogue that is set for the target player.
+BlablaLib.openDialogue(player);
+
+// To set the current dialogue use:
+BlablaLib.setPlayerDialogue(player, dialogue);
+
+// If you need to set the dialogue and immediatly open the dialogue use:
+BlablaLib.openDialogue(player, dialogue);
+```
+
+If you want to customize the `/dialogue` command you may do so by registering it
+```JAVA
+public void onCommandRegister(CommandDispatcher<CommandSourceStack> dispatcher) {
+    // This list represents the suggestions
+    List<String> dialogues = Array.asList("\"my_mod:dialogue_1\"", "\"my_mod:dialogue_2\"", "\"my_mod:dialogue_3\"");
+    DialogueCommand.register(dispatcher, dialogues);
+    
+    // You can also pass in a function that will transform the dialogue argument
+    DialogueCommand.register(dispatcher, dialogues, (CommandContext<CommandSourceStack> context, String dialogue) -> {
+        if(context.context.getSource().getPlayer().isCreative() && dialogue.contentEquals("\"my_mod:dialogue_2\""))
+            return "\"my_mod:dialogue_3\";
+        
+        return dialogue;
+    });
+}
+```
 
 ## How to use the dialogue system<br>
 First create a resource pack using this folder structure

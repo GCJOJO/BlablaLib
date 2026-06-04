@@ -7,6 +7,7 @@ import io.github.gcjojo.blablalib.client.SoundPlayer;
 import io.github.gcjojo.blablalib.events.BlablalibEvents;
 import io.github.gcjojo.blablalib.network.BlablaLibNetwork;
 import io.netty.buffer.Unpooled;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.level.ServerPlayer;
 import org.slf4j.Logger;
@@ -51,20 +52,23 @@ public final class BlablaLib {
         NetworkManager.sendToPlayer(player, BlablaLibNetwork.OPEN_DIALOGUE_PACKET_ID, buf);
     }
 
-    public static void setPlayerDialogue(ServerPlayer player, String dialogue){
+    public static void setPlayerDialogue(ServerPlayer player, String dialogue) {
         PLAYER_DATA_MANAGER.setPlayerCurrentChapter(player, dialogue);
     }
 
-    public static boolean isPlayerInDialogue(ServerPlayer player){
+    public static boolean isPlayerInDialogue(ServerPlayer player) {
         return PLAYER_DATA_MANAGER.getPlayerInDialogue(player);
     }
 
-    public static String getPlayerDialogue(ServerPlayer player){
+    public static String getPlayerDialogue(ServerPlayer player) {
         return PLAYER_DATA_MANAGER.getPlayerCurrentChapter(player);
     }
 
-    public static String getPlayerLastReadDialogue(ServerPlayer player){
+    public static String getPlayerLastReadDialogue(ServerPlayer player) {
         return PLAYER_DATA_MANAGER.getPlayerLastReadChapter(player);
     }
 
+    public static CompoundTag getPlayerAdditionalData(ServerPlayer player) {
+        return PLAYER_DATA_MANAGER.getAdditionalData(player);
+    }
 }
