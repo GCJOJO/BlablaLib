@@ -22,14 +22,13 @@ public class DialogueWait extends DialogueAction {
 
     @Override
     public void step() {
+        currentWaitTime++;
         if(currentWaitTime >= waitTime)
             screen.queueAdvanceDialogue();
     }
 
     @Override
-    public void draw(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
-        currentWaitTime += partialTick;
-    }
+    public void draw(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) { }
 
     @Override
     public void mouseClicked(double mouseX, double mouseY, int button) { }

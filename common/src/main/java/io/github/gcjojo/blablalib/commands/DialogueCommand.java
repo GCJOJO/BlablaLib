@@ -69,6 +69,7 @@ public class DialogueCommand {
 
                     ServerPlayer player = context.getSource().getPlayerOrException();
                     BlablaLib.resetPlayerLastReadDialogue(player);
+                    BlablaLib.setPlayerIsInDialogue(player, false);
                     context.getSource().sendSuccess(() -> Component.translatable("blablalib.commands.reset_success").withStyle(ChatFormatting.GREEN), true);
                     return 1;
                 }))

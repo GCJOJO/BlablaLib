@@ -1,6 +1,7 @@
 package io.github.gcjojo.blablalib.network;
 
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import dev.architectury.event.EventResult;
 import dev.architectury.networking.NetworkManager;
 import io.github.gcjojo.blablalib.BlablaLib;
 import io.github.gcjojo.blablalib.client.gui.DialogueScreen;
@@ -11,6 +12,7 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
+import org.apache.logging.log4j.core.jmx.Server;
 
 public class BlablaLibNetwork {
     public static final ResourceLocation OPEN_DIALOGUE_PACKET_ID = new ResourceLocation(BlablaLib.MOD_ID, "open_dialogue");
@@ -22,7 +24,7 @@ public class BlablaLibNetwork {
     public static void registerPackets() {
         NetworkManager.registerReceiver(NetworkManager.Side.S2C, OPEN_DIALOGUE_PACKET_ID, (buf, context) -> {
             String dialogue = buf.readUtf();
-            context.queue(() -> DialogueScreen.openForSet(dialogue));
+            DialogueScreen.openForSet(dialogue);
         });
 
         NetworkManager.registerReceiver(NetworkManager.Side.C2S, DIALOGUE_SCREEN_OPENED_PACKET_ID, (buf, context) -> {
@@ -37,10 +39,13 @@ public class BlablaLibNetwork {
             String saveSet = choiceNbt.getString("SaveSet");
             String action = choiceNbt.getString("Action");
 
-            BlablaLib.getPlayerDataManager().setPlayerCurrentChapter(player, saveSet);
-            if(player instanceof ServerPlayer)
+            BlablaLib.setPlayerLastReadDialogue((ServerPlayer) player, BlablaLib.getPlayerDialogue((ServerPlayer) player));
 
-                BlablalibEvents.DIALOGUE_CHOICE_MADE.invoker().dialogueChoiceMade((ServerPlayer) player, nextSet, saveSet, action);
+            if(player instanceof ServerPlayer) {
+                EventResult result = BlablalibEvents.DIALOGUE_CHOICE_MADE.invoker().dialogueChoiceMade((ServerPlayer) player, nextSet, saveSet, action);
+                if((result.isPresent() && result.isTrue()) || result.isEmpty())
+                    BlablaLib.setPlayerDialogue((ServerPlayer) player, saveSet);
+            }
         });
 
         NetworkManager.registerReceiver(NetworkManager.Side.C2S, DIALOGUE_COMPLETED_PACKET_ID, (buf, context) -> {

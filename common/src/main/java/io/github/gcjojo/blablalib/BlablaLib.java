@@ -65,6 +65,10 @@ public final class BlablaLib {
         return PLAYER_DATA_MANAGER.getPlayerInDialogue(player);
     }
 
+    public static void setPlayerIsInDialogue(ServerPlayer player, boolean isInDialogue) {
+        PLAYER_DATA_MANAGER.setPlayerInDialogue(player, isInDialogue);
+    }
+
     public static String getPlayerDialogue(ServerPlayer player) {
         return PLAYER_DATA_MANAGER.getPlayerCurrentChapter(player);
     }
@@ -79,5 +83,9 @@ public final class BlablaLib {
 
     public static CompoundTag getPlayerAdditionalData(ServerPlayer player) {
         return PLAYER_DATA_MANAGER.getAdditionalData(player);
+    }
+
+    public static void setPlayerLastReadDialogue(ServerPlayer player, String playerDialogue) {
+        PLAYER_DATA_MANAGER.setPlayerLastReadChapter(player, playerDialogue);
     }
 }

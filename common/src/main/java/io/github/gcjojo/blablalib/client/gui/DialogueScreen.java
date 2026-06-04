@@ -100,7 +100,7 @@ public class DialogueScreen extends Screen {
         buf.writeNbt(choiceNbt);
         NetworkManager.sendToServer(BlablaLibNetwork.CHOICE_PACKET_ID, buf);
 
-        changeSet(nextSet);
+        //changeSet(nextSet);
     }
 
     public void changeSet(String setName) {
@@ -280,6 +280,7 @@ public class DialogueScreen extends Screen {
 
     public void advanceDialogue() {
         actionIndex++;
+        buttons.forEach(button -> button.visible = false);
         buttons.clear();
         if (dialogueActions.isEmpty() || actionIndex >= dialogueActions.size()) {
             endDialogue();

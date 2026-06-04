@@ -17,7 +17,7 @@ public abstract class PlayerDataManager {
     public abstract void setAdditionalData(Player player, CompoundTag data);
 
     public void copyPlayer(Player oldPlayer, Player newPlayer){
-        setPlayerInDialogue(newPlayer, getPlayerInDialogue(oldPlayer));
+        setPlayerInDialogue(newPlayer, false);
         setPlayerCurrentChapter(newPlayer, getPlayerCurrentChapter(oldPlayer));
         setPlayerLastReadChapter(newPlayer, getPlayerLastReadChapter(oldPlayer));
         setAdditionalData(newPlayer, getAdditionalData(oldPlayer));
