@@ -14,4 +14,12 @@ public abstract class PlayerDataManager {
     public abstract String getPlayerCurrentChapter(Player player);
 
     public abstract CompoundTag getAdditionalData(Player player);
+    public abstract void setAdditionalData(Player player, CompoundTag data);
+
+    public void copyPlayer(Player oldPlayer, Player newPlayer){
+        setPlayerInDialogue(newPlayer, getPlayerInDialogue(oldPlayer));
+        setPlayerCurrentChapter(newPlayer, getPlayerCurrentChapter(oldPlayer));
+        setPlayerLastReadChapter(newPlayer, getPlayerCurrentChapter(oldPlayer));
+        setAdditionalData(newPlayer, getAdditionalData(oldPlayer));
+    }
 }

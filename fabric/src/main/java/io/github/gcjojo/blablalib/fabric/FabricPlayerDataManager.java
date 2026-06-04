@@ -46,5 +46,10 @@ public class FabricPlayerDataManager extends PlayerDataManager {
         return getPlayerDataComponent(player).getAdditionalData();
     }
 
+    @Override
+    public void setAdditionalData(Player player, CompoundTag data) {
+        getAdditionalData(player).merge(data);
+    }
+
 
 }

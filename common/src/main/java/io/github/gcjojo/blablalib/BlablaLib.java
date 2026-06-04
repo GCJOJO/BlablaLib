@@ -2,6 +2,7 @@ package io.github.gcjojo.blablalib;
 
 import com.mojang.logging.LogUtils;
 import dev.architectury.event.EventResult;
+import dev.architectury.event.events.common.PlayerEvent;
 import dev.architectury.networking.NetworkManager;
 import io.github.gcjojo.blablalib.client.SoundPlayer;
 import io.github.gcjojo.blablalib.events.BlablalibEvents;
@@ -25,6 +26,10 @@ public final class BlablaLib {
         BlablalibEvents.DIALOGUE_COMPLETED.register((ServerPlayer player, String completedDialogue) -> {
             LOGGER.warn("Player {} has completed dialogue {}", player.getName().getString(), completedDialogue);
             return EventResult.pass();
+        });
+
+        PlayerEvent.PLAYER_CLONE.register((ServerPlayer oldPlayer, ServerPlayer newPlayer, boolean wonGame) -> {
+
         });
     }
 

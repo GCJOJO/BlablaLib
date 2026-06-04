@@ -49,4 +49,9 @@ public class ForgePlayerDataManager extends PlayerDataManager {
             blablalibTag.put("AdditionalData", new CompoundTag());
         return blablalibTag.getCompound("AdditionalData");
     }
+
+    @Override
+    public void setAdditionalData(Player player, CompoundTag data) {
+        getAdditionalData(player).merge(data);
+    }
 }
