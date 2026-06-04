@@ -29,7 +29,7 @@ public final class BlablaLib {
         });
 
         PlayerEvent.PLAYER_CLONE.register((ServerPlayer oldPlayer, ServerPlayer newPlayer, boolean wonGame) -> {
-
+            PLAYER_DATA_MANAGER.copyPlayer(oldPlayer, newPlayer);
         });
     }
 
