@@ -37,7 +37,7 @@ public class BlablaLibNetwork {
             String saveSet = choiceNbt.getString("SaveSet");
             String action = choiceNbt.getString("Action");
 
-            BlablaLib.getPlayerDataManager().setPlayerCurrentChapter(player, nextSet);
+            BlablaLib.getPlayerDataManager().setPlayerCurrentChapter(player, saveSet);
             if(player instanceof ServerPlayer)
 
                 BlablalibEvents.DIALOGUE_CHOICE_MADE.invoker().dialogueChoiceMade((ServerPlayer) player, nextSet, saveSet, action);
