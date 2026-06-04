@@ -19,7 +19,7 @@ public abstract class PlayerDataManager {
     public void copyPlayer(Player oldPlayer, Player newPlayer){
         setPlayerInDialogue(newPlayer, getPlayerInDialogue(oldPlayer));
         setPlayerCurrentChapter(newPlayer, getPlayerCurrentChapter(oldPlayer));
-        setPlayerLastReadChapter(newPlayer, getPlayerCurrentChapter(oldPlayer));
+        setPlayerLastReadChapter(newPlayer, getPlayerLastReadChapter(oldPlayer));
         setAdditionalData(newPlayer, getAdditionalData(oldPlayer));
     }
 }
