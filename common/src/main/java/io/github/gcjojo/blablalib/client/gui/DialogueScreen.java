@@ -99,7 +99,7 @@ public class DialogueScreen extends Screen {
         FriendlyByteBuf buf = new FriendlyByteBuf(Unpooled.buffer());
         buf.writeNbt(choiceNbt);
         NetworkManager.sendToServer(BlablaLibNetwork.CHOICE_PACKET_ID, buf);
-
+        queueAdvanceDialogue();
         //changeSet(nextSet);
     }
 
