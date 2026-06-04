@@ -73,6 +73,10 @@ public final class BlablaLib {
         return PLAYER_DATA_MANAGER.getPlayerLastReadChapter(player);
     }
 
+    public static void resetPlayerLastReadDialogue(ServerPlayer player){
+        PLAYER_DATA_MANAGER.setPlayerLastReadChapter(player, "");
+    }
+
     public static CompoundTag getPlayerAdditionalData(ServerPlayer player) {
         return PLAYER_DATA_MANAGER.getAdditionalData(player);
     }

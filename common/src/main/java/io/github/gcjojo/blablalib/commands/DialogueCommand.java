@@ -60,6 +60,18 @@ public class DialogueCommand {
                                     context.getSource().sendSuccess(() -> Component.translatable("blablalib.commands.updated_dialogue", finalChapterName).withStyle(ChatFormatting.GREEN), true);
                                     return 1;
                                 })))
+                .then(Commands.literal("reset").executes(context -> {
+                    if(!context.getSource().isPlayer())
+                    {
+                        context.getSource().sendFailure(Component.translatable("blablalib.commands.must_be_player").withStyle(ChatFormatting.RED));
+                        return 0;
+                    }
+
+                    ServerPlayer player = context.getSource().getPlayerOrException();
+                    BlablaLib.resetPlayerLastReadDialogue(player);
+                    context.getSource().sendSuccess(() -> Component.translatable("blablalib.commands.reset_success").withStyle(ChatFormatting.GREEN), true);
+                    return 1;
+                }))
         );
     }
 }

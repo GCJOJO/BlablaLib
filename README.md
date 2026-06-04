@@ -4,7 +4,10 @@ This library add a dialogue system.<br>
 You can use commands like `/dialogue play` and `/dialogue set "my_mod:my_cool_dialogue"` to use this library.<br>
 You can also use the `BlablaLib.openDialogue()` function.<br><br>
 
-To enable the `/dialogue` command modify the config and set the `enable_command` field to true
+To enable the `/dialogue` command modify the config and set the `enable_command` field to true.<br> <br>
+
+This library has been used in the [Worlds Colliding Mod](https://github.com/GCJOJO/WorldsColliding). <br>
+If you want to see what you can do with more in depth go check out the source code of our mod !
 
 ## How to use as a library for another mod
 ### Declare Dependencies
