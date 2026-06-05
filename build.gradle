@@ -57,7 +57,7 @@ subprojects {
             mavenJava(MavenPublication) {
                 groupId "${maven_group}.${archives_name}"
                 artifactId = base.archivesName.get()
-                version ${mod_version}
+                version "${mod_version}"
                 from components.java
             }
         }
