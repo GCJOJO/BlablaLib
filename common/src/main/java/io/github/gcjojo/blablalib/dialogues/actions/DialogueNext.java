@@ -1,5 +1,6 @@
 package io.github.gcjojo.blablalib.dialogues.actions;
 
+import com.google.gson.JsonObject;
 import io.github.gcjojo.blablalib.client.gui.DialogueScreen;
 import io.github.gcjojo.blablalib.dialogues.DialogueAction;
 import net.minecraft.client.gui.GuiGraphics;
@@ -12,10 +13,16 @@ public class DialogueNext extends DialogueAction {
         this.nextSet = nextSet;
     }
 
+    public DialogueNext(JsonObject object){
+        if(object.has("set"))
+            this.nextSet = object.get("set").getAsString();
+    }
+
     @Override
     public void setup(DialogueScreen screen) {
         super.setup(screen);
-        screen.queueChangeSet(nextSet);
+        if(!nextSet.isEmpty())
+            screen.queueChangeSet(nextSet);
     }
 
     @Override

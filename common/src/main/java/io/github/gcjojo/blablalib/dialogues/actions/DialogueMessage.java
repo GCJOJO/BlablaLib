@@ -1,5 +1,7 @@
 package io.github.gcjojo.blablalib.dialogues.actions;
 
+import com.google.gson.JsonObject;
+import io.github.gcjojo.blablalib.client.gui.DialogueScreen;
 import io.github.gcjojo.blablalib.dialogues.DialogueAction;
 import io.github.gcjojo.blablalib.dialogues.DialogueSpeaker;
 import net.minecraft.client.Minecraft;
@@ -26,6 +28,18 @@ public class DialogueMessage extends DialogueAction
     public DialogueMessage(int speakerId, String dialogueLine) {
         this.speakerId = speakerId;
         this.dialogueLine = dialogueLine;
+    }
+
+    public DialogueMessage(JsonObject object) {
+        this.speakerId = object.has("speaker") ? object.get("speaker").getAsInt() : Integer.MAX_VALUE;
+        this.dialogueLine = object.has("text") ? Component.translatable(object.get("text").getAsString()).getString() : "";
+    }
+
+    @Override
+    public void setup(DialogueScreen screen) {
+        super.setup(screen);
+        if(this.dialogueLine.isEmpty())
+            screen.queueAdvanceDialogue();
     }
 
     @Override

@@ -29,7 +29,7 @@
       "action": "wait",
       "time": 10
     },
-    { "action": "sound", "sound": "entity.wolf_cute.ambient" },
+    { "action": "sound", "sound": "entity.wolf.whine" },
     {
       "action": "message",
       "speaker": 0,
@@ -80,7 +80,7 @@
       "y_start": 200,
       "y_end": 40
     },
-    { "action": "sound", "sound": "entity.wolf_cute.growl" },
+    { "action": "sound", "sound": "entity.wolf.growl" },
     {
       "action": "message",
       "speaker": 0,

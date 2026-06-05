@@ -6,10 +6,12 @@ import dev.architectury.networking.NetworkManager;
 import io.github.gcjojo.blablalib.BlablaLib;
 import io.github.gcjojo.blablalib.commands.DialogueCommand;
 import io.github.gcjojo.blablalib.dialogues.DialogueAction;
+import io.github.gcjojo.blablalib.dialogues.DialogueManager;
 import io.github.gcjojo.blablalib.dialogues.DialogueSpeaker;
 import io.github.gcjojo.blablalib.dialogues.actions.*;
 import io.github.gcjojo.blablalib.network.BlablaLibNetwork;
 import io.netty.buffer.Unpooled;
+import io.netty.util.Constant;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
@@ -29,20 +31,6 @@ import java.util.*;
 
 public class DialogueScreen extends Screen {
 
-    private static Map<String, Class<? extends DialogueAction>> dialogueActionClasses = Map.ofEntries(
-            Map.entry("clear",      DialogueClear.class),
-            Map.entry("wait",       DialogueWait.class),
-            Map.entry("choice",     DialogueChoice.class),
-            Map.entry("change_set", DialogueNext.class),
-            Map.entry("fade",       DialogueFading.class),
-            Map.entry("message",    DialogueMessage.class),
-            Map.entry("image",      DialogueImage.class),
-            Map.entry("credit",     DialogueCredit.class),
-            Map.entry("image_move", DialogueMoveImage.class),
-            Map.entry("command",    DialogueExecuteCommand.class),
-            Map.entry("sound",      DialogueSound.class)
-    );
-
     private List<DialogueAction> dialogueActions;
     private int actionIndex = -1;
     private List<DialogueSpeaker> dialogueSpeakers;
@@ -61,14 +49,10 @@ public class DialogueScreen extends Screen {
 
     private final List<Button> buttons = new ArrayList<>();
 
-    public static void RegisterCustomAction(String name, Class<? extends DialogueAction> action) {
-        dialogueActionClasses.put(name, action);
-    }
-
     public DialogueScreen(String setName) {
         super(Component.literal("Dialogue"));
         this.currentSet = setName;
-        var actions = loadSet(setName);
+        var actions = DialogueManager.loadDialogue(setName);
         if(actions == null || actions.isEmpty())
         {
             this.onClose();
@@ -76,7 +60,7 @@ public class DialogueScreen extends Screen {
         }
         this.dialogueActions = actions;
 
-        var speakers = loadSpeakers(setName);
+        var speakers = DialogueManager.loadSpeakers(setName);
         if(speakers == null || speakers.isEmpty())
         {
             this.onClose();
@@ -122,12 +106,12 @@ public class DialogueScreen extends Screen {
     }
 
     public void changeSet(String setName) {
-        List<DialogueAction> newActions = loadSet(setName);
+        List<DialogueAction> newActions = DialogueManager.loadDialogue(setName);
         if(newActions == null) {
             this.onClose();
             return;
         }
-        List<DialogueSpeaker> newSpeakers = loadSpeakers(setName);
+        List<DialogueSpeaker> newSpeakers = DialogueManager.loadSpeakers(setName);
         if(newSpeakers == null) {
             this.onClose();
             return;
@@ -140,99 +124,9 @@ public class DialogueScreen extends Screen {
         advanceDialogue();
     }
 
-    public static List<DialogueAction> loadSet(String setPath) {
-        try {
-            String namespace = BlablaLib.MOD_ID;
-            String setName = setPath;
-            if(setPath.contains(":")) {
-                namespace = setPath.split(":")[0];
-                setName = setPath.split(":")[1];
-            }
-
-            ResourceLocation res = ResourceLocation.tryBuild(namespace, "dialogues.json");
-            var resourceOpt = Minecraft.getInstance().getResourceManager().getResource(res);
-            if (resourceOpt.isPresent()) {
-                JsonObject root = new Gson().fromJson(new InputStreamReader(resourceOpt.get().open()), JsonObject.class);
-                if (root.has(setName)) {
-                    List<DialogueAction> actions = new ArrayList<>();
-                    root.getAsJsonArray(setName).forEach(element -> {
-                        JsonObject obj = element.getAsJsonObject();
-                        if(!obj.has("action"))
-                            return;
-
-                        String action = obj.get("action").getAsString();
-                        /*if(dialogueActionClasses.containsKey(action)) {
-                            try {
-                                actions.add(dialogueActionClasses.get(action).getDeclaredConstructor().newInstance(obj));
-                                return;
-                            } catch (InstantiationException | NoSuchMethodException | IllegalAccessException |
-                                     InvocationTargetException e) {
-                                BlablaLib.getLogger().error(e.getMessage());
-                                Arrays.stream(e.getStackTrace()).forEach(stackTraceElement -> BlablaLib.getLogger().error(stackTraceElement.toString()));
-                            }
-                        }
-                        actions.add(new DialogueRawAction(obj));*/
-
-
-                        switch(action)
-                        {
-                            case "clear" -> actions.add(new DialogueClear(obj));
-                            case "wait" -> actions.add(new DialogueWait(obj));
-                            case "choice" -> actions.add(new DialogueChoice(obj));
-                            case "change_set" -> actions.add(new DialogueNext(obj.get("set").getAsString()));
-                            case "fade" -> actions.add(new DialogueFading(obj));
-                            case "message" -> actions.add(new DialogueMessage(obj.get("speaker").getAsInt(), Component.translatable(obj.get("text").getAsString()).getString()));
-                            case "image" -> actions.add(new DialogueImage(obj));
-                            case "credit" -> actions.add(new DialogueCredit(obj));
-                            case "image_move" -> actions.add(new DialogueMoveImage(obj));
-                            case "command" -> actions.add(new DialogueExecuteCommand(obj));
-                            //case "sound" -> actions.add(new DialogueSound(obj));
-                            default -> actions.add(new DialogueRawAction(obj));
-                        }
-
-                    });
-                    return actions;
-                }
-            }
-        } catch (Exception e) {
-            BlablaLib.getLogger().error(e.getMessage());
-            Arrays.stream(e.getStackTrace()).forEach(stackTraceElement -> BlablaLib.getLogger().error(stackTraceElement.toString()));
-            return null;
-        }
-        return null;
-    }
-
-    public static List<DialogueSpeaker> loadSpeakers(String setPath){
-        try {
-            String namespace = BlablaLib.MOD_ID;
-            if (setPath.contains(":"))
-                namespace = setPath.split(":")[0];
-
-            ResourceLocation res = ResourceLocation.tryBuild(namespace, "dialogues.json");
-            var resourceOpt = Minecraft.getInstance().getResourceManager().getResource(res);
-            if (resourceOpt.isPresent()) {
-                JsonObject root = new Gson().fromJson(new InputStreamReader(resourceOpt.get().open()), JsonObject.class);
-                List<DialogueSpeaker> speakers = new ArrayList<>();
-                if(!root.has("speakers"))
-                    return speakers;
-
-                root.getAsJsonArray("speakers").forEach(element -> {
-                    JsonObject obj = element.getAsJsonObject();
-                    speakers.add(new DialogueSpeaker(obj));
-                });
-
-                return speakers;
-            }
-        } catch (Exception e) {
-            BlablaLib.getLogger().warn("Oopsie cannot load speakers !");
-        }
-
-        return null;
-    }
-
     public static void openForSet(String setName) {
-        List<DialogueAction> actions = loadSet(setName);
-        List<DialogueSpeaker> speakers = loadSpeakers(setName);
+        List<DialogueAction> actions = DialogueManager.loadDialogue(setName);
+        List<DialogueSpeaker> speakers = DialogueManager.loadSpeakers(setName);
         if(actions != null && !actions.isEmpty() && speakers != null)
             Minecraft.getInstance().tell(() -> Minecraft.getInstance().setScreen(new DialogueScreen(setName, actions, speakers)));
     }
