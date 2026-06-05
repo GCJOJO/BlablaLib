@@ -28,9 +28,7 @@ architectury {
 }
 
 repositories{
-    maven {
-        url "https://cursemaven.com"
-    }
+    maven { url 'https://jitpack.io' }
 }
 
 dependencies {
