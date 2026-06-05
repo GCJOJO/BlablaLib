@@ -1,12 +1,12 @@
 package io.github.gcjojo.blablalib.client.gui;
 
-import dev.architectury.networking.NetworkManager;
-import io.github.gcjojo.blablalib.BlablaLib;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
-import io.github.gcjojo.blablalib.dialogues.actions.*;
+import dev.architectury.networking.NetworkManager;
+import io.github.gcjojo.blablalib.BlablaLib;
 import io.github.gcjojo.blablalib.dialogues.DialogueAction;
 import io.github.gcjojo.blablalib.dialogues.DialogueSpeaker;
+import io.github.gcjojo.blablalib.dialogues.actions.*;
 import io.github.gcjojo.blablalib.network.BlablaLibNetwork;
 import io.netty.buffer.Unpooled;
 import net.minecraft.client.Minecraft;

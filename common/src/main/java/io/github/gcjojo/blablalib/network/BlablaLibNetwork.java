@@ -12,7 +12,6 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
-import org.apache.logging.log4j.core.jmx.Server;
 
 public class BlablaLibNetwork {
     public static final ResourceLocation OPEN_DIALOGUE_PACKET_ID = new ResourceLocation(BlablaLib.MOD_ID, "open_dialogue");
