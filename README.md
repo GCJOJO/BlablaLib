@@ -32,11 +32,11 @@ repositories{
 dependencies {
     // Fabric
     modImplementation "dev.architectury:architectury-fabric:${architectury_api_version}"
-    modImplementation "com.github.GCJOJO:BlablaLib:${blablalib_version}"
+    modImplementation "com.github.GCJOJO.BlablaLib:blablalib-fabric:${blablalib_version}"
 
     // Forge
     implementation fg.deobf("dev.architectury:architectury-forge:${architectury_api_version}")
-    implementation fg.deobf("com.github.GCJOJO:BlablaLib:${blablalib_version}")
+    implementation fg.deobf("com.github.GCJOJO.BlablaLib:blablalib-forge:${blablalib_version}")
 }
 ```
 

@@ -70,23 +70,9 @@ subprojects {
             // retrieving dependencies.
             mavenLocal()
             maven {
-                name = "StagingDeploy"
-                url = layout.buildDirectory.dir('staging-deploy')
-            }
-            maven {
                 name = "Libs"
                 url "file://${project.projectDir}/libs"
             }
-
-
-            /*maven {
-                name = "OSSRH"
-                url = "https://ossrh-staging-api.central.sonatype.com/service/local/staging/deploy/maven2/"
-                credentials {
-                    username = System.getenv("MAVEN_USERNAME")
-                    password = System.getenv("MAVEN_PASSWORD")
-                }
-            }*/
             maven {
                 name = "GitHubPackages"
                 url = "https://maven.pkg.github.com/gcjojo/BlablaLib"
