@@ -21,6 +21,6 @@ public final class ModEntryForge {
         BlablaLib.setSoundPlayer(new ForgeSoundPlayer());
         BlablaLib.setPlayerDataManager(new ForgePlayerDataManager());
 
-        context.registerConfig(ModConfig.Type.COMMON, ForgeConfig.SPEC);
+        context.registerConfig(ModConfig.Type.COMMON, BlablaLibForgeConfig.SPEC);
     }
 }

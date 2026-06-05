@@ -14,7 +14,7 @@ public class ConfigManager {
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
     private static final File FILE = new File("config/blablalib.json");
 
-    public static FabricConfig config = new FabricConfig();
+    public static BlablaLibFabricConfig config = new BlablaLibFabricConfig();
 
     public static void load() {
         try {
@@ -24,7 +24,7 @@ public class ConfigManager {
             }
 
             FileReader reader = new FileReader(FILE);
-            config = GSON.fromJson(reader, FabricConfig.class);
+            config = GSON.fromJson(reader, BlablaLibFabricConfig.class);
             reader.close();
         } catch (Exception e) {
             BlablaLib.getLogger().error(e.getMessage());
