@@ -90,7 +90,6 @@ public class DialogueScreen extends Screen {
     }
 
     public void handleChoiceSelection(String nextSet, String saveSet, String action) {
-        //BlablaLibNetwork.sendToServer(new BlablaLibNetwork.ChoiceSelectedPacket(nextSet, saveSet, action));
         CompoundTag choiceNbt = new CompoundTag();
         choiceNbt.putString("NextSet", nextSet);
         choiceNbt.putString("SaveSet", saveSet);
@@ -100,7 +99,6 @@ public class DialogueScreen extends Screen {
         buf.writeNbt(choiceNbt);
         NetworkManager.sendToServer(BlablaLibNetwork.CHOICE_PACKET_ID, buf);
         queueAdvanceDialogue();
-        //changeSet(nextSet);
     }
 
     public void changeSet(String setName) {

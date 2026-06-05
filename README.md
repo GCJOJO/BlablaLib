@@ -32,11 +32,11 @@ repositories{
 dependencies {
     // Fabric
     modImplementation "dev.architectury:architectury-fabric:${architectury_api_version}"
-    modImplementation "curse.maven:blablalib-1563558:<file_id>"
+    modImplementation "com.github.GCJOJO:BlablaLib:${blablalib_version}"
 
     // Forge
     implementation fg.deobf("dev.architectury:architectury-forge:${architectury_api_version}")
-    implementation fg.deobf("curse.maven:blablalib-1563558:<file_id>")
+    implementation fg.deobf("com.github.GCJOJO:BlablaLib:${blablalib_version}")
 }
 ```
 

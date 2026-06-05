@@ -43,8 +43,10 @@ public class BlablaLibNetwork {
 
             if(player instanceof ServerPlayer) {
                 EventResult result = BlablalibEvents.DIALOGUE_CHOICE_MADE.invoker().dialogueChoiceMade((ServerPlayer) player, nextSet, saveSet, action);
-                if((result.isPresent() && result.isTrue()) || result.isEmpty())
+                if((result.isPresent() && result.isTrue()) || result.isEmpty()) {
+                    BlablaLib.openDialogue((ServerPlayer) player, nextSet);
                     BlablaLib.setPlayerDialogue((ServerPlayer) player, saveSet);
+                }
             }
         });
 

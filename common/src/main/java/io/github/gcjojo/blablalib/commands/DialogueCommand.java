@@ -19,7 +19,7 @@ public class DialogueCommand {
     public interface DialogueTransformation {
         String transformDialogue(CommandContext<CommandSourceStack> context, String dialogue);
 
-        public static final DialogueTransformation DEFAULT_TRANSFORMATION = (CommandContext<CommandSourceStack> context, String dialogue) -> { return dialogue; };
+        DialogueTransformation DEFAULT_TRANSFORMATION = (CommandContext<CommandSourceStack> context, String dialogue) -> dialogue;
     }
 
     public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
