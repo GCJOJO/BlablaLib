@@ -68,8 +68,8 @@ public void onCommandRegister(CommandDispatcher<CommandSourceStack> dispatcher) 
     
     // You can also pass in a function that will transform the dialogue argument
     DialogueCommand.register(dispatcher, dialogues, (CommandContext<CommandSourceStack> context, String dialogue) -> {
-        if(context.context.getSource().getPlayer().isCreative() && dialogue.contentEquals("\"my_mod:dialogue_2\""))
-            return "\"my_mod:dialogue_3\";
+        if(context.context.getSource().getPlayer().isCreative() && dialogue.contentEquals("my_mod:dialogue_2"))
+            return "my_mod:dialogue_3";
         
         return dialogue;
     });
