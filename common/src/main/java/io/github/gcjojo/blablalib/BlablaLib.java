@@ -5,6 +5,7 @@ import dev.architectury.event.EventResult;
 import dev.architectury.event.events.common.PlayerEvent;
 import dev.architectury.networking.NetworkManager;
 import io.github.gcjojo.blablalib.client.SoundPlayer;
+import io.github.gcjojo.blablalib.dialogues.DialogueManager;
 import io.github.gcjojo.blablalib.events.BlablalibEvents;
 import io.github.gcjojo.blablalib.network.BlablaLibNetwork;
 import io.netty.buffer.Unpooled;
@@ -22,6 +23,7 @@ public final class BlablaLib {
 
     public static void init() {
         BlablaLibNetwork.registerPackets();
+        DialogueManager.registerDefaultActions();
 
         BlablalibEvents.DIALOGUE_COMPLETED.register((ServerPlayer player, String completedDialogue) -> {
             LOGGER.warn("Player {} has completed dialogue {}", player.getName().getString(), completedDialogue);

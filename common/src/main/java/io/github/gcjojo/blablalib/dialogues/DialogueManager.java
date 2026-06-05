@@ -10,25 +10,24 @@ import net.minecraft.resources.ResourceLocation;
 import java.io.InputStreamReader;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class DialogueManager {
-    private static Map<String, Class<? extends DialogueAction>> dialogueActionClasses = Map.ofEntries(
-            Map.entry("clear",      DialogueClear.class),
-            Map.entry("wait",       DialogueWait.class),
-            Map.entry("choice",     DialogueChoice.class),
-            Map.entry("change_set", DialogueNext.class),
-            Map.entry("fade",       DialogueFading.class),
-            Map.entry("message",    DialogueMessage.class),
-            Map.entry("image",      DialogueImage.class),
-            Map.entry("credit",     DialogueCredit.class),
-            Map.entry("image_move", DialogueMoveImage.class),
-            Map.entry("command",    DialogueExecuteCommand.class),
-            Map.entry("sound",      DialogueSound.class)
-    );
+    private static Map<String, Class<? extends DialogueAction>> dialogueActionClasses = new HashMap<>();
+
+    public static void registerDefaultActions(){
+        dialogueActionClasses.put("clear",DialogueClear .class);
+        dialogueActionClasses.put("wait",DialogueWait .class);
+        dialogueActionClasses.put("choice",DialogueChoice .class);
+        dialogueActionClasses.put("change_set",DialogueNext .class);
+        dialogueActionClasses.put("fade",DialogueFading .class);
+        dialogueActionClasses.put("message",DialogueMessage .class);
+        dialogueActionClasses.put("image",DialogueImage .class);
+        dialogueActionClasses.put("credit",DialogueCredit .class);
+        dialogueActionClasses.put("image_move",DialogueMoveImage .class);
+        dialogueActionClasses.put("command",DialogueExecuteCommand .class);
+        dialogueActionClasses.put("sound",DialogueSound .class);
+    }
 
     public static boolean registerCustomAction(String name, Class<? extends DialogueAction> action) {
         if(dialogueActionClasses.containsKey(name)) return false;
