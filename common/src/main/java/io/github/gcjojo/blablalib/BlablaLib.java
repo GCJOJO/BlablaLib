@@ -33,6 +33,10 @@ public final class BlablaLib {
         });
     }
 
+    public static void initClient() {
+        BlablaLibNetwork.registerClientPackets();
+    }
+
     public static SoundPlayer getSoundPlayer() { return SOUND_PLAYER; }
     public static void setSoundPlayer(SoundPlayer newSoundPlayer) { SOUND_PLAYER = newSoundPlayer; }
 

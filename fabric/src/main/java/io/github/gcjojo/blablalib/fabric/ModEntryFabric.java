@@ -15,7 +15,6 @@ public final class ModEntryFabric implements ModInitializer {
 
         // Run our common setup.
         BlablaLib.init();
-        BlablaLib.setSoundPlayer(new FabricSoundPlayer());
         BlablaLib.setPlayerDataManager(new FabricPlayerDataManager());
 
         ConfigManager.load();

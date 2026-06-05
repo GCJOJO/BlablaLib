@@ -21,11 +21,6 @@ public class BlablaLibNetwork {
     public static final ResourceLocation DIALOGUE_COMMAND_PACKET_ID = new ResourceLocation(BlablaLib.MOD_ID, "dialogue_command");
 
     public static void registerPackets() {
-        NetworkManager.registerReceiver(NetworkManager.Side.S2C, OPEN_DIALOGUE_PACKET_ID, (buf, context) -> {
-            String dialogue = buf.readUtf();
-            DialogueScreen.openForSet(dialogue);
-        });
-
         NetworkManager.registerReceiver(NetworkManager.Side.C2S, DIALOGUE_SCREEN_OPENED_PACKET_ID, (buf, context) -> {
             Player player = context.getPlayer();
             BlablaLib.getPlayerDataManager().setPlayerInDialogue(player, true);
@@ -78,6 +73,13 @@ public class BlablaLibNetwork {
                     throw new RuntimeException(e);
                 }
             });
+        });
+    }
+
+    public static void registerClientPackets() {
+        NetworkManager.registerReceiver(NetworkManager.Side.S2C, OPEN_DIALOGUE_PACKET_ID, (buf, context) -> {
+            String dialogue = buf.readUtf();
+            context.queue(() -> DialogueScreen.openForSet(dialogue));
         });
     }
 }

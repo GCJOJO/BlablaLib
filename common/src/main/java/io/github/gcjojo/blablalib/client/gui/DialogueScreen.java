@@ -186,7 +186,7 @@ public class DialogueScreen extends Screen {
                             case "credit" -> actions.add(new DialogueCredit(obj));
                             case "image_move" -> actions.add(new DialogueMoveImage(obj));
                             case "command" -> actions.add(new DialogueExecuteCommand(obj));
-                            case "sound" -> actions.add(new DialogueSound(obj));
+                            //case "sound" -> actions.add(new DialogueSound(obj));
                             default -> actions.add(new DialogueRawAction(obj));
                         }
 
