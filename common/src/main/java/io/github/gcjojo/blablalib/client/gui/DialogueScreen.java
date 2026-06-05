@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import dev.architectury.networking.NetworkManager;
 import io.github.gcjojo.blablalib.BlablaLib;
+import io.github.gcjojo.blablalib.commands.DialogueCommand;
 import io.github.gcjojo.blablalib.dialogues.DialogueAction;
 import io.github.gcjojo.blablalib.dialogues.DialogueSpeaker;
 import io.github.gcjojo.blablalib.dialogues.actions.*;
@@ -22,11 +23,26 @@ import net.minecraft.util.Mth;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.InputStreamReader;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
+import java.util.*;
 
 public class DialogueScreen extends Screen {
+
+    private static Map<String, Class<? extends DialogueAction>> dialogueActionClasses = Map.ofEntries(
+            Map.entry("clear",      DialogueClear.class),
+            Map.entry("wait",       DialogueWait.class),
+            Map.entry("choice",     DialogueChoice.class),
+            Map.entry("change_set", DialogueNext.class),
+            Map.entry("fade",       DialogueFading.class),
+            Map.entry("message",    DialogueMessage.class),
+            Map.entry("image",      DialogueImage.class),
+            Map.entry("credit",     DialogueCredit.class),
+            Map.entry("image_move", DialogueMoveImage.class),
+            Map.entry("command",    DialogueExecuteCommand.class),
+            Map.entry("sound",      DialogueSound.class)
+    );
+
     private List<DialogueAction> dialogueActions;
     private int actionIndex = -1;
     private List<DialogueSpeaker> dialogueSpeakers;
@@ -44,6 +60,10 @@ public class DialogueScreen extends Screen {
     private boolean guiVisible = true;
 
     private final List<Button> buttons = new ArrayList<>();
+
+    public static void RegisterCustomAction(String name, Class<? extends DialogueAction> action) {
+        dialogueActionClasses.put(name, action);
+    }
 
     public DialogueScreen(String setName) {
         super(Component.literal("Dialogue"));
@@ -141,6 +161,19 @@ public class DialogueScreen extends Screen {
                             return;
 
                         String action = obj.get("action").getAsString();
+                        /*if(dialogueActionClasses.containsKey(action)) {
+                            try {
+                                actions.add(dialogueActionClasses.get(action).getDeclaredConstructor().newInstance(obj));
+                                return;
+                            } catch (InstantiationException | NoSuchMethodException | IllegalAccessException |
+                                     InvocationTargetException e) {
+                                BlablaLib.getLogger().error(e.getMessage());
+                                Arrays.stream(e.getStackTrace()).forEach(stackTraceElement -> BlablaLib.getLogger().error(stackTraceElement.toString()));
+                            }
+                        }
+                        actions.add(new DialogueRawAction(obj));*/
+
+
                         switch(action)
                         {
                             case "clear" -> actions.add(new DialogueClear(obj));
@@ -153,6 +186,7 @@ public class DialogueScreen extends Screen {
                             case "credit" -> actions.add(new DialogueCredit(obj));
                             case "image_move" -> actions.add(new DialogueMoveImage(obj));
                             case "command" -> actions.add(new DialogueExecuteCommand(obj));
+                            case "sound" -> actions.add(new DialogueSound(obj));
                             default -> actions.add(new DialogueRawAction(obj));
                         }
 

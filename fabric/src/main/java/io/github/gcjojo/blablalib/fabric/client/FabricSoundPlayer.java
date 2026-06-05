@@ -9,10 +9,10 @@ import net.minecraft.sounds.SoundEvent;
 
 public class FabricSoundPlayer extends SoundPlayer {
     @Override
-    public void playSound(String soundName) {
+    public void playSound(String soundName, float pitch, float volume) {
         SoundEvent soundEvent = loadSound(soundName);
         if(soundEvent != null)
-            Minecraft.getInstance().getSoundManager().play(SimpleSoundInstance.forUI(soundEvent, 1.0F));
+            Minecraft.getInstance().getSoundManager().play(SimpleSoundInstance.forUI(soundEvent, pitch, volume));
     }
 
     @Override

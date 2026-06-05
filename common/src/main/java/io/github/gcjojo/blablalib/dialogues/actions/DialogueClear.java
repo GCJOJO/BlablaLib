@@ -7,11 +7,7 @@ import net.minecraft.client.gui.GuiGraphics;
 
 public class DialogueClear extends DialogueAction {
 
-    String clearedClass;
-
-    public DialogueClear(){
-        this.clearedClass = "none";
-    }
+    String clearedClass = "none";
 
     public DialogueClear(String clearedClass){
         this.clearedClass = clearedClass;
@@ -20,8 +16,6 @@ public class DialogueClear extends DialogueAction {
     public DialogueClear(JsonObject object){
         if(object.has("cleared_actions"))
             this.clearedClass = object.get("cleared_actions").getAsString();
-        else
-            this.clearedClass = "none";
     }
 
     @Override

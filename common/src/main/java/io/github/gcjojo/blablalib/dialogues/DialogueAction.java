@@ -1,11 +1,15 @@
 package io.github.gcjojo.blablalib.dialogues;
 
+import com.google.gson.JsonObject;
 import io.github.gcjojo.blablalib.client.gui.DialogueScreen;
 import net.minecraft.client.gui.GuiGraphics;
 
 public abstract class DialogueAction
 {
     protected DialogueScreen screen;
+
+    public DialogueAction() { }
+    public DialogueAction(JsonObject object) { }
 
     public void setup(DialogueScreen screen)
     {
