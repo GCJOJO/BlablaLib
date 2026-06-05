@@ -1,17 +1,12 @@
 package io.github.gcjojo.blablalib.client.gui;
 
-import com.google.gson.Gson;
-import com.google.gson.JsonObject;
 import dev.architectury.networking.NetworkManager;
-import io.github.gcjojo.blablalib.BlablaLib;
-import io.github.gcjojo.blablalib.commands.DialogueCommand;
 import io.github.gcjojo.blablalib.dialogues.DialogueAction;
 import io.github.gcjojo.blablalib.dialogues.DialogueManager;
 import io.github.gcjojo.blablalib.dialogues.DialogueSpeaker;
 import io.github.gcjojo.blablalib.dialogues.actions.*;
 import io.github.gcjojo.blablalib.network.BlablaLibNetwork;
 import io.netty.buffer.Unpooled;
-import io.netty.util.Constant;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
@@ -19,15 +14,12 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FastColor;
 import net.minecraft.util.Mth;
 import org.jetbrains.annotations.NotNull;
 
-import java.io.InputStreamReader;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public class DialogueScreen extends Screen {
 

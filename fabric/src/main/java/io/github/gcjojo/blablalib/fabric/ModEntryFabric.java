@@ -3,7 +3,6 @@ package io.github.gcjojo.blablalib.fabric;
 import dev.architectury.event.events.common.CommandRegistrationEvent;
 import io.github.gcjojo.blablalib.BlablaLib;
 import io.github.gcjojo.blablalib.commands.DialogueCommand;
-import io.github.gcjojo.blablalib.fabric.client.FabricSoundPlayer;
 import net.fabricmc.api.ModInitializer;
 
 public final class ModEntryFabric implements ModInitializer {
