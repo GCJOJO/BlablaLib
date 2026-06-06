@@ -4,13 +4,16 @@ import com.mojang.logging.LogUtils;
 import dev.architectury.event.EventResult;
 import dev.architectury.event.events.common.PlayerEvent;
 import dev.architectury.networking.NetworkManager;
+import io.github.gcjojo.blablalib.client.ClientModEvents;
 import io.github.gcjojo.blablalib.client.SoundPlayer;
+import io.github.gcjojo.blablalib.commands.DialogueCommand;
 import io.github.gcjojo.blablalib.dialogues.DialogueManager;
 import io.github.gcjojo.blablalib.events.BlablalibEvents;
 import io.github.gcjojo.blablalib.network.BlablaLibNetwork;
 import io.netty.buffer.Unpooled;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import org.slf4j.Logger;
 
@@ -25,14 +28,16 @@ public final class BlablaLib {
         BlablaLibNetwork.registerPackets();
         DialogueManager.registerDefaultActions();
 
-        BlablalibEvents.DIALOGUE_COMPLETED.register((ServerPlayer player, String completedDialogue) -> {
-            LOGGER.warn("Player {} has completed dialogue {}", player.getName().getString(), completedDialogue);
+        BlablalibEvents.DIALOGUE_COMPLETED.register((ServerPlayer player, ResourceLocation completedDialogue) -> {
+            LOGGER.warn("Player {} has completed dialogue {}", player.getName().getString(), completedDialogue.toString());
             return EventResult.pass();
         });
 
         PlayerEvent.PLAYER_CLONE.register((ServerPlayer oldPlayer, ServerPlayer newPlayer, boolean wonGame) -> {
             PLAYER_DATA_MANAGER.copyPlayer(oldPlayer, newPlayer);
         });
+
+        PlayerEvent.PLAYER_QUIT.register(DialogueCommand::disconnectPlayer);
     }
 
     public static void initClient() {
@@ -48,23 +53,23 @@ public final class BlablaLib {
     public static Logger getLogger() { return LOGGER; }
 
     public static void openDialogue(ServerPlayer player){
-        String currentDialogue = PLAYER_DATA_MANAGER.getPlayerCurrentChapter(player);
-        if(currentDialogue.isEmpty()) return;
+        ResourceLocation currentDialogue = PLAYER_DATA_MANAGER.getPlayerCurrentDialogue(player);
+        if(currentDialogue == null) return;
 
         openDialogue(player, currentDialogue);
     }
 
-    public static void openDialogue(ServerPlayer player, String dialogue) {
+    public static void openDialogue(ServerPlayer player, ResourceLocation dialogue) {
         if (PLAYER_DATA_MANAGER.getPlayerInDialogue(player)) return;
 
-        PLAYER_DATA_MANAGER.setPlayerCurrentChapter(player, dialogue);
+        PLAYER_DATA_MANAGER.setPlayerCurrentDialogue(player, dialogue);
         FriendlyByteBuf buf = new FriendlyByteBuf(Unpooled.buffer());
-        buf.writeUtf(dialogue);
+        buf.writeUtf(dialogue.toString());
         NetworkManager.sendToPlayer(player, BlablaLibNetwork.OPEN_DIALOGUE_PACKET_ID, buf);
     }
 
-    public static void setPlayerDialogue(ServerPlayer player, String dialogue) {
-        PLAYER_DATA_MANAGER.setPlayerCurrentChapter(player, dialogue);
+    public static void setPlayerDialogue(ServerPlayer player, ResourceLocation dialogue) {
+        PLAYER_DATA_MANAGER.setPlayerCurrentDialogue(player, dialogue);
     }
 
     public static boolean isPlayerInDialogue(ServerPlayer player) {
@@ -75,23 +80,23 @@ public final class BlablaLib {
         PLAYER_DATA_MANAGER.setPlayerInDialogue(player, isInDialogue);
     }
 
-    public static String getPlayerDialogue(ServerPlayer player) {
-        return PLAYER_DATA_MANAGER.getPlayerCurrentChapter(player);
+    public static ResourceLocation getPlayerDialogue(ServerPlayer player) {
+        return PLAYER_DATA_MANAGER.getPlayerCurrentDialogue(player);
     }
 
-    public static String getPlayerLastReadDialogue(ServerPlayer player) {
-        return PLAYER_DATA_MANAGER.getPlayerLastReadChapter(player);
+    public static ResourceLocation getPlayerLastReadDialogue(ServerPlayer player) {
+        return PLAYER_DATA_MANAGER.getPlayerLastReadDialogue(player);
     }
 
     public static void resetPlayerLastReadDialogue(ServerPlayer player){
-        PLAYER_DATA_MANAGER.setPlayerLastReadChapter(player, "");
+        PLAYER_DATA_MANAGER.setPlayerLastReadDialogue(player, null);
     }
 
     public static CompoundTag getPlayerAdditionalData(ServerPlayer player) {
         return PLAYER_DATA_MANAGER.getAdditionalData(player);
     }
 
-    public static void setPlayerLastReadDialogue(ServerPlayer player, String playerDialogue) {
-        PLAYER_DATA_MANAGER.setPlayerLastReadChapter(player, playerDialogue);
+    public static void setPlayerLastReadDialogue(ServerPlayer player, ResourceLocation playerDialogue) {
+        PLAYER_DATA_MANAGER.setPlayerLastReadDialogue(player, playerDialogue);
     }
 }

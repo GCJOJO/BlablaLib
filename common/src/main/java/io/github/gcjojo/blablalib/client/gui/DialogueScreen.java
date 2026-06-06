@@ -14,6 +14,7 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FastColor;
 import net.minecraft.util.Mth;
 import org.jetbrains.annotations.NotNull;
@@ -27,12 +28,12 @@ public class DialogueScreen extends Screen {
     private int actionIndex = -1;
     private List<DialogueSpeaker> dialogueSpeakers;
 
-    private String currentSet;
+    private ResourceLocation currentDialogue;
 
     private final List<DialogueAction> currentActions = new ArrayList<>();
 
     private boolean advanceDialogueAtTickEnd = false;
-    private String queuedNextSet = null;
+    private ResourceLocation queuedNextDialogue = null;
 
     private float currentFadingTime = -1.0f;
     private static final float endFade = 7.5f;
@@ -41,10 +42,10 @@ public class DialogueScreen extends Screen {
 
     private final List<Button> buttons = new ArrayList<>();
 
-    public DialogueScreen(String setName) {
+    public DialogueScreen(ResourceLocation dialoguePath) {
         super(Component.literal("Dialogue"));
-        this.currentSet = setName;
-        var actions = DialogueManager.loadDialogue(setName);
+        this.currentDialogue = dialoguePath;
+        var actions = DialogueManager.loadDialogue(dialoguePath);
         if(actions == null || actions.isEmpty())
         {
             this.onClose();
@@ -52,7 +53,7 @@ public class DialogueScreen extends Screen {
         }
         this.dialogueActions = actions;
 
-        var speakers = DialogueManager.loadSpeakers(setName);
+        var speakers = DialogueManager.loadSpeakers(dialoguePath);
         if(speakers == null || speakers.isEmpty())
         {
             this.onClose();
@@ -61,9 +62,9 @@ public class DialogueScreen extends Screen {
         this.dialogueSpeakers = speakers;
     }
 
-    public DialogueScreen(String setName, List<DialogueAction> actions, List<DialogueSpeaker> speakers) {
+    public DialogueScreen(ResourceLocation dialoguePath, List<DialogueAction> actions, List<DialogueSpeaker> speakers) {
         super(Component.literal("Dialogue"));
-        this.currentSet = setName;
+        this.currentDialogue = dialoguePath;
         this.dialogueActions = actions;
         this.dialogueSpeakers = speakers;
         if(!actions.isEmpty())
@@ -85,10 +86,10 @@ public class DialogueScreen extends Screen {
         buttons.add(button);
     }
 
-    public void handleChoiceSelection(String nextSet, String saveSet, String action) {
+    public void handleChoiceSelection(ResourceLocation nextSet, ResourceLocation saveSet, String action) {
         CompoundTag choiceNbt = new CompoundTag();
-        choiceNbt.putString("NextSet", nextSet);
-        choiceNbt.putString("SaveSet", saveSet);
+        choiceNbt.putString("NextSet", nextSet.toString());
+        choiceNbt.putString("SaveSet", saveSet.toString());
         choiceNbt.putString("Action", action);
 
         FriendlyByteBuf buf = new FriendlyByteBuf(Unpooled.buffer());
@@ -97,30 +98,30 @@ public class DialogueScreen extends Screen {
         queueAdvanceDialogue();
     }
 
-    public void changeSet(String setName) {
-        List<DialogueAction> newActions = DialogueManager.loadDialogue(setName);
+    public void changeToDialogue(ResourceLocation dialoguePath) {
+        List<DialogueAction> newActions = DialogueManager.loadDialogue(dialoguePath);
         if(newActions == null) {
             this.onClose();
             return;
         }
-        List<DialogueSpeaker> newSpeakers = DialogueManager.loadSpeakers(setName);
+        List<DialogueSpeaker> newSpeakers = DialogueManager.loadSpeakers(dialoguePath);
         if(newSpeakers == null) {
             this.onClose();
             return;
         }
 
-        currentSet = setName;
+        currentDialogue = dialoguePath;
         actionIndex = -1;
         dialogueActions = newActions;
         dialogueSpeakers = newSpeakers;
         advanceDialogue();
     }
 
-    public static void openForSet(String setName) {
-        List<DialogueAction> actions = DialogueManager.loadDialogue(setName);
-        List<DialogueSpeaker> speakers = DialogueManager.loadSpeakers(setName);
+    public static void openDialogueScreen(ResourceLocation dialoguePath) {
+        List<DialogueAction> actions = DialogueManager.loadDialogue(dialoguePath);
+        List<DialogueSpeaker> speakers = DialogueManager.loadSpeakers(dialoguePath);
         if(actions != null && !actions.isEmpty() && speakers != null)
-            Minecraft.getInstance().tell(() -> Minecraft.getInstance().setScreen(new DialogueScreen(setName, actions, speakers)));
+            Minecraft.getInstance().tell(() -> Minecraft.getInstance().setScreen(new DialogueScreen(dialoguePath, actions, speakers)));
     }
 
     @Override
@@ -135,9 +136,9 @@ public class DialogueScreen extends Screen {
             this.advanceDialogue();
         }
 
-        if(queuedNextSet != null){
-            changeSet(queuedNextSet);
-            queuedNextSet = null;
+        if(queuedNextDialogue != null){
+            changeToDialogue(queuedNextDialogue);
+            queuedNextDialogue = null;
         }
     }
 
@@ -194,7 +195,7 @@ public class DialogueScreen extends Screen {
 
     public void queueAdvanceDialogue() { this.advanceDialogueAtTickEnd = true; }
 
-    public void queueChangeSet(String nextSet) { this.queuedNextSet = nextSet; }
+    public void queueChangeSet(ResourceLocation nextDialogue) { this.queuedNextDialogue = nextDialogue; }
 
     public void advanceDialogue() {
         actionIndex++;
@@ -242,16 +243,7 @@ public class DialogueScreen extends Screen {
     public void clearActions() { currentActions.clear(); }
 
     public void clearActions(String clearedClass){
-        Class<? extends DialogueAction> classToRemove = null;
-
-        switch (clearedClass)
-        {
-            case "message" -> classToRemove = DialogueMessage.class;
-            case "credit" -> classToRemove = DialogueCredit.class;
-            case "fade" -> classToRemove = DialogueFading.class;
-            case "image" -> classToRemove = DialogueImage.class;
-            case "move_image" -> classToRemove = DialogueMoveImage.class;
-        }
+        Class<? extends DialogueAction> classToRemove = DialogueManager.getActionClass(clearedClass);
         if(classToRemove != null)
             currentActions.removeIf(classToRemove::isInstance);
     }
@@ -275,7 +267,7 @@ public class DialogueScreen extends Screen {
         currentFadingTime = 0.0f;
 
         FriendlyByteBuf buf = new FriendlyByteBuf(Unpooled.buffer());
-        buf.writeUtf(currentSet);
+        buf.writeUtf(currentDialogue.toString());
         NetworkManager.sendToServer(BlablaLibNetwork.DIALOGUE_COMPLETED_PACKET_ID, buf);
     }
 

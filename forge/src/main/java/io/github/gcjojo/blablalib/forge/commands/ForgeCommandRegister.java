@@ -12,7 +12,6 @@ public class ForgeCommandRegister {
 
     @SubscribeEvent
     public static void onRegisterCommands(RegisterCommandsEvent event) {
-        if(BlablaLibForgeConfig.enableCommand)
-            DialogueCommand.register(event.getDispatcher());
+        DialogueCommand.register(event.getDispatcher());
     }
 }

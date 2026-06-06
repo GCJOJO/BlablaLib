@@ -4,25 +4,26 @@ import com.google.gson.JsonObject;
 import io.github.gcjojo.blablalib.client.gui.DialogueScreen;
 import io.github.gcjojo.blablalib.dialogues.DialogueAction;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.resources.ResourceLocation;
 
 public class DialogueNext extends DialogueAction {
 
-    String nextSet;
+    ResourceLocation nextDialogue;
 
-    public DialogueNext(String nextSet) {
-        this.nextSet = nextSet;
+    public DialogueNext(ResourceLocation nextSet) {
+        this.nextDialogue = nextSet;
     }
 
     public DialogueNext(JsonObject object){
         if(object.has("set"))
-            this.nextSet = object.get("set").getAsString();
+            this.nextDialogue = ResourceLocation.tryParse(object.get("set").getAsString());
     }
 
     @Override
     public void setup(DialogueScreen screen) {
         super.setup(screen);
-        if(!nextSet.isEmpty())
-            screen.queueChangeSet(nextSet);
+        if(nextDialogue != null)
+            screen.queueChangeSet(nextDialogue);
     }
 
     @Override

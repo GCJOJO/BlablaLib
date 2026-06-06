@@ -1,12 +1,15 @@
 package io.github.gcjojo.blablalib.fabric.client;
 
 import io.github.gcjojo.blablalib.client.SoundPlayer;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
 
+@Environment(EnvType.CLIENT)
 public class FabricSoundPlayer extends SoundPlayer {
     @Override
     public void playSound(String soundName, float pitch, float volume) {

@@ -4,6 +4,7 @@ import io.github.gcjojo.blablalib.PlayerDataManager;
 import io.github.gcjojo.blablalib.fabric.data_components.ModComponents;
 import io.github.gcjojo.blablalib.fabric.data_components.PlayerDataComponent;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
 
 public class FabricPlayerDataManager extends PlayerDataManager {
@@ -22,22 +23,22 @@ public class FabricPlayerDataManager extends PlayerDataManager {
     }
 
     @Override
-    public void setPlayerLastReadChapter(Player player, String lastReadChapter) {
+    public void setPlayerLastReadDialogue(Player player, ResourceLocation lastReadChapter) {
         getPlayerDataComponent(player).setLastReadDialogue(lastReadChapter);
     }
 
     @Override
-    public String getPlayerLastReadChapter(Player player) {
+    public ResourceLocation getPlayerLastReadDialogue(Player player) {
         return getPlayerDataComponent(player).getLastReadDialogue();
     }
 
     @Override
-    public void setPlayerCurrentChapter(Player player, String currentChapter) {
+    public void setPlayerCurrentDialogue(Player player, ResourceLocation currentChapter) {
         getPlayerDataComponent(player).setCurrentDialogue(currentChapter);
     }
 
     @Override
-    public String getPlayerCurrentChapter(Player player) {
+    public ResourceLocation getPlayerCurrentDialogue(Player player) {
         return getPlayerDataComponent(player).getCurrentDialogue();
     }
 

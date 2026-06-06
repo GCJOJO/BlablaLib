@@ -5,6 +5,7 @@ import dev.architectury.event.EventResult;
 import dev.architectury.networking.NetworkManager;
 import io.github.gcjojo.blablalib.BlablaLib;
 import io.github.gcjojo.blablalib.client.gui.DialogueScreen;
+import io.github.gcjojo.blablalib.commands.DialogueCommand;
 import io.github.gcjojo.blablalib.events.BlablalibEvents;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
@@ -13,7 +14,11 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class BlablaLibNetwork {
+    public static final ResourceLocation SEND_DIALOGUE_LIST_ID = new ResourceLocation(BlablaLib.MOD_ID, "send_dialogue_list");
     public static final ResourceLocation OPEN_DIALOGUE_PACKET_ID = new ResourceLocation(BlablaLib.MOD_ID, "open_dialogue");
     public static final ResourceLocation DIALOGUE_SCREEN_OPENED_PACKET_ID = new ResourceLocation(BlablaLib.MOD_ID, "dialogue_screen_opened");
     public static final ResourceLocation CHOICE_PACKET_ID = new ResourceLocation(BlablaLib.MOD_ID, "choice");
@@ -21,6 +26,19 @@ public class BlablaLibNetwork {
     public static final ResourceLocation DIALOGUE_COMMAND_PACKET_ID = new ResourceLocation(BlablaLib.MOD_ID, "dialogue_command");
 
     public static void registerPackets() {
+        NetworkManager.registerReceiver(NetworkManager.Side.C2S, SEND_DIALOGUE_LIST_ID, (buf, context) -> {
+            if(!(context.getPlayer() instanceof ServerPlayer)) return;
+
+            List<ResourceLocation> dialoguePaths = new ArrayList<>();
+
+            int dialogueCount = buf.readInt();
+            for(int i = 0; i <= dialogueCount - 1; i++) {
+                dialoguePaths.add(buf.readResourceLocation());
+            }
+
+            DialogueCommand.registerPlayerDialogueList((ServerPlayer) context.getPlayer(), dialoguePaths);
+        });
+
         NetworkManager.registerReceiver(NetworkManager.Side.C2S, DIALOGUE_SCREEN_OPENED_PACKET_ID, (buf, context) -> {
             Player player = context.getPlayer();
             BlablaLib.getPlayerDataManager().setPlayerInDialogue(player, true);
@@ -29,8 +47,8 @@ public class BlablaLibNetwork {
         NetworkManager.registerReceiver(NetworkManager.Side.C2S, CHOICE_PACKET_ID, (buf, context) -> {
             Player player = context.getPlayer();
             CompoundTag choiceNbt = buf.readNbt();
-            String nextSet = choiceNbt.getString("NextSet");
-            String saveSet = choiceNbt.getString("SaveSet");
+            ResourceLocation nextSet = ResourceLocation.tryParse(choiceNbt.getString("NextSet"));
+            ResourceLocation saveSet = ResourceLocation.tryParse(choiceNbt.getString("SaveSet"));
             String action = choiceNbt.getString("Action");
 
             BlablaLib.setPlayerIsInDialogue((ServerPlayer) player, false);
@@ -47,9 +65,9 @@ public class BlablaLibNetwork {
 
         NetworkManager.registerReceiver(NetworkManager.Side.C2S, DIALOGUE_COMPLETED_PACKET_ID, (buf, context) -> {
             Player player = context.getPlayer();
-            String completedSet = buf.readUtf();
+            ResourceLocation completedSet = ResourceLocation.tryParse(buf.readUtf());
 
-            BlablaLib.getPlayerDataManager().setPlayerLastReadChapter(player, completedSet);
+            BlablaLib.getPlayerDataManager().setPlayerLastReadDialogue(player, completedSet);
             BlablaLib.getPlayerDataManager().setPlayerInDialogue(player, false);
 
             if(player instanceof ServerPlayer)
@@ -78,8 +96,9 @@ public class BlablaLibNetwork {
 
     public static void registerClientPackets() {
         NetworkManager.registerReceiver(NetworkManager.Side.S2C, OPEN_DIALOGUE_PACKET_ID, (buf, context) -> {
-            String dialogue = buf.readUtf();
-            context.queue(() -> DialogueScreen.openForSet(dialogue));
+            ResourceLocation dialogue = ResourceLocation.tryParse(buf.readUtf());
+            if(dialogue != null)
+                context.queue(() -> DialogueScreen.openDialogueScreen(dialogue));
         });
     }
 }

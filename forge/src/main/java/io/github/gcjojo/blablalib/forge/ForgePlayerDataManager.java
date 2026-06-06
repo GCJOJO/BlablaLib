@@ -2,7 +2,10 @@ package io.github.gcjojo.blablalib.forge;
 
 import io.github.gcjojo.blablalib.PlayerDataManager;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
+
+import java.lang.module.ResolutionException;
 
 public class ForgePlayerDataManager extends PlayerDataManager {
     private CompoundTag getBlablalibTag(Player player){
@@ -23,23 +26,23 @@ public class ForgePlayerDataManager extends PlayerDataManager {
     }
 
     @Override
-    public void setPlayerLastReadChapter(Player player, String lastReadChapter) {
-        getBlablalibTag(player).putString("LastReadChapter", lastReadChapter);
+    public void setPlayerLastReadDialogue(Player player, ResourceLocation lastReadDialogue) {
+        getBlablalibTag(player).putString("LastReadDialogue", lastReadDialogue.toString());
     }
 
     @Override
-    public String getPlayerLastReadChapter(Player player) {
-        return getBlablalibTag(player).getString("LastReadChapter");
+    public ResourceLocation getPlayerLastReadDialogue(Player player) {
+        return ResourceLocation.tryParse(getBlablalibTag(player).getString("LastReadDialogue"));
     }
 
     @Override
-    public void setPlayerCurrentChapter(Player player, String currentChapter) {
-        getBlablalibTag(player).putString("CurrentChapter", currentChapter);
+    public void setPlayerCurrentDialogue(Player player, ResourceLocation currentDialogue) {
+        getBlablalibTag(player).putString("CurrentDialogue", currentDialogue.toString());
     }
 
     @Override
-    public String getPlayerCurrentChapter(Player player) {
-        return getBlablalibTag(player).getString("CurrentChapter");
+    public ResourceLocation getPlayerCurrentDialogue(Player player) {
+        return ResourceLocation.tryParse(getBlablalibTag(player).getString("CurrentDialogue"));
     }
 
     @Override

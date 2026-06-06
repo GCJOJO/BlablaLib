@@ -3,6 +3,7 @@ package io.github.gcjojo.blablalib.events;
 import dev.architectury.event.Event;
 import dev.architectury.event.EventFactory;
 import dev.architectury.event.EventResult;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 
 public interface BlablalibEvents {
@@ -11,10 +12,10 @@ public interface BlablalibEvents {
 
 
     interface DialogueCompleted {
-        EventResult dialogueCompleted(ServerPlayer player, String dialogue);
+        EventResult dialogueCompleted(ServerPlayer player, ResourceLocation dialogue);
     }
 
     interface DialogueChoiceMade {
-        EventResult dialogueChoiceMade(ServerPlayer player, String nextSet, String saveSet, String action);
+        EventResult dialogueChoiceMade(ServerPlayer player, ResourceLocation nextSet, ResourceLocation saveSet, String action);
     }
 }

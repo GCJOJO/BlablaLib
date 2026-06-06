@@ -6,19 +6,21 @@ import io.github.gcjojo.blablalib.dialogues.DialogueAction;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
 
 public class DialogueChoice extends DialogueAction {
     private String choice1;
-    private String nextSet1;
-    private String saveSet1;
+    private ResourceLocation nextSet1;
+    private ResourceLocation saveSet1;
     private String action1;
 
     private String choice2;
-    private String nextSet2;
-    private String saveSet2;
+    private ResourceLocation nextSet2;
+    private ResourceLocation saveSet2;
     private String action2;
 
-    public DialogueChoice(String choice1, String nextSet1, String saveSet1, String action1, String choice2, String nextSet2, String saveSet2, String action2)
+    public DialogueChoice(String choice1, ResourceLocation nextSet1, ResourceLocation saveSet1, String action1,
+                          String choice2, ResourceLocation nextSet2, ResourceLocation saveSet2, String action2)
     {
         this.choice1 = choice1;
         this.nextSet1 = nextSet1;
@@ -33,12 +35,12 @@ public class DialogueChoice extends DialogueAction {
 
     public DialogueChoice(JsonObject object){
         this.choice1  = object.get("option1").getAsString();
-        this.nextSet1 = object.get("next1").getAsString();
-        this.saveSet1 = object.get("save1").getAsString();
+        this.nextSet1 = ResourceLocation.tryParse(object.get("next1").getAsString());
+        this.saveSet1 = ResourceLocation.tryParse(object.get("save1").getAsString());
         this.action1  = object.get("action1").getAsString();
         this.choice2  = object.get("option2").getAsString();
-        this.nextSet2 = object.get("next2").getAsString();
-        this.saveSet2 = object.get("save2").getAsString();
+        this.nextSet2 = ResourceLocation.tryParse(object.get("next2").getAsString());
+        this.saveSet2 = ResourceLocation.tryParse(object.get("save2").getAsString());
         this.action2  = object.get("action2").getAsString();
     }
 
