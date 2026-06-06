@@ -29,6 +29,12 @@ architectury {
 
 repositories{
     maven { url 'https://jitpack.io' }
+
+    //For fabric only
+    maven {
+        name = "Ladysnake Mods"
+        url = 'https://maven.ladysnake.org/releases'
+    }
 }
 
 dependencies {
