@@ -8,8 +8,6 @@ This library add a dialogue system.<br>
 You can use commands like `/dialogue play` and `/dialogue set "my_mod:my_cool_dialogue"` to use this library.<br>
 You can also use the `BlablaLib.openDialogue()` function.<br><br>
 
-To enable the `/dialogue` command modify the config and set the `enable_command` field to true.<br> <br>
-
 This library has been used in the [Worlds Colliding Mod](https://github.com/GCJOJO/WorldsColliding). <br>
 If you want to see what you can do with more in depth go check out the source code of our mod !
 
@@ -65,22 +63,6 @@ BlablaLib.setPlayerDialogue(player, dialogue);
 BlablaLib.openDialogue(player, dialogue);
 ```
 
-If you want to customize the `/dialogue` command you may do so by registering it
-```JAVA
-public void onCommandRegister(CommandDispatcher<CommandSourceStack> dispatcher) {
-    // This list represents the suggestions
-    List<String> dialogues = Array.asList("\"my_mod:dialogue_1\"", "\"my_mod:dialogue_2\"", "\"my_mod:dialogue_3\"");
-    DialogueCommand.register(dispatcher, dialogues);
-    
-    // You can also pass in a function that will transform the dialogue argument
-    DialogueCommand.register(dispatcher, dialogues, (CommandContext<CommandSourceStack> context, String dialogue) -> {
-        if(context.context.getSource().getPlayer().isCreative() && dialogue.contentEquals("my_mod:dialogue_2"))
-            return "my_mod:dialogue_3";
-        
-        return dialogue;
-    });
-}
-```
 
 ## How to use the dialogue system<br>
 First create a resource pack using this folder structure
