@@ -54,15 +54,20 @@ public class DialogueManager {
                 JsonObject obj = element.getAsJsonObject();
                 if(!obj.has("action"))
                     return;
-
                 String action = obj.get("action").getAsString();
                 if(dialogueActionClasses.containsKey(action)) {
                     try {
-                        Constructor<DialogueAction> constructor = (Constructor<DialogueAction>) dialogueActionClasses.get(action).getConstructor(JsonObject.class);
-                        actions.add(constructor.newInstance(obj));
-                        return;
-                    } catch (InstantiationException | NoSuchMethodException | IllegalAccessException |
-                             InvocationTargetException e) {
+                        try {
+                            Constructor<DialogueAction> constructor = (Constructor<DialogueAction>) dialogueActionClasses.get(action).getConstructor(JsonObject.class);
+                            actions.add(constructor.newInstance(obj));
+                            return;
+                        } catch (NoSuchMethodException e) {
+                            Constructor<DialogueAction> constructor = (Constructor<DialogueAction>) dialogueActionClasses.get(action).getConstructor();
+                            actions.add(constructor.newInstance(obj));
+                            return;
+                        }
+                    } catch (InstantiationException | IllegalAccessException | InvocationTargetException |
+                             NoSuchMethodException e) {
                         BlablaLib.getLogger().error(e.getMessage());
                         Arrays.stream(e.getStackTrace()).forEach(stackTraceElement -> BlablaLib.getLogger().error(stackTraceElement.toString()));
                     }

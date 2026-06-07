@@ -208,7 +208,7 @@ public class DialogueScreen extends Screen {
 
         currentActions.removeIf(DialogueAction::isBlocking);
 
-        for(int i = actionIndex; i <= dialogueActions.size(); i++)
+        for(int i = actionIndex; i <= dialogueActions.size() - 1; i++)
         {
             DialogueAction currentAction = dialogueActions.get(i);
 

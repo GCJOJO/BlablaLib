@@ -53,11 +53,17 @@ public class DialogueChoice extends DialogueAction {
         int yPos = screen.height / 2 + 50;
 
         screen.drawButton(Button.builder(Component.translatable(choice1), b -> {
-            screen.handleChoiceSelection(nextSet1, saveSet1, action1);
+            if(nextSet1 != null && saveSet1 != null)
+                screen.handleChoiceSelection(nextSet1, saveSet1, action1);
+            else
+                screen.endDialogue();
         }).bounds(screen.width / 4 - btnWidth / 2, yPos, btnWidth, btnHeight).build());
 
         screen.drawButton(Button.builder(Component.translatable(choice2), b -> {
-            screen.handleChoiceSelection(nextSet2, saveSet2, action2);
+            if(nextSet2 != null && saveSet2 != null)
+                screen.handleChoiceSelection(nextSet2, saveSet2, action2);
+            else
+                screen.endDialogue();
         }).bounds(3 * screen.width / 4 - btnWidth / 2, yPos, btnWidth, btnHeight).build());
     }
 
