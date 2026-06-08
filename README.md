@@ -145,6 +145,16 @@ You may display you dialogues using the following commands : <br>
 ``/dialogue set my_resourcepack:dialogue_1`` <br>
 ``/dialogue play``
 
+If you want the `/dialogue set` command to act differently depending on the user input you can register a transformation using `DialogueCommand.registerTransformation()`:
+```JAVA
+    DialogueCommand.registerTransformation((CommandContext<CommandSourceStack> context, ResourceLocation dialogue) -> {
+        if(context.getSource().getPlayer().isCreative() && dialogue.equals(ResourceLocation.tryBuild("my_mod", "dialogue_2")))
+            return ResourceLocation.tryBuild("my_mod", "dialogue_3");
+
+        return dialogue;
+    });
+```
+
 <ins>__What are blocking and non-blocking actions ?__</ins><br>
 Blocking actions are considered as actions that blocks the current dialogue, when they end, they wait for user input instead of directly going to the next action. <br>
 There can be only one Blocking Action at any point.
