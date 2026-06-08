@@ -5,7 +5,7 @@
 [![](https://jitpack.io/v/GCJOJO/BlablaLib.svg)](https://jitpack.io/#GCJOJO/BlablaLib)
 
 This library add a dialogue system.<br>
-You can use commands like `/dialogue play` and `/dialogue set "my_mod:my_cool_dialogue"` to use this library.<br>
+You can use commands like `/dialogue play` and `/dialogue set my_mod:my_cool_dialogue` to use this library.<br>
 You can also use the `BlablaLib.openDialogue()` function.<br><br>
 
 This library has been used in the [Worlds Colliding Mod](https://github.com/GCJOJO/WorldsColliding). <br>
@@ -39,6 +39,10 @@ repositories{
 }
 
 dependencies {
+    // Common (if using Architectury)
+    modImplementation "dev.architectury:architectury:$rootProject.architectury_api_version"
+    modImplementation "com.github.gcjojo.BlablaLib:BlablaLib-common:${blablalib_version}"
+    
     // Fabric
     modImplementation "dev.architectury:architectury-fabric:${architectury_api_version}"
     modImplementation "com.github.GCJOJO.BlablaLib:blablalib-fabric:${blablalib_version}"
