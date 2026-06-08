@@ -162,5 +162,3 @@ Here is a table of Blocking and Non-Blocking Actions
 | ExecuteCommandAction  |     CreditAction      |
 |                       |      ClearAction      |
 |                       |    MoveImageAction    |
-
-_This project is currently in active development_
