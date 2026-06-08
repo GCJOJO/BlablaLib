@@ -41,7 +41,7 @@ repositories{
 dependencies {
     // Common (if using Architectury)
     modImplementation "dev.architectury:architectury:$rootProject.architectury_api_version"
-    modImplementation "com.github.gcjojo.BlablaLib:BlablaLib-common:${blablalib_version}"
+    modImplementation "com.github.GCJOJO.BlablaLib:BlablaLib-common:${blablalib_version}"
     
     // Fabric
     modImplementation "dev.architectury:architectury-fabric:${architectury_api_version}"
