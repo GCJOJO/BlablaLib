@@ -81,7 +81,6 @@ First create a resource pack using this folder structure
                      en_us.json
                      any other language files...
                  dialogues.json
-            pack.mcmeta
 ```
 
 Inside dialogues.json define the different speakers that may speak in your dialogues.
