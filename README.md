@@ -26,7 +26,10 @@ architectury {
 }
 
 repositories{
-    maven { url 'https://jitpack.io' }
+    maven {
+        url 'https://jitpack.io'
+        content { includeGroup "com.github.GCJOJO.BlablaLib" }
+    }
 
     //For fabric only
     maven {
