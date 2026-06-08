@@ -81,7 +81,7 @@ public class DialogueCommand {
                                     transformations.forEach(transformation -> finalDialogue.set(transformation.transformDialogue(context, finalDialogue.get())));
 
                                     BlablaLib.getPlayerDataManager().setPlayerCurrentDialogue(player, finalDialogue.get());
-                                    String dialogueString = dialogue.toString();
+                                    String dialogueString = finalDialogue.get().toString();
                                     context.getSource().sendSuccess(() -> Component.translatable("blablalib.commands.updated_dialogue", dialogueString).withStyle(ChatFormatting.GREEN), true);
                                     return 1;
                                 })))
