@@ -5,7 +5,7 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import io.github.gcjojo.blablalib.BlablaLib;
 import io.github.gcjojo.blablalib.dialogues.DialogueAction;
-import io.github.gcjojo.blablalib.utils.MathUtils;
+import io.github.gcjojo.liblib.utils.MathUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
@@ -14,7 +14,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.util.FastColor;
 
-public class DialogueCredit extends DialogueAction {
+public class DialogueText extends DialogueAction {
     enum DisplayState
     {
         FADE_IN,
@@ -45,7 +45,7 @@ public class DialogueCredit extends DialogueAction {
     private int alpha = 0;
     private float currentTime = 0.0f;
 
-    public DialogueCredit(String text, float fadeInTime, float holdTime, float fadeOutTime, float xPercentage, float yPercentage, float scale, String color){
+    public DialogueText(String text, float fadeInTime, float holdTime, float fadeOutTime, float xPercentage, float yPercentage, float scale, String color){
         this.text = text;
         this.fadeInTime = fadeInTime;
         this.holdTime = holdTime;
@@ -68,7 +68,7 @@ public class DialogueCredit extends DialogueAction {
         state = DisplayState.FADE_IN;
     }
 
-    public DialogueCredit(JsonObject object){
+    public DialogueText(JsonObject object){
         this.text = "";
         this.fadeInTime = 0.0f;
         this.holdTime = 1.0f;

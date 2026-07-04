@@ -8,7 +8,6 @@ public final class ModEntryFabricClient implements ClientModInitializer {
     @Override
     public void onInitializeClient() {
         BlablaLib.initClient();
-        BlablaLib.setSoundPlayer(new FabricSoundPlayer());
         ClientModEvents.registerClientModEvents();
     }
 }

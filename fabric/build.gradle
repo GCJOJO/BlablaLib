@@ -41,6 +41,8 @@ dependencies {
     common(project(path: ':common', configuration: 'namedElements')) { transitive false }
     shadowBundle project(path: ':common', configuration: 'transformProductionFabric')
 
+    modImplementation "com.github.GCJOJO.LibLib:LibLib-fabric:${liblib_version}"
+
     // Replace modImplementation with modApi if you expose components in your own API
     modImplementation "dev.onyxstudios.cardinal-components-api:cardinal-components-base:${project.cca_version}"
     modImplementation "dev.onyxstudios.cardinal-components-api:cardinal-components-entity:${project.cca_version}"

@@ -25,7 +25,8 @@ public class DialogueManager {
         dialogueActionClasses.put("fade",           DialogueFading.class);
         dialogueActionClasses.put("message",        DialogueMessage.class);
         dialogueActionClasses.put("image",          DialogueImage.class);
-        dialogueActionClasses.put("credit",         DialogueCredit.class);
+        dialogueActionClasses.put("credit",         DialogueText.class);
+        dialogueActionClasses.put("text",           DialogueText.class);
         dialogueActionClasses.put("image_move",     DialogueMoveImage.class);
         dialogueActionClasses.put("command",        DialogueExecuteCommand.class);
         dialogueActionClasses.put("sound",          DialogueSound.class);

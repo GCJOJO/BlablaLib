@@ -3,7 +3,7 @@ package io.github.gcjojo.blablalib.dialogues.actions;
 import com.google.gson.JsonObject;
 import io.github.gcjojo.blablalib.BlablaLib;
 import io.github.gcjojo.blablalib.dialogues.DialogueAction;
-import io.github.gcjojo.blablalib.utils.MathUtils;
+import io.github.gcjojo.liblib.utils.MathUtils;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.util.FastColor;
 
