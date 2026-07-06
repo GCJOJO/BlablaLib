@@ -1,6 +1,6 @@
 package io.github.gcjojo.blablalib;
 
-import io.github.gcjojo.liblib.utils.PlayerData;
+import io.github.gcjojo.liblib.utils.PlayerSaveData;
 import lombok.Getter;
 import lombok.Setter;
 import net.minecraft.nbt.CompoundTag;
@@ -8,7 +8,7 @@ import net.minecraft.resources.ResourceLocation;
 
 @Getter
 @Setter
-public class BlablaLibPlayerData extends PlayerData {
+public class BlablaLibPlayerSaveData extends PlayerSaveData {
     protected boolean isInDialogue = false;
     protected ResourceLocation currentDialogue = null;
     protected ResourceLocation lastReadDialogue = null;
@@ -23,12 +23,12 @@ public class BlablaLibPlayerData extends PlayerData {
     }
 
     @Override
-    public void deserialize(CompoundTag data) {
-        if(data.contains("IsInDialogue"))
-            this.isInDialogue = data.getBoolean("IsInDialogue");
-        if(data.contains("CurrentDialogue"))
-            this.currentDialogue = ResourceLocation.tryParse(data.getString("CurrentDialogue"));
-        if(data.contains("LastReadDialogue"))
-            this.lastReadDialogue = ResourceLocation.tryParse(data.getString("LastReadDialogue"));
+    public void deserialize(CompoundTag nbt) {
+        if (nbt.contains("IsInDialogue"))
+            this.isInDialogue = nbt.getBoolean("IsInDialogue");
+        if (nbt.contains("CurrentDialogue"))
+            this.currentDialogue = ResourceLocation.tryParse(nbt.getString("CurrentDialogue"));
+        if (nbt.contains("LastReadDialogue"))
+            this.lastReadDialogue = ResourceLocation.tryParse(nbt.getString("LastReadDialogue"));
     }
 }

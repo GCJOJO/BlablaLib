@@ -4,6 +4,7 @@ import com.mojang.logging.LogUtils;
 import dev.architectury.event.EventResult;
 import dev.architectury.event.events.common.PlayerEvent;
 import dev.architectury.networking.NetworkManager;
+import io.github.gcjojo.blablalib.api.BlablaLibAPIImpl;
 import io.github.gcjojo.blablalib.commands.DialogueCommand;
 import io.github.gcjojo.blablalib.dialogues.DialogueManager;
 import io.github.gcjojo.blablalib.events.BlablalibEvents;
@@ -19,18 +20,19 @@ import org.slf4j.Logger;
 public final class BlablaLib {
     public static final String MOD_ID = "blablalib";
     public static final ResourceLocation BLABLALIB_DIALOGUE_DATA_ID = ResourceLocation.tryBuild(MOD_ID, "dialogue_data");
-
+    private static final Logger LOGGER = LogUtils.getLogger();
     @Deprecated
     private static PlayerDataManager PLAYER_DATA_MANAGER;
-
-    private static final Logger LOGGER = LogUtils.getLogger();
 
     public static void init() {
         BlablaLibNetwork.registerPackets();
         DialogueManager.registerDefaultActions();
 
+        LibLib.setBlablaLibAPI(new BlablaLibAPIImpl());
+
         BlablalibEvents.DIALOGUE_COMPLETED.register((ServerPlayer player, ResourceLocation completedDialogue) -> {
             LOGGER.warn("Player {} has completed dialogue {}", player.getName().getString(), completedDialogue.toString());
+            BlablaLibAPIImpl.DIALOGUE_COMPLETED.invoker().onDialogueCompleted(player, completedDialogue);
             return EventResult.pass();
         });
 
@@ -46,15 +48,22 @@ public final class BlablaLib {
     }
 
     @Deprecated
-    public static PlayerDataManager getPlayerDataManager() { return PLAYER_DATA_MANAGER; }
+    public static PlayerDataManager getPlayerDataManager() {
+        return PLAYER_DATA_MANAGER;
+    }
+
     @Deprecated
-    public static void setPlayerDataManager(PlayerDataManager newPlayerDataManager) { PLAYER_DATA_MANAGER = newPlayerDataManager; }
+    public static void setPlayerDataManager(PlayerDataManager newPlayerDataManager) {
+        PLAYER_DATA_MANAGER = newPlayerDataManager;
+    }
 
-    public static Logger getLogger() { return LOGGER; }
+    public static Logger getLogger() {
+        return LOGGER;
+    }
 
-    public static void openDialogue(ServerPlayer player){
-        ResourceLocation currentDialogue = LibLib.getPlayerDataManager().deserializePlayerData(player, BLABLALIB_DIALOGUE_DATA_ID, BlablaLibPlayerData.class).getCurrentDialogue();
-        if(currentDialogue == null) return;
+    public static void openDialogue(ServerPlayer player) {
+        ResourceLocation currentDialogue = LibLib.getPlayerDataManager().deserializePlayerData(player, BLABLALIB_DIALOGUE_DATA_ID, BlablaLibPlayerSaveData.class).getCurrentDialogue();
+        if (currentDialogue == null) return;
 
         openDialogue(player, currentDialogue);
     }
@@ -68,8 +77,8 @@ public final class BlablaLib {
         NetworkManager.sendToPlayer(player, BlablaLibNetwork.OPEN_DIALOGUE_PACKET_ID, buf);
     }
 
-    public static BlablaLibPlayerData getPlayerData(ServerPlayer player) {
-        return LibLib.getPlayerDataManager().deserializePlayerData(player, BLABLALIB_DIALOGUE_DATA_ID, BlablaLibPlayerData.class);
+    public static BlablaLibPlayerSaveData getPlayerData(ServerPlayer player) {
+        return LibLib.getPlayerDataManager().deserializePlayerData(player, BLABLALIB_DIALOGUE_DATA_ID, BlablaLibPlayerSaveData.class);
     }
 
     public static void setPlayerDialogue(ServerPlayer player, ResourceLocation dialogue) {
@@ -96,7 +105,7 @@ public final class BlablaLib {
         getPlayerData(player).setLastReadDialogue(playerDialogue);
     }
 
-    public static void resetPlayerLastReadDialogue(ServerPlayer player){
+    public static void resetPlayerLastReadDialogue(ServerPlayer player) {
         setPlayerLastReadDialogue(player, null);
     }
 
