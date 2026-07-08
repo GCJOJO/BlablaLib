@@ -7,6 +7,7 @@ import io.github.gcjojo.blablalib.BlablaLib;
 import io.github.gcjojo.blablalib.client.gui.DialogueScreen;
 import io.github.gcjojo.blablalib.commands.DialogueCommand;
 import io.github.gcjojo.blablalib.events.BlablalibEvents;
+import io.github.gcjojo.liblib.LibLib;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
@@ -24,15 +25,17 @@ public class BlablaLibNetwork {
     public static final ResourceLocation CHOICE_PACKET_ID = new ResourceLocation(BlablaLib.MOD_ID, "choice");
     public static final ResourceLocation DIALOGUE_COMPLETED_PACKET_ID = new ResourceLocation(BlablaLib.MOD_ID, "dialogue_completed");
     public static final ResourceLocation DIALOGUE_COMMAND_PACKET_ID = new ResourceLocation(BlablaLib.MOD_ID, "dialogue_command");
+    public static final ResourceLocation DIALOGUE_QUEST_SET_STATE_ID = new ResourceLocation(BlablaLib.MOD_ID, "dialogue_set_quest_state");
+    public static final ResourceLocation DIALOGUE_TASK_SET_STATE_ID = new ResourceLocation(BlablaLib.MOD_ID, "dialogue_set_task_state");
 
     public static void registerPackets() {
         NetworkManager.registerReceiver(NetworkManager.Side.C2S, SEND_DIALOGUE_LIST_ID, (buf, context) -> {
-            if(!(context.getPlayer() instanceof ServerPlayer)) return;
+            if (!(context.getPlayer() instanceof ServerPlayer)) return;
 
             List<ResourceLocation> dialoguePaths = new ArrayList<>();
 
             int dialogueCount = buf.readInt();
-            for(int i = 0; i <= dialogueCount - 1; i++) {
+            for (int i = 0; i <= dialogueCount - 1; i++) {
                 dialoguePaths.add(buf.readResourceLocation());
             }
 
@@ -54,9 +57,9 @@ public class BlablaLibNetwork {
             BlablaLib.setPlayerIsInDialogue((ServerPlayer) player, false);
             BlablaLib.setPlayerLastReadDialogue((ServerPlayer) player, BlablaLib.getPlayerDialogue((ServerPlayer) player));
 
-            if(player instanceof ServerPlayer) {
+            if (player instanceof ServerPlayer) {
                 EventResult result = BlablalibEvents.DIALOGUE_CHOICE_MADE.invoker().dialogueChoiceMade((ServerPlayer) player, nextSet, saveSet, action);
-                if((result.isPresent() && result.isTrue()) || result.isEmpty()) {
+                if ((result.isPresent() && result.isTrue()) || result.isEmpty()) {
                     BlablaLib.openDialogue((ServerPlayer) player, nextSet);
                     BlablaLib.setPlayerDialogue((ServerPlayer) player, saveSet);
                 }
@@ -70,18 +73,18 @@ public class BlablaLibNetwork {
             BlablaLib.getPlayerDataManager().setPlayerLastReadDialogue(player, completedSet);
             BlablaLib.getPlayerDataManager().setPlayerInDialogue(player, false);
 
-            if(player instanceof ServerPlayer)
+            if (player instanceof ServerPlayer)
                 BlablalibEvents.DIALOGUE_COMPLETED.invoker().dialogueCompleted((ServerPlayer) player, completedSet);
         });
 
         NetworkManager.registerReceiver(NetworkManager.Side.C2S, DIALOGUE_COMMAND_PACKET_ID, (buf, context) -> {
             Player player = context.getPlayer();
-            if(!(player instanceof ServerPlayer)) return;
+            if (!(player instanceof ServerPlayer)) return;
 
             String command = buf.readUtf();
             context.queue(() -> {
                 MinecraftServer server = player.getServer();
-                if(server == null) return;
+                if (server == null) return;
 
                 String formattedCommand = "execute positioned as %s rotated as %s run %s".formatted(player.getName().getString(), player.getName().getString(), command);
                 try {
@@ -92,12 +95,27 @@ public class BlablaLibNetwork {
                 }
             });
         });
+
+        NetworkManager.registerReceiver(NetworkManager.Side.C2S, DIALOGUE_QUEST_SET_STATE_ID, (buf, context) -> {
+            Player player = context.getPlayer();
+            ResourceLocation questId = buf.readResourceLocation();
+            String newState = buf.readUtf();
+            LibLib.getQuestsLibAPI().setQuestCompletionState(player, questId, newState);
+        });
+
+        NetworkManager.registerReceiver(NetworkManager.Side.C2S, DIALOGUE_TASK_SET_STATE_ID, (buf, context) -> {
+            Player player = context.getPlayer();
+            ResourceLocation questId = buf.readResourceLocation();
+            ResourceLocation taskId = buf.readResourceLocation();
+            String newState = buf.readUtf();
+            LibLib.getQuestsLibAPI().setTaskCompletionState(player, questId, taskId, newState);
+        });
     }
 
     public static void registerClientPackets() {
         NetworkManager.registerReceiver(NetworkManager.Side.S2C, OPEN_DIALOGUE_PACKET_ID, (buf, context) -> {
             ResourceLocation dialogue = ResourceLocation.tryParse(buf.readUtf());
-            if(dialogue != null)
+            if (dialogue != null)
                 context.queue(() -> DialogueScreen.openDialogueScreen(dialogue));
         });
     }

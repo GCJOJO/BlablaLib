@@ -15,7 +15,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 
 public class DialogueManager {
-    private static Map<String, Class<? extends DialogueAction>> dialogueActionClasses = new HashMap<>();
+    private static final Map<String, Class<? extends DialogueAction>> dialogueActionClasses = new HashMap<>();
 
     public static void registerDefaultActions(){
         dialogueActionClasses.put("clear",          DialogueClear.class);
@@ -30,6 +30,8 @@ public class DialogueManager {
         dialogueActionClasses.put("image_move",     DialogueMoveImage.class);
         dialogueActionClasses.put("command",        DialogueExecuteCommand.class);
         dialogueActionClasses.put("sound",          DialogueSound.class);
+
+        dialogueActionClasses.put("quest_state",    DialogueQuestStateAction.class);
     }
 
     public static Class<? extends DialogueAction> getActionClass(String action) {
