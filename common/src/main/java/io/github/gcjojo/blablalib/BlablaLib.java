@@ -10,6 +10,7 @@ import io.github.gcjojo.blablalib.dialogues.DialogueManager;
 import io.github.gcjojo.blablalib.events.BlablalibEvents;
 import io.github.gcjojo.blablalib.network.BlablaLibNetwork;
 import io.github.gcjojo.liblib.LibLib;
+import io.github.gcjojo.liblib.factory.PlayerDataRegistry;
 import io.netty.buffer.Unpooled;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
@@ -28,6 +29,7 @@ public final class BlablaLib {
         BlablaLibNetwork.registerPackets();
         DialogueManager.registerDefaultActions();
 
+        PlayerDataRegistry.register(BlablaLibPlayerSaveData.class, BlablaLibPlayerSaveData::new);
         LibLib.setBlablaLibAPI(new BlablaLibAPIImpl());
 
         BlablalibEvents.DIALOGUE_COMPLETED.register((ServerPlayer player, ResourceLocation completedDialogue) -> {
@@ -82,7 +84,9 @@ public final class BlablaLib {
     }
 
     public static void setPlayerDialogue(ServerPlayer player, ResourceLocation dialogue) {
-        getPlayerData(player).setCurrentDialogue(dialogue);
+        BlablaLibPlayerSaveData saveData = getPlayerData(player);
+        saveData.setCurrentDialogue(dialogue);
+        LibLib.getPlayerDataManager().serializePlayerData(player, saveData, BLABLALIB_DIALOGUE_DATA_ID);
     }
 
     public static boolean isPlayerInDialogue(ServerPlayer player) {
@@ -90,7 +94,9 @@ public final class BlablaLib {
     }
 
     public static void setPlayerIsInDialogue(ServerPlayer player, boolean isInDialogue) {
-        getPlayerData(player).setInDialogue(isInDialogue);
+        BlablaLibPlayerSaveData saveData = getPlayerData(player);
+        saveData.setInDialogue(isInDialogue);
+        LibLib.getPlayerDataManager().serializePlayerData(player, saveData, BLABLALIB_DIALOGUE_DATA_ID);
     }
 
     public static ResourceLocation getPlayerDialogue(ServerPlayer player) {
@@ -102,11 +108,12 @@ public final class BlablaLib {
     }
 
     public static void setPlayerLastReadDialogue(ServerPlayer player, @Nullable ResourceLocation playerDialogue) {
-        getPlayerData(player).setLastReadDialogue(playerDialogue);
+        BlablaLibPlayerSaveData saveData = getPlayerData(player);
+        saveData.setLastReadDialogue(playerDialogue);
+        LibLib.getPlayerDataManager().serializePlayerData(player, saveData, BLABLALIB_DIALOGUE_DATA_ID);
     }
 
     public static void resetPlayerLastReadDialogue(ServerPlayer player) {
         setPlayerLastReadDialogue(player, null);
     }
-
 }

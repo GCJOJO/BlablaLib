@@ -44,7 +44,7 @@ public class BlablaLibNetwork {
 
         NetworkManager.registerReceiver(NetworkManager.Side.C2S, DIALOGUE_SCREEN_OPENED_PACKET_ID, (buf, context) -> {
             Player player = context.getPlayer();
-            BlablaLib.getPlayerDataManager().setPlayerInDialogue(player, true);
+            BlablaLib.setPlayerIsInDialogue((ServerPlayer) player, true);
         });
 
         NetworkManager.registerReceiver(NetworkManager.Side.C2S, CHOICE_PACKET_ID, (buf, context) -> {
@@ -70,8 +70,8 @@ public class BlablaLibNetwork {
             Player player = context.getPlayer();
             ResourceLocation completedSet = ResourceLocation.tryParse(buf.readUtf());
 
-            BlablaLib.getPlayerDataManager().setPlayerLastReadDialogue(player, completedSet);
-            BlablaLib.getPlayerDataManager().setPlayerInDialogue(player, false);
+            BlablaLib.setPlayerLastReadDialogue((ServerPlayer) player, completedSet);
+            BlablaLib.setPlayerIsInDialogue((ServerPlayer) player, false);
 
             if (player instanceof ServerPlayer)
                 BlablalibEvents.DIALOGUE_COMPLETED.invoker().dialogueCompleted((ServerPlayer) player, completedSet);

@@ -5,6 +5,6 @@
   "blablalib.commands.reset_success" : "Réinitialisation du dernier dialogue lu par le joueur.",
 
   "blablalib.speaker.dog": "Le chien :D",
-  "blablalib.dogcheck.woof": "Wouaf !",
-  "blablalib.dogcheck.jumpscare": "Wouaf qui fait peur !"
+  "blablalib.dogcheck.woof": "[shake]Wouaf ![/shake]",
+  "blablalib.dogcheck.jumpscare": "[shake]Wouaf qui fait peur ![/shake]"
 }

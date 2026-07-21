@@ -5,6 +5,6 @@
   "blablalib.commands.reset_success" : "Last Read dialogue successfully reset!",
 
   "blablalib.speaker.dog": "Dog :D",
-  "blablalib.dogcheck.woof": "Woof",
-  "blablalib.dogcheck.jumpscare": "Woof jumpscare !"
+  "blablalib.dogcheck.woof": "[shake]Woof[/shake]",
+  "blablalib.dogcheck.jumpscare": "[shake]Woof jumpscare ![/shake]"
 }

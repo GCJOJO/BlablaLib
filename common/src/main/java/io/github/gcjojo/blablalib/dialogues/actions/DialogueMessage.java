@@ -4,26 +4,28 @@ import com.google.gson.JsonObject;
 import io.github.gcjojo.blablalib.client.gui.DialogueScreen;
 import io.github.gcjojo.blablalib.dialogues.DialogueAction;
 import io.github.gcjojo.blablalib.dialogues.DialogueSpeaker;
+import io.github.gcjojo.liblib.client.gui.elements.GuiRichText;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.network.chat.Component;
 import net.minecraft.sounds.SoundEvent;
+import net.minecraft.world.phys.Vec2;
 
 import java.util.List;
 import java.util.Random;
 
 public class DialogueMessage extends DialogueAction
 {
+    private static final Font font = Minecraft.getInstance().font;
     private final int speakerId;
     private final String dialogueLine;
-
+    private final Random random = new Random();
+    GuiRichText richText;
     private int charIndex = 0;
     private int tickCount = 0;
     private int pauseTimer = 0;
-    private final Random random = new Random();
-    private static final Font font = Minecraft.getInstance().font;
 
     public DialogueMessage(int speakerId, String dialogueLine) {
         this.speakerId = speakerId;
@@ -38,6 +40,11 @@ public class DialogueMessage extends DialogueAction
     @Override
     public void setup(DialogueScreen screen) {
         super.setup(screen);
+        richText = new GuiRichText(screen, Component.literal(dialogueLine));
+
+        screen.addElement(richText);
+        richText.setDrawnCharacters(0);
+
         if(this.dialogueLine.isEmpty())
             screen.queueAdvanceDialogue();
     }
@@ -54,11 +61,12 @@ public class DialogueMessage extends DialogueAction
         if (charIndex >= dialogueLine.length()) return;
 
         charIndex++;
+        richText.setDrawnCharacters(charIndex);
         List<SoundEvent> sounds = screen.getDialogueSpeaker(this.speakerId).getSounds();
         if(!sounds.isEmpty())
             Minecraft.getInstance().getSoundManager().play(SimpleSoundInstance.forUI(sounds.get(random.nextInt(sounds.size())), 1.0F));
 
-        char currentChar = dialogueLine.charAt(charIndex - 1);
+        char currentChar = richText.getLastDrawCharacter();
         if (currentChar == '.' || currentChar == '!' || currentChar == '?') {
             pauseTimer = 8;
         }
@@ -79,7 +87,8 @@ public class DialogueMessage extends DialogueAction
 
         if (dialogueLine != null) {
             String displayedText = dialogueLine.substring(0, charIndex);
-            graphics.drawWordWrap(font, Component.literal(displayedText), boxX + 10, boxY + 20, boxWidth - 20, 0xFFFFFF);
+            //graphics.drawWordWrap(font, Component.literal(displayedText), boxX + 10, boxY + 20, boxWidth - 20, 0xFFFFFF);
+            richText.setPosition(new Vec2(boxX + 10, boxY + 20));
 
             if (charIndex >= dialogueLine.length() && (tickCount % 20 < 10)) {
                 graphics.drawString(font, "▼", boxX + boxWidth - 15, boxY + boxHeight - 15, 0xFFFFFF, false);
@@ -102,8 +111,10 @@ public class DialogueMessage extends DialogueAction
 
         if(charIndex >= dialogueLine.length())
             screen.queueAdvanceDialogue();
-        else
+        else {
             charIndex = dialogueLine.length();
+            richText.setDrawnCharacters(charIndex);
+        }
     }
 
     @Override

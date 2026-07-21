@@ -1,22 +1,17 @@
 package io.github.gcjojo.blablalib.commands;
 
-import com.google.gson.JsonObject;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
-import dev.architectury.platform.Platform;
 import io.github.gcjojo.blablalib.BlablaLib;
-import io.github.gcjojo.blablalib.dialogues.DialogueManager;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.ResourceLocationArgument;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.server.packs.repository.PackRepository;
 
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
@@ -25,6 +20,7 @@ import java.util.concurrent.atomic.AtomicReference;
 public class DialogueCommand {
 
     private static Map<UUID, List<ResourceLocation>> playerDialogueLists = new HashMap<>();
+    private static List<DialogueTransformation> transformations = new ArrayList<>();
 
     public static void registerPlayerDialogueList(ServerPlayer player, List<ResourceLocation> dialogueList) {
         if(playerDialogueLists.containsKey(player.getUUID()))
@@ -44,14 +40,8 @@ public class DialogueCommand {
         return builder.buildFuture();
     }
 
-    private static List<DialogueTransformation> transformations = new ArrayList<>();
-
     public static void registerTransformation(DialogueTransformation transformation){
         transformations.add(transformation);
-    }
-
-    public interface DialogueTransformation {
-        ResourceLocation transformDialogue(CommandContext<CommandSourceStack> context, ResourceLocation dialogue);
     }
 
     public static void register(CommandDispatcher<CommandSourceStack> dispatcher)
@@ -61,7 +51,7 @@ public class DialogueCommand {
                 .then(Commands.literal("play")
                         .executes(context -> {
                             ServerPlayer player = context.getSource().getPlayerOrException();
-                            ResourceLocation currentDialogue = BlablaLib.getPlayerDataManager().getPlayerCurrentDialogue(player);
+                            ResourceLocation currentDialogue = BlablaLib.getPlayerDialogue(player);
                             if(currentDialogue != null) {
                                 BlablaLib.openDialogue(player, currentDialogue);
                                 return 1;
@@ -80,7 +70,7 @@ public class DialogueCommand {
                                     AtomicReference<ResourceLocation> finalDialogue = new AtomicReference<>(dialogue);
                                     transformations.forEach(transformation -> finalDialogue.set(transformation.transformDialogue(context, finalDialogue.get())));
 
-                                    BlablaLib.getPlayerDataManager().setPlayerCurrentDialogue(player, finalDialogue.get());
+                                    BlablaLib.setPlayerDialogue(player, finalDialogue.get());
                                     String dialogueString = finalDialogue.get().toString();
                                     context.getSource().sendSuccess(() -> Component.translatable("blablalib.commands.updated_dialogue", dialogueString).withStyle(ChatFormatting.GREEN), true);
                                     return 1;
@@ -99,5 +89,9 @@ public class DialogueCommand {
                     return 1;
                 }))
         );
+    }
+
+    public interface DialogueTransformation {
+        ResourceLocation transformDialogue(CommandContext<CommandSourceStack> context, ResourceLocation dialogue);
     }
 }

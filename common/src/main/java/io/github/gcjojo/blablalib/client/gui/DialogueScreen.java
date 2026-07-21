@@ -4,13 +4,13 @@ import dev.architectury.networking.NetworkManager;
 import io.github.gcjojo.blablalib.dialogues.DialogueAction;
 import io.github.gcjojo.blablalib.dialogues.DialogueManager;
 import io.github.gcjojo.blablalib.dialogues.DialogueSpeaker;
-import io.github.gcjojo.blablalib.dialogues.actions.*;
+import io.github.gcjojo.blablalib.dialogues.actions.DialogueRawAction;
 import io.github.gcjojo.blablalib.network.BlablaLibNetwork;
+import io.github.gcjojo.liblib.client.gui.GuiScreen;
 import io.netty.buffer.Unpooled;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
-import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
@@ -22,25 +22,19 @@ import org.jetbrains.annotations.NotNull;
 import java.util.ArrayList;
 import java.util.List;
 
-public class DialogueScreen extends Screen {
+public class DialogueScreen extends GuiScreen {
 
+    private static final float endFade = 7.5f;
+    private final List<DialogueAction> currentActions = new ArrayList<>();
+    private final List<Button> buttons = new ArrayList<>();
     private List<DialogueAction> dialogueActions;
     private int actionIndex = -1;
     private List<DialogueSpeaker> dialogueSpeakers;
-
     private ResourceLocation currentDialogue;
-
-    private final List<DialogueAction> currentActions = new ArrayList<>();
-
     private boolean advanceDialogueAtTickEnd = false;
     private ResourceLocation queuedNextDialogue = null;
-
     private float currentFadingTime = -1.0f;
-    private static final float endFade = 7.5f;
-
     private boolean guiVisible = true;
-
-    private final List<Button> buttons = new ArrayList<>();
 
     public DialogueScreen(ResourceLocation dialoguePath) {
         super(Component.literal("Dialogue"));
@@ -69,6 +63,13 @@ public class DialogueScreen extends Screen {
         this.dialogueSpeakers = speakers;
         if(!actions.isEmpty())
             NetworkManager.sendToServer(BlablaLibNetwork.DIALOGUE_SCREEN_OPENED_PACKET_ID, new FriendlyByteBuf(Unpooled.buffer()));
+    }
+
+    public static void openDialogueScreen(ResourceLocation dialoguePath) {
+        List<DialogueAction> actions = DialogueManager.loadDialogue(dialoguePath);
+        List<DialogueSpeaker> speakers = DialogueManager.loadSpeakers(dialoguePath);
+        if(actions != null && !actions.isEmpty() && speakers != null)
+            Minecraft.getInstance().tell(() -> Minecraft.getInstance().setScreen(new DialogueScreen(dialoguePath, actions, speakers)));
     }
 
     @Override
@@ -115,13 +116,6 @@ public class DialogueScreen extends Screen {
         dialogueActions = newActions;
         dialogueSpeakers = newSpeakers;
         advanceDialogue();
-    }
-
-    public static void openDialogueScreen(ResourceLocation dialoguePath) {
-        List<DialogueAction> actions = DialogueManager.loadDialogue(dialoguePath);
-        List<DialogueSpeaker> speakers = DialogueManager.loadSpeakers(dialoguePath);
-        if(actions != null && !actions.isEmpty() && speakers != null)
-            Minecraft.getInstance().tell(() -> Minecraft.getInstance().setScreen(new DialogueScreen(dialoguePath, actions, speakers)));
     }
 
     @Override
@@ -198,6 +192,7 @@ public class DialogueScreen extends Screen {
     public void queueChangeSet(ResourceLocation nextDialogue) { this.queuedNextDialogue = nextDialogue; }
 
     public void advanceDialogue() {
+        clearElements();
         actionIndex++;
         buttons.forEach(button -> button.visible = false);
         buttons.clear();
