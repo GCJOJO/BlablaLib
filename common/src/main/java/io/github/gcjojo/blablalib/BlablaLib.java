@@ -4,9 +4,12 @@ import com.mojang.logging.LogUtils;
 import dev.architectury.event.EventResult;
 import dev.architectury.event.events.common.PlayerEvent;
 import dev.architectury.networking.NetworkManager;
+import dev.architectury.registry.level.entity.EntityAttributeRegistry;
 import io.github.gcjojo.blablalib.api.BlablaLibAPIImpl;
 import io.github.gcjojo.blablalib.commands.DialogueCommand;
 import io.github.gcjojo.blablalib.dialogues.DialogueManager;
+import io.github.gcjojo.blablalib.entities.BlablaLibEntityTypes;
+import io.github.gcjojo.blablalib.entities.NPC;
 import io.github.gcjojo.blablalib.events.BlablalibEvents;
 import io.github.gcjojo.blablalib.network.BlablaLibNetwork;
 import io.github.gcjojo.liblib.LibLib;
@@ -31,6 +34,13 @@ public final class BlablaLib {
 
         PlayerDataRegistry.register(BlablaLibPlayerSaveData.class, BlablaLibPlayerSaveData::new);
         LibLib.setBlablaLibAPI(new BlablaLibAPIImpl());
+
+
+
+        BlablaLibEntityTypes.registerEntityTypes();
+        EntityAttributeRegistry.register(() -> BlablaLibEntityTypes.NPC_TYPE.get(), NPC::createAttributes);
+
+
 
         BlablalibEvents.DIALOGUE_COMPLETED.register((ServerPlayer player, ResourceLocation completedDialogue) -> {
             LOGGER.warn("Player {} has completed dialogue {}", player.getName().getString(), completedDialogue.toString());
