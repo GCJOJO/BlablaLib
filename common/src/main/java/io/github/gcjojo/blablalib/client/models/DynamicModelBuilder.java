@@ -37,13 +37,13 @@ public class DynamicModelBuilder {
                     CubeListBuilder subBuilder = CubeListBuilder.create()
                             .texOffs(cube.uv()[0], cube.uv()[1])
                             .addBox(
-                                    cube.origin()[0] - bonePivot[0], cube.origin()[1] - bonePivot[1], cube.origin()[2] - bonePivot[2],
+                                    cube.origin()[0] - bonePivot[0], -(cube.origin()[1] - bonePivot[1] - 12), cube.origin()[2] - bonePivot[2],
                                     cube.size()[0], cube.size()[1], cube.size()[2]
                             );
 
                     float[] cubePivot = cube.pivot() != null ? cube.pivot() : bonePivot;
                     PartPose subPose = toPartPose(
-                            new float[]{ cubePivot[0] - bonePivot[0], cubePivot[1] - bonePivot[1], cubePivot[2] - bonePivot[2] },
+                            new float[]{ cubePivot[0] - bonePivot[0], -(cubePivot[1] - bonePivot[1] - 12), cubePivot[2] - bonePivot[2] },
                             cube.rotation()
                     );
 
@@ -54,7 +54,7 @@ public class DynamicModelBuilder {
 
                 simpleCubeBuilder.texOffs(cube.uv()[0], cube.uv()[1])
                         .addBox(
-                                cube.origin()[0] - bonePivot[0],cube.origin()[1] - bonePivot[1],cube.origin()[2] - bonePivot[2],
+                                cube.origin()[0] - bonePivot[0], -(cube.origin()[1] - bonePivot[1] - 12), cube.origin()[2] - bonePivot[2],
                                 cube.size()[0], cube.size()[1], cube.size()[2]
                         );
             }
@@ -95,11 +95,15 @@ public class DynamicModelBuilder {
     }
 
     private static PartPose toPartPose(float[] pivot, float[] rotationDegrees) {
+        float x =  pivot[0];
+        float y = -pivot[1];
+        float z =  pivot[2];
+
         if (rotationDegrees == null) {
-            return PartPose.offset(pivot[0], pivot[1], pivot[2]);
+            return PartPose.offset(x, y, z);
         }
         return PartPose.offsetAndRotation(
-                pivot[0], pivot[1], pivot[2],
+                x, y, z,
                 (float) Math.toRadians(rotationDegrees[0]),
                 (float) Math.toRadians(rotationDegrees[1]),
                 (float) Math.toRadians(rotationDegrees[2])

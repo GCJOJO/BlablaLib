@@ -25,6 +25,7 @@ public class DialogueMessage extends DialogueAction
     GuiRichText richText;
     private int charIndex = 0;
     private int tickCount = 0;
+    private int characterTimer = 0;
     private int pauseTimer = 0;
 
     public DialogueMessage(int speakerId, String dialogueLine) {
@@ -58,8 +59,10 @@ public class DialogueMessage extends DialogueAction
             return;
         }
 
+        if(++characterTimer < screen.getDialogueSpeed()) return;
         if (charIndex >= dialogueLine.length()) return;
 
+        characterTimer = 0;
         charIndex++;
         richText.setDrawnCharacters(charIndex);
         List<SoundEvent> sounds = screen.getDialogueSpeaker(this.speakerId).getSounds();
@@ -68,7 +71,7 @@ public class DialogueMessage extends DialogueAction
 
         char currentChar = richText.getLastDrawCharacter();
         if (currentChar == '.' || currentChar == '!' || currentChar == '?') {
-            pauseTimer = 8;
+            pauseTimer = characterTimer * screen.getWaitMultiplier();
         }
     }
 

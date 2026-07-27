@@ -14,6 +14,8 @@ import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 
+import java.util.Collections;
+
 public class NPC extends LivingEntity {
     public static final EntityDataAccessor<String> CURRENT_MODEL = SynchedEntityData.defineId(NPC.class, EntityDataSerializers.STRING);
     public static final EntityDataAccessor<String> CURRENT_TEXTURE = SynchedEntityData.defineId(NPC.class, EntityDataSerializers.STRING);
@@ -31,8 +33,8 @@ public class NPC extends LivingEntity {
     @Override
     protected void defineSynchedData() {
         super.defineSynchedData();
-        this.entityData.define(CURRENT_MODEL, "blablalib:npc");
-        this.entityData.define(CURRENT_TEXTURE, "blablalib:npc/default");
+        this.entityData.define(CURRENT_MODEL, "blablalib:geometry.npc");
+        this.entityData.define(CURRENT_TEXTURE, "blablalib:textures/entity/npc/default.png");
         this.entityData.define(CURRENT_ANIMATION, "blablalib:npc/idle");
     }
 
@@ -86,12 +88,12 @@ public class NPC extends LivingEntity {
 
     @Override
     public Iterable<ItemStack> getArmorSlots() {
-        return null;
+        return Collections.singleton(ItemStack.EMPTY);
     }
 
     @Override
     public ItemStack getItemBySlot(EquipmentSlot equipmentSlot) {
-        return null;
+        return ItemStack.EMPTY;
     }
 
     @Override
@@ -101,6 +103,6 @@ public class NPC extends LivingEntity {
 
     @Override
     public HumanoidArm getMainArm() {
-        return null;
+        return HumanoidArm.RIGHT;
     }
 }

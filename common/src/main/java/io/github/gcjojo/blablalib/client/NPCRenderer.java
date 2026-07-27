@@ -1,5 +1,6 @@
 package io.github.gcjojo.blablalib.client;
 
+import com.mojang.blaze3d.vertex.PoseStack;
 import io.github.gcjojo.blablalib.client.models.NPCModel;
 import io.github.gcjojo.blablalib.client.models.NpcModelRegistry;
 import io.github.gcjojo.blablalib.entities.NPC;
@@ -10,6 +11,7 @@ import net.minecraft.client.model.geom.builders.CubeListBuilder;
 import net.minecraft.client.model.geom.builders.LayerDefinition;
 import net.minecraft.client.model.geom.builders.MeshDefinition;
 import net.minecraft.client.model.geom.builders.PartDefinition;
+import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.LivingEntityRenderer;
 import net.minecraft.client.renderer.texture.MissingTextureAtlasSprite;
@@ -29,6 +31,12 @@ public class NPCRenderer extends LivingEntityRenderer<NPC, EntityModel<NPC>> {
         root.addOrReplaceChild("cube",
                 CubeListBuilder.create().texOffs(0, 0).addBox(-4, -8, -4, 8, 16, 8), PartPose.ZERO);
         return LayerDefinition.create(mesh, 16, 16).bakeRoot();
+    }
+
+    @Override
+    public void render(NPC entity, float entityYaw, float partialTick, PoseStack poseStack, MultiBufferSource buffer, int packedLight){
+        this.model = resolveModel(entity);
+        super.render(entity, entityYaw, partialTick, poseStack, buffer, packedLight);
     }
 
     private EntityModel<NPC> resolveModel(NPC entity) {

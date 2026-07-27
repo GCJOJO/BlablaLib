@@ -22,6 +22,7 @@ public class DialogueManager {
         dialogueActionClasses.put("wait",           DialogueWait.class);
         dialogueActionClasses.put("choice",         DialogueChoice.class);
         dialogueActionClasses.put("change_set",     DialogueNext.class);
+        dialogueActionClasses.put("next_dialogue",  DialogueNext.class);
         dialogueActionClasses.put("fade",           DialogueFading.class);
         dialogueActionClasses.put("message",        DialogueMessage.class);
         dialogueActionClasses.put("image",          DialogueImage.class);
@@ -30,6 +31,7 @@ public class DialogueManager {
         dialogueActionClasses.put("image_move",     DialogueMoveImage.class);
         dialogueActionClasses.put("command",        DialogueExecuteCommand.class);
         dialogueActionClasses.put("sound",          DialogueSound.class);
+        dialogueActionClasses.put("timings",        DialogueTimings.class);
 
         dialogueActionClasses.put("quest_state",    DialogueQuestStateAction.class);
     }

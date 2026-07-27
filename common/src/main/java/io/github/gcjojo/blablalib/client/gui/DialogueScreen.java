@@ -8,6 +8,8 @@ import io.github.gcjojo.blablalib.dialogues.actions.DialogueRawAction;
 import io.github.gcjojo.blablalib.network.BlablaLibNetwork;
 import io.github.gcjojo.liblib.client.gui.GuiScreen;
 import io.netty.buffer.Unpooled;
+import lombok.Getter;
+import lombok.Setter;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
@@ -35,6 +37,16 @@ public class DialogueScreen extends GuiScreen {
     private ResourceLocation queuedNextDialogue = null;
     private float currentFadingTime = -1.0f;
     private boolean guiVisible = true;
+
+    /**
+     *  The number of ticks to wait before a new character is drawn
+     */
+    @Setter
+    @Getter
+    private int dialogueSpeed = 1;
+    @Setter
+    @Getter
+    private int waitMultiplier = 8;
 
     public DialogueScreen(ResourceLocation dialoguePath) {
         super(Component.literal("Dialogue"));
