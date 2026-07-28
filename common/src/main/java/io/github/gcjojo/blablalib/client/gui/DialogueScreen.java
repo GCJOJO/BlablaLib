@@ -132,11 +132,6 @@ public class DialogueScreen extends GuiScreen {
 
     @Override
     public void tick() {
-        if(actionIndex >= dialogueActions.size())
-            return;
-
-        currentActions.forEach(DialogueAction::step);
-
         if(advanceDialogueAtTickEnd) {
             this.advanceDialogueAtTickEnd = false;
             this.advanceDialogue();
@@ -146,6 +141,12 @@ public class DialogueScreen extends GuiScreen {
             changeToDialogue(queuedNextDialogue);
             queuedNextDialogue = null;
         }
+
+        if(actionIndex >= dialogueActions.size())
+            return;
+
+        currentActions.forEach(DialogueAction::step);
+
     }
 
     @Override

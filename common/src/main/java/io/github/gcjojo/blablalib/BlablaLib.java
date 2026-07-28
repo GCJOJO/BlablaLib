@@ -2,12 +2,14 @@ package io.github.gcjojo.blablalib;
 
 import com.mojang.logging.LogUtils;
 import dev.architectury.event.EventResult;
+import dev.architectury.event.events.common.InteractionEvent;
 import dev.architectury.event.events.common.PlayerEvent;
 import dev.architectury.networking.NetworkManager;
 import dev.architectury.registry.level.entity.EntityAttributeRegistry;
 import io.github.gcjojo.blablalib.api.BlablaLibAPIImpl;
 import io.github.gcjojo.blablalib.commands.DialogueCommand;
 import io.github.gcjojo.blablalib.dialogues.DialogueManager;
+import io.github.gcjojo.blablalib.entities.BlablaLibEntityDataSerializers;
 import io.github.gcjojo.blablalib.entities.BlablaLibEntityTypes;
 import io.github.gcjojo.blablalib.entities.NPC;
 import io.github.gcjojo.blablalib.events.BlablalibEvents;
@@ -17,19 +19,31 @@ import io.github.gcjojo.liblib.factory.PlayerDataRegistry;
 import io.netty.buffer.Unpooled;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.player.Player;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
+import java.util.UUID;
 
 public final class BlablaLib {
     public static final String MOD_ID = "blablalib";
     public static final ResourceLocation BLABLALIB_DIALOGUE_DATA_ID = ResourceLocation.tryBuild(MOD_ID, "dialogue_data");
     private static final Logger LOGGER = LogUtils.getLogger();
+    private static final Map<UUID, Map<Integer, UUID>> playerNPCs = new HashMap<>();
     @Deprecated
     private static PlayerDataManager PLAYER_DATA_MANAGER;
 
     public static void init() {
         BlablaLibNetwork.registerPackets();
+        BlablaLibEntityDataSerializers.register();
+
         DialogueManager.registerDefaultActions();
 
         PlayerDataRegistry.register(BlablaLibPlayerSaveData.class, BlablaLibPlayerSaveData::new);
@@ -39,8 +53,6 @@ public final class BlablaLib {
 
         BlablaLibEntityTypes.registerEntityTypes();
         EntityAttributeRegistry.register(() -> BlablaLibEntityTypes.NPC_TYPE.get(), NPC::createAttributes);
-
-
 
         BlablalibEvents.DIALOGUE_COMPLETED.register((ServerPlayer player, ResourceLocation completedDialogue) -> {
             LOGGER.warn("Player {} has completed dialogue {}", player.getName().getString(), completedDialogue.toString());
@@ -53,6 +65,12 @@ public final class BlablaLib {
         });
 
         PlayerEvent.PLAYER_QUIT.register(DialogueCommand::disconnectPlayer);
+
+        InteractionEvent.INTERACT_ENTITY.register((Player player, Entity entity, InteractionHand hand) -> {
+            if(entity instanceof NPC npc)
+                return EventResult.interrupt(npc.playerInteraction(player, hand));
+            return EventResult.pass();
+        });
     }
 
     public static void initClient() {
@@ -125,5 +143,30 @@ public final class BlablaLib {
 
     public static void resetPlayerLastReadDialogue(ServerPlayer player) {
         setPlayerLastReadDialogue(player, null);
+    }
+
+    public static boolean playerHasNPC(ServerPlayer player, int npcId){
+        if(!playerNPCs.containsKey(player.getUUID()))
+            return false;
+        return playerNPCs.get(player.getUUID()).containsKey(npcId);
+    }
+
+    public static Optional<NPC> getPlayerNPC(ServerPlayer player, int npcId) {
+        if(!playerHasNPC(player, npcId))
+            return Optional.empty();
+
+        ServerLevel level = (ServerLevel) player.level();
+        UUID npcUUID = playerNPCs.get(player.getUUID()).get(npcId);
+        Entity npcEntity = level.getEntity(npcUUID);
+
+        if(!(npcEntity instanceof NPC npc))
+            return Optional.empty();
+
+        return Optional.of(npc);
+    }
+
+    public static void setPlayerNPC(ServerPlayer player, NPC npc, int npcId) {
+        playerNPCs.computeIfAbsent(player.getUUID(), playerUUID -> new HashMap<>())
+                .put(npcId, npc.getUUID());
     }
 }

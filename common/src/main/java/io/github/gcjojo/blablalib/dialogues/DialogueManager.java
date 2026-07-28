@@ -32,6 +32,7 @@ public class DialogueManager {
         dialogueActionClasses.put("command",        DialogueExecuteCommand.class);
         dialogueActionClasses.put("sound",          DialogueSound.class);
         dialogueActionClasses.put("timings",        DialogueTimings.class);
+        dialogueActionClasses.put("npc",            DialogueNPC.class);
 
         dialogueActionClasses.put("quest_state",    DialogueQuestStateAction.class);
     }

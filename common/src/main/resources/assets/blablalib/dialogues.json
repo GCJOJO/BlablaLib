@@ -132,6 +132,12 @@
     { "action": "message", "speaker": 0, "text": "Choice 2" }
   ],
 
+  "test_npc": [
+    { "action" : "npc", "npc":  0, "model": "blablalib:geometry.npc" },
+    { "action" : "message", "speaker":  0, "text": "Hey there I will change model !" },
+    { "action" : "npc", "npc":  0, "model": "blablalib:geometry.test_model" }
+  ],
+
   "test_speed" : [
     { "action": "message", "speaker": 0, "text": "Very long message to test the new Dialogue Timings Action. I am a very very long message please do not read me." },
     { "action": "timings", "speed": 10, "wait": 16 },

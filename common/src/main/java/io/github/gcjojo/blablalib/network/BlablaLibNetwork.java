@@ -27,6 +27,7 @@ public class BlablaLibNetwork {
     public static final ResourceLocation DIALOGUE_COMMAND_PACKET_ID = new ResourceLocation(BlablaLib.MOD_ID, "dialogue_command");
     public static final ResourceLocation DIALOGUE_QUEST_SET_STATE_ID = new ResourceLocation(BlablaLib.MOD_ID, "dialogue_set_quest_state");
     public static final ResourceLocation DIALOGUE_TASK_SET_STATE_ID = new ResourceLocation(BlablaLib.MOD_ID, "dialogue_set_task_state");
+    public static final ResourceLocation DIALOGUE_NPC_ACTION = new ResourceLocation(BlablaLib.MOD_ID, "dialogue_npc_action");
 
     public static void registerPackets() {
         NetworkManager.registerReceiver(NetworkManager.Side.C2S, SEND_DIALOGUE_LIST_ID, (buf, context) -> {
@@ -109,6 +110,27 @@ public class BlablaLibNetwork {
             ResourceLocation taskId = buf.readResourceLocation();
             String newState = buf.readUtf();
             LibLib.getQuestsLibAPI().setTaskCompletionState(player, questId, taskId, newState);
+        });
+
+        NetworkManager.registerReceiver(NetworkManager.Side.C2S, DIALOGUE_NPC_ACTION, (buf, context) -> {
+            ServerPlayer player = (ServerPlayer) context.getPlayer();
+
+            int npcId = buf.readInt();
+            String newModel = buf.readUtf();
+            String newTexture = buf.readUtf();
+            String newAnimation = buf.readUtf();
+            boolean loopAnimation = buf.readBoolean();
+
+            if(!BlablaLib.playerHasNPC(player, npcId)) return;
+
+            BlablaLib.getPlayerNPC(player, npcId).ifPresent(npc -> {
+                if(!newModel.isEmpty())
+                    npc.setCurrentModel(newModel);
+                if(!newTexture.isEmpty())
+                    npc.setCurrentTexture(newTexture);
+                if(!newAnimation.isEmpty())
+                    npc.setCurrentAnimation(newAnimation, loopAnimation);
+            });
         });
     }
 

@@ -104,8 +104,10 @@ public class DialogueMessage extends DialogueAction
     public void mouseClicked(double mouseX, double mouseY, int button) {
         if(charIndex >= dialogueLine.length())
             screen.queueAdvanceDialogue();
-        else
+        else {
             charIndex = dialogueLine.length();
+            richText.setDrawnCharacters(charIndex);
+        }
     }
 
     @Override

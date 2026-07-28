@@ -19,7 +19,7 @@ public class BlablaLibEntityTypes {
 
     public static void registerEntityTypes() {
         NPC_TYPE = registerEntityType("npc", () -> EntityType.Builder.of(NPC::new, MobCategory.MISC)
-                .sized(0.9f, 1.8f)
+                .sized(0.9f, 1.95f)
                 .fireImmune()
                 .clientTrackingRange(60)
                 .build(ResourceKey.create(Registries.ENTITY_TYPE, ResourceLocation.tryBuild(BlablaLib.MOD_ID, "npc")).toString()));
