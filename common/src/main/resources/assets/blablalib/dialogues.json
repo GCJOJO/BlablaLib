@@ -123,12 +123,18 @@
   ],
 
   "choice1": [
-    { "action": "message", "speaker": "0", "text": "Choice 1" },
+    { "action": "message", "speaker": 0, "text": "Choice 1" },
     { "action": "hide_ui" },
     { "action": "wait", "time": 90}
   ],
 
   "choice2": [
-    { "action": "message", "speaker": "0", "text": "Choice 2" }
+    { "action": "message", "speaker": 0, "text": "Choice 2" }
+  ],
+
+  "test_speed" : [
+    { "action": "message", "speaker": 0, "text": "Very long message to test the new Dialogue Timings Action. I am a very very long message please do not read me." },
+    { "action": "timings", "speed": 10, "wait": 16 },
+    { "action": "message", "speaker": 0, "text": "Very long message to test the new Dialogue Timings Action. I am a very very long message please do not read me." }
   ]
 }

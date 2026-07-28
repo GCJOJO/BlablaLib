@@ -89,8 +89,9 @@ public class DialogueMessage extends DialogueAction
         graphics.drawString(font, speakerTranslated, boxX + 10, boxY + 5, speaker.getColor(), false);
 
         if (dialogueLine != null) {
-            String displayedText = dialogueLine.substring(0, charIndex);
+            //String displayedText = dialogueLine.substring(0, charIndex);
             //graphics.drawWordWrap(font, Component.literal(displayedText), boxX + 10, boxY + 20, boxWidth - 20, 0xFFFFFF);
+            richText.setWidth(boxWidth - 30);
             richText.setPosition(new Vec2(boxX + 10, boxY + 20));
 
             if (charIndex >= dialogueLine.length() && (tickCount % 20 < 10)) {
