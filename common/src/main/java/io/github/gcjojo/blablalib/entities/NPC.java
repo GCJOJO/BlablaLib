@@ -35,6 +35,7 @@ public class NPC extends LivingEntity {
         super.defineSynchedData();
         this.entityData.define(CURRENT_MODEL, "blablalib:geometry.npc");
         this.entityData.define(CURRENT_TEXTURE, "blablalib:textures/entity/npc/default.png");
+        //this.entityData.define(CURRENT_TEXTURE, "");
         this.entityData.define(CURRENT_ANIMATION, "blablalib:npc/idle");
     }
 

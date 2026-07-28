@@ -25,7 +25,7 @@ public class ModelLoader {
             @SerializedName("visible_bound_height") float visibleBoundHeight,
             @SerializedName("visible_bound_offset") float[] visibleBoundOffset){}
 
-    public record GeoCube(int[] origin,  float[] pivot, float[] rotation, int[] size, int[] uv){}
+    public record GeoCube(float[] origin,  float[] pivot, float[] rotation, int[] size, int[] uv){}
 
     public record GeoBone(String name, String parent, float[] pivot, float[] rotation, List<GeoCube> cubes){}
 

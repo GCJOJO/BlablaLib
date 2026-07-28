@@ -1,0 +1,33 @@
+{
+	"format_version": "1.12.0",
+	"minecraft:geometry": [
+		{
+			"description": {
+				"identifier": "blablalib:geometry.test_model",
+				"texture_width": 16,
+				"texture_height": 16,
+				"visible_bounds_width": 3,
+				"visible_bounds_height": 2.5,
+				"visible_bounds_offset": [0, 0.75, 0]
+			},
+			"bones": [
+				{
+					"name": "body",
+					"pivot": [0, 0, 0],
+					"rotation": [0, -45, 0],
+					"cubes": [
+						{"origin": [-15.42839, 6.87204, -2.37237], "size": [8, 8, 8], "pivot": [0, 11, 9], "rotation": [54.20684, -59.99894, -89.54208], "uv": [0, 0]}
+					]
+				},
+				{
+					"name": "body2",
+					"parent": "body",
+					"pivot": [0, 0, 0],
+					"cubes": [
+						{"origin": [-19, 1, -19], "size": [20, 2, 20], "uv": [-36, -18]}
+					]
+				}
+			]
+		}
+	]
+}

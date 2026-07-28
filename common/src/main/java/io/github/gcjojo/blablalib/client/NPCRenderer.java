@@ -50,8 +50,10 @@ public class NPCRenderer extends LivingEntityRenderer<NPC, EntityModel<NPC>> {
 
     @Override
     public ResourceLocation getTextureLocation(NPC entity) {
-        ResourceLocation resLoc = ResourceLocation.tryBuild(entity.getTextureNamespace(), entity.getTexturePath());
-        if(resLoc != null) return resLoc;
+        if(!entity.getTexturePath().isEmpty()) {
+            ResourceLocation resLoc = ResourceLocation.tryBuild(entity.getTextureNamespace(), entity.getTexturePath());
+            if (resLoc != null) return resLoc;
+        }
 
         return MissingTextureAtlasSprite.getLocation();
     }
