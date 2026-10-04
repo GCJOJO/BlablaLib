@@ -1,6 +1,7 @@
 package io.github.gcjojo.blablalib.entities;
 
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.syncher.EntityDataSerializer;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import org.jetbrains.annotations.NotNull;
@@ -9,14 +10,14 @@ public class BlablaLibEntityDataSerializers {
 
     public static final EntityDataSerializer<NPCDefinition> NPC_DEFINITION =
             new EntityDataSerializer<NPCDefinition>() {
-                @Override
-                public void write(FriendlyByteBuf friendlyByteBuf, NPCDefinition object) {
-                    object.write(friendlyByteBuf);
-                }
+                public static final StreamCodec<RegistryFriendlyByteBuf, NPCDefinition> STREAM_CODEC = StreamCodec.of(
+                    (buf, def) -> def.write(buf),
+                    NPCDefinition::read
+                );
 
                 @Override
-                public @NotNull NPCDefinition read(FriendlyByteBuf friendlyByteBuf) {
-                    return NPCDefinition.read(friendlyByteBuf);
+                public StreamCodec<? super RegistryFriendlyByteBuf, NPCDefinition> codec() {
+                    return STREAM_CODEC;
                 }
 
                 @Override

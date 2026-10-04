@@ -14,10 +14,9 @@ import io.github.gcjojo.blablalib.entities.BlablaLibEntityTypes;
 import io.github.gcjojo.blablalib.entities.NPC;
 import io.github.gcjojo.blablalib.events.BlablalibEvents;
 import io.github.gcjojo.blablalib.network.BlablaLibNetwork;
+import io.github.gcjojo.blablalib.network.payloads.OpenDialoguePayload;
 import io.github.gcjojo.liblib.LibLib;
 import io.github.gcjojo.liblib.factory.PlayerDataRegistry;
-import io.netty.buffer.Unpooled;
-import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -37,8 +36,6 @@ public final class BlablaLib {
     public static final ResourceLocation BLABLALIB_DIALOGUE_DATA_ID = ResourceLocation.tryBuild(MOD_ID, "dialogue_data");
     private static final Logger LOGGER = LogUtils.getLogger();
     private static final Map<UUID, Map<Integer, UUID>> playerNPCs = new HashMap<>();
-    @Deprecated
-    private static PlayerDataManager PLAYER_DATA_MANAGER;
 
     public static void init() {
         BlablaLibNetwork.registerPackets();
@@ -49,8 +46,6 @@ public final class BlablaLib {
         PlayerDataRegistry.register(BlablaLibPlayerSaveData.class, BlablaLibPlayerSaveData::new);
         LibLib.setBlablaLibAPI(new BlablaLibAPIImpl());
 
-
-
         BlablaLibEntityTypes.registerEntityTypes();
         EntityAttributeRegistry.register(() -> BlablaLibEntityTypes.NPC_TYPE.get(), NPC::createAttributes);
 
@@ -58,10 +53,6 @@ public final class BlablaLib {
             LOGGER.warn("Player {} has completed dialogue {}", player.getName().getString(), completedDialogue.toString());
             BlablaLibAPIImpl.DIALOGUE_COMPLETED.invoker().onDialogueCompleted(player, completedDialogue);
             return EventResult.pass();
-        });
-
-        PlayerEvent.PLAYER_JOIN.register((ServerPlayer player) -> {
-            LibLib.getPlayerDataManager().setAdditionalData(player, BlablaLib.MOD_ID, getPlayerDataManager().getAllData(player));
         });
 
         PlayerEvent.PLAYER_QUIT.register(DialogueCommand::disconnectPlayer);
@@ -77,16 +68,6 @@ public final class BlablaLib {
         BlablaLibNetwork.registerClientPackets();
     }
 
-    @Deprecated
-    public static PlayerDataManager getPlayerDataManager() {
-        return PLAYER_DATA_MANAGER;
-    }
-
-    @Deprecated
-    public static void setPlayerDataManager(PlayerDataManager newPlayerDataManager) {
-        PLAYER_DATA_MANAGER = newPlayerDataManager;
-    }
-
     public static Logger getLogger() {
         return LOGGER;
     }
@@ -100,11 +81,9 @@ public final class BlablaLib {
 
     public static void openDialogue(ServerPlayer player, ResourceLocation dialogue) {
         if (isPlayerInDialogue(player)) return;
-
         setPlayerDialogue(player, dialogue);
-        FriendlyByteBuf buf = new FriendlyByteBuf(Unpooled.buffer());
-        buf.writeUtf(dialogue.toString());
-        NetworkManager.sendToPlayer(player, BlablaLibNetwork.OPEN_DIALOGUE_PACKET_ID, buf);
+
+        NetworkManager.sendToPlayer(player, new OpenDialoguePayload(dialogue));
     }
 
     public static BlablaLibPlayerSaveData getPlayerData(ServerPlayer player) {

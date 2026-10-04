@@ -4,11 +4,9 @@ import com.google.gson.JsonObject;
 import dev.architectury.networking.NetworkManager;
 import io.github.gcjojo.blablalib.client.gui.DialogueScreen;
 import io.github.gcjojo.blablalib.dialogues.DialogueAction;
-import io.github.gcjojo.blablalib.network.BlablaLibNetwork;
-import io.netty.buffer.Unpooled;
+import io.github.gcjojo.blablalib.network.payloads.DialogueCommandPayload;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.network.FriendlyByteBuf;
 
 public class DialogueExecuteCommand extends DialogueAction {
     private String command;
@@ -26,9 +24,7 @@ public class DialogueExecuteCommand extends DialogueAction {
             if (this.command.contains("<PLAYER>"))
                 this.command = this.command.replace("<PLAYER>", Minecraft.getInstance().player.getName().getString());
 
-            FriendlyByteBuf buf = new FriendlyByteBuf(Unpooled.buffer());
-            buf.writeUtf(command);
-            NetworkManager.sendToServer(BlablaLibNetwork.DIALOGUE_COMMAND_PACKET_ID, buf);
+            NetworkManager.sendToServer(new DialogueCommandPayload(command));
         }
         screen.queueAdvanceDialogue();
     }

@@ -54,11 +54,11 @@ public class NPC extends LivingEntity {
     }
 
     @Override
-    protected void defineSynchedData() {
-        super.defineSynchedData();
-        this.entityData.define(DEFAULT_STATE, NPCDefinition.EMPTY);
-        this.entityData.define(CURRENT_STATE, NPCDefinition.EMPTY);
-        this.entityData.define(LOOP_CURRENT_ANIMATION, false);
+    protected void defineSynchedData(SynchedEntityData.Builder builder) {
+        super.defineSynchedData(builder);
+        builder.define(DEFAULT_STATE, NPCDefinition.EMPTY);
+        builder.define(CURRENT_STATE, NPCDefinition.EMPTY);
+        builder.define(LOOP_CURRENT_ANIMATION, false);
     }
 
     public String getModelNamespace() {

@@ -4,10 +4,8 @@ import com.google.gson.JsonObject;
 import dev.architectury.networking.NetworkManager;
 import io.github.gcjojo.blablalib.client.gui.DialogueScreen;
 import io.github.gcjojo.blablalib.dialogues.DialogueAction;
-import io.github.gcjojo.blablalib.network.BlablaLibNetwork;
-import io.netty.buffer.Unpooled;
+import io.github.gcjojo.blablalib.network.payloads.DialogueSetNPCPayload;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.network.FriendlyByteBuf;
 
 public class DialogueNPC extends DialogueAction {
     private final int npcId;
@@ -54,14 +52,7 @@ public class DialogueNPC extends DialogueAction {
             return;
         }
 
-        FriendlyByteBuf buf = new FriendlyByteBuf(Unpooled.buffer());
-        buf.writeInt(npcId);
-        buf.writeUtf(newModel);
-        buf.writeUtf(newTexture);
-        buf.writeUtf(newAnimation);
-        buf.writeBoolean(loopAnimation);
-
-        NetworkManager.sendToServer(BlablaLibNetwork.DIALOGUE_NPC_ACTION, buf);
+        NetworkManager.sendToServer(new DialogueSetNPCPayload(npcId, newModel, newTexture, newAnimation, loopAnimation));
 
         screen.queueAdvanceDialogue();
     }

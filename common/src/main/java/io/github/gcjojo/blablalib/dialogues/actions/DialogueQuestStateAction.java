@@ -4,7 +4,8 @@ import com.google.gson.JsonObject;
 import dev.architectury.networking.NetworkManager;
 import io.github.gcjojo.blablalib.client.gui.DialogueScreen;
 import io.github.gcjojo.blablalib.dialogues.DialogueAction;
-import io.github.gcjojo.blablalib.network.BlablaLibNetwork;
+import io.github.gcjojo.blablalib.network.payloads.DialogueSetQuestStatePayload;
+import io.github.gcjojo.blablalib.network.payloads.DialogueSetTaskStatePayload;
 import io.netty.buffer.Unpooled;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.FriendlyByteBuf;
@@ -37,12 +38,12 @@ public class DialogueQuestStateAction extends DialogueAction {
                     buf.writeResourceLocation(questId);
                     buf.writeResourceLocation(taskId);
                     buf.writeUtf(newState);
-                    NetworkManager.sendToServer(BlablaLibNetwork.DIALOGUE_TASK_SET_STATE_ID, buf);
+                    NetworkManager.sendToServer(new DialogueSetTaskStatePayload(questId, taskId, newState));
                 }, () -> {
                     FriendlyByteBuf buf = new FriendlyByteBuf(Unpooled.buffer());
                     buf.writeResourceLocation(questId);
                     buf.writeUtf(newState);
-                    NetworkManager.sendToServer(BlablaLibNetwork.DIALOGUE_QUEST_SET_STATE_ID, buf);
+                    NetworkManager.sendToServer(new DialogueSetQuestStatePayload(questId, newState));
                 });
             });
         }

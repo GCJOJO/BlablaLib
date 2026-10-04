@@ -5,16 +5,15 @@ import io.github.gcjojo.blablalib.dialogues.DialogueAction;
 import io.github.gcjojo.blablalib.dialogues.DialogueManager;
 import io.github.gcjojo.blablalib.dialogues.DialogueSpeaker;
 import io.github.gcjojo.blablalib.dialogues.actions.DialogueRawAction;
-import io.github.gcjojo.blablalib.network.BlablaLibNetwork;
+import io.github.gcjojo.blablalib.network.payloads.DialogueChoicePayload;
+import io.github.gcjojo.blablalib.network.payloads.DialogueCompletedPayload;
+import io.github.gcjojo.blablalib.network.payloads.DialogueScreenOpenedPayload;
 import io.github.gcjojo.liblib.client.gui.GuiScreen;
-import io.netty.buffer.Unpooled;
 import lombok.Getter;
 import lombok.Setter;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FastColor;
@@ -27,6 +26,7 @@ import java.util.List;
 public class DialogueScreen extends GuiScreen {
 
     private static final float endFade = 7.5f;
+    @Getter
     private final List<DialogueAction> currentActions = new ArrayList<>();
     private final List<Button> buttons = new ArrayList<>();
     private List<DialogueAction> dialogueActions;
@@ -74,7 +74,7 @@ public class DialogueScreen extends GuiScreen {
         this.dialogueActions = actions;
         this.dialogueSpeakers = speakers;
         if(!actions.isEmpty())
-            NetworkManager.sendToServer(BlablaLibNetwork.DIALOGUE_SCREEN_OPENED_PACKET_ID, new FriendlyByteBuf(Unpooled.buffer()));
+            NetworkManager.sendToServer(new DialogueScreenOpenedPayload());
     }
 
     public static void openDialogueScreen(ResourceLocation dialoguePath) {
@@ -100,14 +100,7 @@ public class DialogueScreen extends GuiScreen {
     }
 
     public void handleChoiceSelection(ResourceLocation nextSet, ResourceLocation saveSet, String action) {
-        CompoundTag choiceNbt = new CompoundTag();
-        choiceNbt.putString("NextSet", nextSet.toString());
-        choiceNbt.putString("SaveSet", saveSet.toString());
-        choiceNbt.putString("Action", action);
-
-        FriendlyByteBuf buf = new FriendlyByteBuf(Unpooled.buffer());
-        buf.writeNbt(choiceNbt);
-        NetworkManager.sendToServer(BlablaLibNetwork.CHOICE_PACKET_ID, buf);
+        NetworkManager.sendToServer(new DialogueChoicePayload(nextSet, saveSet, action));
         queueAdvanceDialogue();
     }
 
@@ -274,12 +267,6 @@ public class DialogueScreen extends GuiScreen {
         clearActions();
         currentFadingTime = 0.0f;
 
-        FriendlyByteBuf buf = new FriendlyByteBuf(Unpooled.buffer());
-        buf.writeUtf(currentDialogue.toString());
-        NetworkManager.sendToServer(BlablaLibNetwork.DIALOGUE_COMPLETED_PACKET_ID, buf);
-    }
-
-    public List<DialogueAction> getCurrentActions() {
-        return this.currentActions;
+        NetworkManager.sendToServer(new DialogueCompletedPayload(currentDialogue));
     }
 }

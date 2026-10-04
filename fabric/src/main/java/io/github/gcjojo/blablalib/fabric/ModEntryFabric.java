@@ -14,7 +14,6 @@ public final class ModEntryFabric implements ModInitializer {
 
         // Run our common setup.
         BlablaLib.init();
-        BlablaLib.setPlayerDataManager(new FabricPlayerDataManager());
 
         ConfigManager.load();
         CommandRegistrationEvent.EVENT.register(((dispatcher, registry, selection) -> {
