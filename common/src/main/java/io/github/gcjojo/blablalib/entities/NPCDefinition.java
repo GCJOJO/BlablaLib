@@ -5,6 +5,9 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.annotations.SerializedName;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
 
 public record NPCDefinition(
         @SerializedName("model") String modelLocation,
@@ -76,4 +79,12 @@ public record NPCDefinition(
         buf.writeUtf(animation);
         buf.writeUtf(dialogue);
     }
+
+    public static StreamCodec<RegistryFriendlyByteBuf, NPCDefinition> STREAM_CODEC = StreamCodec.composite(
+            ByteBufCodecs.STRING_UTF8, NPCDefinition::modelLocation,
+            ByteBufCodecs.STRING_UTF8, NPCDefinition::textureLocation,
+            ByteBufCodecs.STRING_UTF8, NPCDefinition::animation,
+            ByteBufCodecs.STRING_UTF8, NPCDefinition::dialogue,
+            NPCDefinition::new
+    );
 }

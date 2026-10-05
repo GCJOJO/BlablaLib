@@ -39,7 +39,6 @@ public final class BlablaLib {
 
     public static void init() {
         BlablaLibNetwork.registerPackets();
-        BlablaLibEntityDataSerializers.register();
 
         DialogueManager.registerDefaultActions();
 

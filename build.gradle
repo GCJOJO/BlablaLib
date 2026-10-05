@@ -81,14 +81,6 @@ subprojects {
                     name = "Libs"
                     url "file://${rootProject.projectDir}/build/libs"
                 }
-                maven {
-                    name = "GitHubPackages"
-                    url = "https://maven.pkg.github.com/gcjojo/BlablaLib"
-                    credentials {
-                        username = System.getenv("GITHUB_ACTOR")
-                        password = System.getenv("GITHUB_TOKEN")
-                    }
-                }
             }
         }
     }

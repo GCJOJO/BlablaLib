@@ -21,8 +21,8 @@ import net.minecraft.world.level.Level;
 import java.util.Collections;
 
 public class NPC extends LivingEntity {
-    protected static final EntityDataAccessor<NPCDefinition> DEFAULT_STATE = SynchedEntityData.defineId(NPC.class, BlablaLibEntityDataSerializers.NPC_DEFINITION);
-    protected static final EntityDataAccessor<NPCDefinition> CURRENT_STATE = SynchedEntityData.defineId(NPC.class, BlablaLibEntityDataSerializers.NPC_DEFINITION);
+    protected static final EntityDataAccessor<NPCDefinition> DEFAULT_STATE = SynchedEntityData.defineId(NPC.class, BlablaLibEntityDataSerializers.npcDefinition());
+    protected static final EntityDataAccessor<NPCDefinition> CURRENT_STATE = SynchedEntityData.defineId(NPC.class, BlablaLibEntityDataSerializers.npcDefinition());
     protected static final EntityDataAccessor<Boolean> LOOP_CURRENT_ANIMATION = SynchedEntityData.defineId(NPC.class, EntityDataSerializers.BOOLEAN);
 
     public NPC(EntityType<? extends LivingEntity> entityType, Level level) {

@@ -162,13 +162,14 @@ public class DialogueScreen extends GuiScreen {
             return;
         }
 
+        super.render(graphics, mouseX, mouseY, partialTick);
+
         if(actionIndex >= dialogueActions.size())
             return;
         if(guiVisible)
             graphics.fillGradient(0, 0, this.width, this.height, 0x11000000, 0xDD000000);
 
         currentActions.forEach(action -> action.draw(graphics, mouseX, mouseY, partialTick));
-        super.render(graphics, mouseX, mouseY, partialTick);
     }
 
     @Override
