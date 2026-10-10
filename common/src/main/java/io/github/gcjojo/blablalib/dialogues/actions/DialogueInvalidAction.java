@@ -4,11 +4,11 @@ import com.google.gson.JsonObject;
 import io.github.gcjojo.blablalib.dialogues.DialogueAction;
 import net.minecraft.client.gui.GuiGraphics;
 
-public class DialogueRawAction extends DialogueAction {
+public class DialogueInvalidAction extends DialogueAction {
 
-    private String action;
+    private final String action;
 
-    public DialogueRawAction(JsonObject object){
+    public DialogueInvalidAction(JsonObject object){
         this.action = object.get("action").getAsString();
     }
 

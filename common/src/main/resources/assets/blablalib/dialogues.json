@@ -9,7 +9,7 @@
   ],
   "dogcheck": [
     {
-      "action": "image",
+      "action": "blablalib:image",
       "id": 0,
       "image": "blablalib:textures/gui/woof.png",
       "fade_in_time": 10,
@@ -19,52 +19,52 @@
       "alpha": 0
     },
     {
-      "action": "image_move",
+      "action": "blablalib:image_move",
       "id": 0,
       "anim_time": 10,
       "alpha_start": 0,
       "alpha_end": 255
     },
     {
-      "action": "wait",
+      "action": "blablalib:wait",
       "time": 10
     },
-    { "action": "sound", "sound": "entity.wolf.whine" },
+    { "action": "blablalib:sound", "sound": "entity.wolf.whine" },
     {
-      "action": "message",
+      "action": "blablalib:message",
       "speaker": 0,
       "text": "blablalib.dogcheck.woof"
     },
     {
-      "action": "image_move",
+      "action": "blablalib:image_move",
       "id": 0,
       "anim_time": 10,
       "alpha_start": 255,
       "alpha_end": 0
     },
     {
-      "action": "wait",
+      "action": "blablalib:wait",
       "time": 10
     },
     {
-      "action": "clear"
+      "action": "blablalib:clear"
     },
     {
-      "action": "wait",
+      "action": "blablalib:wait",
       "time": 10
     },
     {
-      "action": "fade",
+      "action": "blablalib:fade",
       "from": "00000000",
       "to": "FF000000",
       "time": 10
     },
     {
-      "action": "wait",
+      "action": "blablalib:wait",
       "time": 20
     },
     {
-      "action": "image",
+      "action": "blablalib:image",
       "id": 0,
       "image": "blablalib:textures/gui/woof.png",
       "fade_in_time": 10,
@@ -74,73 +74,73 @@
       "y": 200
     },
     {
-      "action": "image_move",
+      "action": "blablalib:image_move",
       "id": 0,
       "anim_time": 5,
       "y_start": 200,
       "y_end": 40
     },
-    { "action": "sound", "sound": "entity.wolf.growl" },
+    { "action": "blablalib:sound", "sound": "entity.wolf.growl" },
     {
-      "action": "message",
+      "action": "blablalib:message",
       "speaker": 0,
       "text": "blablalib.dogcheck.jumpscare"
     },
     {
-      "action": "clear",
+      "action": "blablalib:clear",
       "cleared_actions": "fade"
     },
     {
-      "action": "fade",
+      "action": "blablalib:fade",
       "from": "FF000000",
       "to": "00000000",
       "time": 10
     },
     {
-      "action": "image_move",
+      "action": "blablalib:image_move",
       "id": 0,
       "anim_time": 10,
       "alpha_start": 255,
       "alpha_end": 0
     },
     {
-      "action": "wait",
+      "action": "blablalib:wait",
       "time": 15
     },
     {
-      "action": "command",
+      "action": "blablalib:command",
       "command": "title @s title \"DOGCHECK\""
     },
     {
-      "action": "command",
+      "action": "blablalib:command",
       "command": "tp @s ~ ~10 ~"
     }
   ],
 
   "test_choice" : [
-    { "action": "message", "speaker": "0", "text": "Test Choice" },
-    { "action": "choice", "option1": "Choice 1", "action1": "none", "next1": "choice1", "save1": "choice1", "option2": "Choice 2", "action2": "none", "next2": "choice2", "save2": "choice2" }
+    { "action": "blablalib:message", "speaker": "0", "text": "Test Choice" },
+    { "action": "blablalib:choice", "option1": "Choice 1", "action1": "none", "next1": "choice1", "save1": "choice1", "option2": "Choice 2", "action2": "none", "next2": "choice2", "save2": "choice2" }
   ],
 
   "choice1": [
-    { "action": "message", "speaker": 0, "text": "Choice 1" },
-    { "action": "hide_ui" },
-    { "action": "wait", "time": 90}
+    { "action": "blablalib:message", "speaker": 0, "text": "Choice 1" },
+    { "action": "blablalib:hide_ui" },
+    { "action": "blablalib:wait", "time": 90}
   ],
 
   "choice2": [
-    { "action": "message", "speaker": 0, "text": "Choice 2" }
+    { "action": "blablalib:message", "speaker": 0, "text": "Choice 2" }
   ],
 
   "test_npc": [
-    { "action" : "npc", "npc":  0, "model": "blablalib:geometry.npc" },
-    { "action" : "message", "speaker":  0, "text": "Hey there I will change model !" },
-    { "action" : "npc", "npc":  0, "model": "blablalib:geometry.test_model" }
+    { "action": "blablalib:npc", "npc":  0, "model": "blablalib:geometry.npc" },
+    { "action": "blablalib:message", "speaker":  0, "text": "Hey there I will change model !" },
+    { "action": "blablalib:npc", "npc":  0, "model": "blablalib:geometry.test_model" }
   ],
 
   "test_speed" : [
-    { "action": "message", "speaker": 0, "text": "Very long message to test the new Dialogue Timings Action. I am a very very long message please do not read me." },
-    { "action": "timings", "speed": 10, "wait": 16 },
-    { "action": "message", "speaker": 0, "text": "Very long message to test the new Dialogue Timings Action. I am a very very long message please do not read me." }
+    { "action": "blablalib:message", "speaker": 0, "text": "Very long message to test the new Dialogue Timings Action. I am a very very long message please do not read me." },
+    { "action": "blablalib:timings", "speed": 10, "wait": 16 },
+    { "action": "blablalib:message", "speaker": 0, "text": "Very long message to test the new Dialogue Timings Action. I am a very very long message please do not read me." }
   ]
 }

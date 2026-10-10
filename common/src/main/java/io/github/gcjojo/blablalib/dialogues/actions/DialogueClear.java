@@ -4,27 +4,27 @@ import com.google.gson.JsonObject;
 import io.github.gcjojo.blablalib.client.gui.DialogueScreen;
 import io.github.gcjojo.blablalib.dialogues.DialogueAction;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.resources.ResourceLocation;
+
+import java.util.Optional;
 
 public class DialogueClear extends DialogueAction {
 
-    String clearedClass = "none";
+    Optional<ResourceLocation> clearedClass = Optional.empty();
 
-    public DialogueClear(String clearedClass){
-        this.clearedClass = clearedClass;
+    public DialogueClear(ResourceLocation clearedClass) {
+        this.clearedClass = Optional.ofNullable(clearedClass);
     }
 
     public DialogueClear(JsonObject object){
         if(object.has("cleared_actions"))
-            this.clearedClass = object.get("cleared_actions").getAsString();
+            this.clearedClass = Optional.ofNullable(ResourceLocation.tryParse(object.get("cleared_actions").getAsString()));
     }
 
     @Override
     public void setup(DialogueScreen screen) {
         super.setup(screen);
-        if(clearedClass.equals("none"))
-            screen.clearActions();
-        else
-            screen.clearActions(this.clearedClass);
+        clearedClass.ifPresentOrElse(screen::clearActions, screen::clearActions);
         screen.advanceDialogue();
     }
 

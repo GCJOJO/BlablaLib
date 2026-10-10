@@ -5,6 +5,7 @@ import com.google.gson.JsonObject;
 import dev.architectury.platform.Platform;
 import io.github.gcjojo.blablalib.BlablaLib;
 import io.github.gcjojo.blablalib.dialogues.actions.*;
+import lombok.Getter;
 import net.minecraft.client.Minecraft;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
@@ -15,43 +16,56 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 
 public class DialogueManager {
-    private static final Map<String, Class<? extends DialogueAction>> dialogueActionClasses = new HashMap<>();
+    public record ActionOverload<T extends DialogueAction>(Class<? extends T> overloadClass){ }
+
+    @Getter
+    private static final Map<ResourceLocation, Class<? extends DialogueAction>> dialogueActionClasses = new HashMap<>();
+    @Getter
+    private static final Map<String, Map<ResourceLocation, ActionOverload<?>>> dialogueActionOverloads = new HashMap<>();
+
 
     public static void registerDefaultActions(){
-        dialogueActionClasses.put("clear",          DialogueClear.class);
-        dialogueActionClasses.put("wait",           DialogueWait.class);
-        dialogueActionClasses.put("choice",         DialogueChoice.class);
-        dialogueActionClasses.put("change_set",     DialogueNext.class);
-        dialogueActionClasses.put("next_dialogue",  DialogueNext.class);
-        dialogueActionClasses.put("fade",           DialogueFading.class);
-        dialogueActionClasses.put("message",        DialogueMessage.class);
-        dialogueActionClasses.put("image",          DialogueImage.class);
-        dialogueActionClasses.put("credit",         DialogueText.class);
-        dialogueActionClasses.put("text",           DialogueText.class);
-        dialogueActionClasses.put("image_move",     DialogueMoveImage.class);
-        dialogueActionClasses.put("command",        DialogueExecuteCommand.class);
-        dialogueActionClasses.put("sound",          DialogueSound.class);
-        dialogueActionClasses.put("timings",        DialogueTimings.class);
-        dialogueActionClasses.put("npc",            DialogueNPC.class);
+        dialogueActionClasses.put(ResourceLocation.tryBuild(BlablaLib.MOD_ID, "clear"),          DialogueClear.class);
+        dialogueActionClasses.put(ResourceLocation.tryBuild(BlablaLib.MOD_ID, "wait"),           DialogueWait.class);
+        dialogueActionClasses.put(ResourceLocation.tryBuild(BlablaLib.MOD_ID, "choice"),         DialogueChoice.class);
+        dialogueActionClasses.put(ResourceLocation.tryBuild(BlablaLib.MOD_ID, "change_set"),     DialogueNext.class);
+        dialogueActionClasses.put(ResourceLocation.tryBuild(BlablaLib.MOD_ID, "next_dialogue"),  DialogueNext.class);
+        dialogueActionClasses.put(ResourceLocation.tryBuild(BlablaLib.MOD_ID, "fade"),           DialogueFading.class);
+        dialogueActionClasses.put(ResourceLocation.tryBuild(BlablaLib.MOD_ID, "message"),        DialogueMessage.class);
+        dialogueActionClasses.put(ResourceLocation.tryBuild(BlablaLib.MOD_ID, "image"),          DialogueImage.class);
+        dialogueActionClasses.put(ResourceLocation.tryBuild(BlablaLib.MOD_ID, "credit"),         DialogueText.class);
+        dialogueActionClasses.put(ResourceLocation.tryBuild(BlablaLib.MOD_ID, "text"),           DialogueText.class);
+        dialogueActionClasses.put(ResourceLocation.tryBuild(BlablaLib.MOD_ID, "image_move"),     DialogueMoveImage.class);
+        dialogueActionClasses.put(ResourceLocation.tryBuild(BlablaLib.MOD_ID, "command"),        DialogueExecuteCommand.class);
+        dialogueActionClasses.put(ResourceLocation.tryBuild(BlablaLib.MOD_ID, "sound"),          DialogueSound.class);
+        dialogueActionClasses.put(ResourceLocation.tryBuild(BlablaLib.MOD_ID, "timings"),        DialogueTimings.class);
+        dialogueActionClasses.put(ResourceLocation.tryBuild(BlablaLib.MOD_ID, "npc"),            DialogueNPC.class);
 
-        dialogueActionClasses.put("quest_state",    DialogueQuestStateAction.class);
+        dialogueActionClasses.put(ResourceLocation.tryBuild(BlablaLib.MOD_ID, "quest_state"),    DialogueQuestStateAction.class);
     }
 
-    public static Class<? extends DialogueAction> getActionClass(String action) {
+    public static Class<? extends DialogueAction> getActionClass(ResourceLocation action) {
         if(dialogueActionClasses.containsKey(action))
             return dialogueActionClasses.get(action);
         return null;
     }
 
-    public static boolean registerCustomAction(String name, Class<? extends DialogueAction> action) {
+    public static boolean registerCustomAction(ResourceLocation name, Class<? extends DialogueAction> action) {
         if(dialogueActionClasses.containsKey(name)) return false;
         var put = dialogueActionClasses.put(name, action);
+        return put != null;
+    }
+
+    public static <T extends DialogueAction> boolean registerOverload(String overloadingNamespace, ResourceLocation actionName, Class<? extends T> overloadClass) {
+        var overloadList = dialogueActionOverloads.computeIfAbsent(overloadingNamespace, key -> new HashMap<>());
+        var put = overloadList.put(actionName, new ActionOverload<T>(overloadClass));
         return put != null;
     }
 
     public static List<DialogueAction> loadDialogue(ResourceLocation dialoguePath) {
         try {
             String dialogueName = dialoguePath.getPath();
+            String dialogueNamespace = dialoguePath.getNamespace();
             JsonObject root = getDialogueFile(dialoguePath.getNamespace());
             if (root == null || !root.has(dialogueName)) return null;
             List<DialogueAction> actions = new ArrayList<>();
@@ -60,16 +74,21 @@ public class DialogueManager {
                 JsonObject obj = element.getAsJsonObject();
                 if(!obj.has("action"))
                     return;
-                String action = obj.get("action").getAsString();
+                ResourceLocation action = ResourceLocation.tryParse(obj.get("action").getAsString());
                 if(dialogueActionClasses.containsKey(action)) {
+
+                    Class<? extends DialogueAction> actionClass = dialogueActionClasses.get(action);
+                    if(dialogueActionOverloads.containsKey(dialogueNamespace) && dialogueActionOverloads.get(dialogueNamespace).containsKey(action))
+                        actionClass = dialogueActionOverloads.get(dialogueNamespace).get(action).overloadClass();
+
                     try {
                         try {
-                            Constructor<DialogueAction> constructor = (Constructor<DialogueAction>) dialogueActionClasses.get(action).getConstructor(JsonObject.class);
+                            Constructor<? extends DialogueAction> constructor = actionClass.getConstructor(JsonObject.class);
                             actions.add(constructor.newInstance(obj));
                             return;
                         } catch (NoSuchMethodException e) {
-                            Constructor<DialogueAction> constructor = (Constructor<DialogueAction>) dialogueActionClasses.get(action).getConstructor();
-                            actions.add(constructor.newInstance(obj));
+                            Constructor<? extends DialogueAction> constructor = actionClass.getConstructor();
+                            actions.add(constructor.newInstance());
                             return;
                         }
                     } catch (InstantiationException | IllegalAccessException | InvocationTargetException |
@@ -78,7 +97,7 @@ public class DialogueManager {
                         Arrays.stream(e.getStackTrace()).forEach(stackTraceElement -> BlablaLib.getLogger().error(stackTraceElement.toString()));
                     }
                 }
-                actions.add(new DialogueRawAction(obj));
+                actions.add(new DialogueInvalidAction(obj));
             });
             return actions;
 

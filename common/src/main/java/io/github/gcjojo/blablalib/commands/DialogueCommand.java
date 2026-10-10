@@ -19,8 +19,8 @@ import java.util.concurrent.atomic.AtomicReference;
 
 public class DialogueCommand {
 
-    private static Map<UUID, List<ResourceLocation>> playerDialogueLists = new HashMap<>();
-    private static List<DialogueTransformation> transformations = new ArrayList<>();
+    private static final Map<UUID, List<ResourceLocation>> playerDialogueLists = new HashMap<>();
+    private static final List<DialogueTransformation> transformations = new ArrayList<>();
 
     public static void registerPlayerDialogueList(ServerPlayer player, List<ResourceLocation> dialogueList) {
         if(playerDialogueLists.containsKey(player.getUUID()))
@@ -29,12 +29,16 @@ public class DialogueCommand {
     }
 
     public static void disconnectPlayer(ServerPlayer player) {
-        if(playerDialogueLists.containsKey(player.getUUID()))
-            playerDialogueLists.remove(player.getUUID());
+        if(player == null) return;
+
+        playerDialogueLists.remove(player.getUUID());
     }
 
     private static CompletableFuture<Suggestions> suggestDialogues(CommandContext<CommandSourceStack> context, SuggestionsBuilder builder) {
         ServerPlayer player = context.getSource().getPlayer();
+        if(player == null) return builder.buildFuture();
+
+
         if(playerDialogueLists.containsKey(player.getUUID()))
             playerDialogueLists.get(player.getUUID()).forEach(dialoguePath -> builder.suggest(dialoguePath.toString()));
         return builder.buildFuture();

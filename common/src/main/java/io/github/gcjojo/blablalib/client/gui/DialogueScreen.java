@@ -4,7 +4,7 @@ import dev.architectury.networking.NetworkManager;
 import io.github.gcjojo.blablalib.dialogues.DialogueAction;
 import io.github.gcjojo.blablalib.dialogues.DialogueManager;
 import io.github.gcjojo.blablalib.dialogues.DialogueSpeaker;
-import io.github.gcjojo.blablalib.dialogues.actions.DialogueRawAction;
+import io.github.gcjojo.blablalib.dialogues.actions.DialogueInvalidAction;
 import io.github.gcjojo.blablalib.network.payloads.DialogueChoicePayload;
 import io.github.gcjojo.blablalib.network.payloads.DialogueCompletedPayload;
 import io.github.gcjojo.blablalib.network.payloads.DialogueScreenOpenedPayload;
@@ -214,8 +214,8 @@ public class DialogueScreen extends GuiScreen {
         {
             DialogueAction currentAction = dialogueActions.get(i);
 
-            if(currentAction instanceof DialogueRawAction){
-                switch(((DialogueRawAction) currentAction).getRawAction()){
+            if(currentAction instanceof DialogueInvalidAction){
+                switch(((DialogueInvalidAction) currentAction).getRawAction()){
                     case "hide_ui" -> hideGui();
                     case "show_ui" -> showGui();
                 }
@@ -232,8 +232,6 @@ public class DialogueScreen extends GuiScreen {
         }
     }
 
-    public List<DialogueSpeaker> getDialogueSpeakers() { return this.dialogueSpeakers; }
-
     public DialogueSpeaker getDialogueSpeaker(int id){
         if (dialogueSpeakers.isEmpty())
             return DialogueSpeaker.DEFAULT_SPEAKER;
@@ -244,7 +242,7 @@ public class DialogueScreen extends GuiScreen {
 
     public void clearActions() { currentActions.clear(); }
 
-    public void clearActions(String clearedClass){
+    public void clearActions(ResourceLocation clearedClass){
         Class<? extends DialogueAction> classToRemove = DialogueManager.getActionClass(clearedClass);
         if(classToRemove != null)
             currentActions.removeIf(classToRemove::isInstance);
