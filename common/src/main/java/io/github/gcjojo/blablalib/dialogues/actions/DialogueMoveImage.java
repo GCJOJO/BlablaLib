@@ -1,8 +1,13 @@
 package io.github.gcjojo.blablalib.dialogues.actions;
 
 import com.google.gson.JsonObject;
+import io.github.gcjojo.blablalib.BlablaLib;
 import io.github.gcjojo.blablalib.dialogues.DialogueAction;
+import io.github.gcjojo.blablalib.dialogues.DialogueManager;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 
 import java.util.Optional;
@@ -20,12 +25,26 @@ public class DialogueMoveImage extends DialogueAction {
     private Optional<Integer> alphaStart = Optional.empty();
     private Optional<Integer> alphaEnd = Optional.empty();
 
+    // TODO
+    public static final StreamCodec<RegistryFriendlyByteBuf, DialogueMoveImage> MOVE_IMAGE_STREAM_CODEC = StreamCodec.unit(new DialogueMoveImage());
+
+    private static final DialogueManager.DialogueActionType<DialogueMoveImage> TYPE = DialogueManager.register(
+            ResourceLocation.fromNamespaceAndPath(BlablaLib.MOD_ID, "dialogue_move_image"),
+            MOVE_IMAGE_STREAM_CODEC
+    );
+
     private boolean animateX = false;
     private boolean animateY = false;
     private boolean animateScale = false;
     private boolean animateAlpha = false;
 
     private float currentTime;
+
+    public DialogueMoveImage() {
+        this.imageId = -1;
+        this.animTime = 0;
+        this.currentTime = 1;
+    }
 
     public DialogueMoveImage(JsonObject object){
         if(object.has("id"))
@@ -67,20 +86,18 @@ public class DialogueMoveImage extends DialogueAction {
                 .filter(action -> action instanceof DialogueImage && ((DialogueImage)action)
                         .getImageId() == this.imageId).findFirst();
 
-        if(imageAction.isEmpty() || !(imageAction.get() instanceof DialogueImage))
+        if(imageAction.isEmpty() || !(imageAction.get() instanceof DialogueImage image))
             return;
-
-        DialogueImage image = (DialogueImage) imageAction.get();
 
         float animPercentage = currentTime / animTime;
 
-        float xPercentage = animateX ? Mth.lerp(animPercentage, xPercentageStart.get(), xPercentageEnd.get()) : image.getXPercentage();
-        float yPercentage = animateY ? Mth.lerp(animPercentage, yPercentageStart.get(), yPercentageEnd.get()) : image.getYPercentage();
+        float xPercentage = animateX ? Mth.lerp(animPercentage, xPercentageStart.get(), xPercentageEnd.get()) : image.getX();
+        float yPercentage = animateY ? Mth.lerp(animPercentage, yPercentageStart.get(), yPercentageEnd.get()) : image.getY();
         float scale = animateScale ? Mth.lerp(animPercentage, scaleStart.get(), scaleEnd.get()) : image.getScale();
         int alpha = animateAlpha ? (int) Mth.lerp(animPercentage, (float) alphaStart.get(), (float) alphaEnd.get()) : image.getAlpha();
 
-        image.setXPercentage(xPercentage);
-        image.setYPercentage(yPercentage);
+        image.setX(xPercentage);
+        image.setY(yPercentage);
         image.setScale(scale);
         image.setAlpha(alpha);
 
@@ -98,4 +115,7 @@ public class DialogueMoveImage extends DialogueAction {
 
     @Override
     public boolean isSkippable() { return true; }
+
+    @Override
+    public DialogueManager.DialogueActionType<?> getType() { return TYPE; }
 }

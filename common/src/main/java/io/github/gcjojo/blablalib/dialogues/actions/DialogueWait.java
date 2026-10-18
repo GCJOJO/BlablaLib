@@ -1,13 +1,29 @@
 package io.github.gcjojo.blablalib.dialogues.actions;
 
 import com.google.gson.JsonObject;
+import io.github.gcjojo.blablalib.BlablaLib;
 import io.github.gcjojo.blablalib.dialogues.DialogueAction;
+import io.github.gcjojo.blablalib.dialogues.DialogueManager;
+import lombok.Getter;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.resources.ResourceLocation;
 
 public class DialogueWait extends DialogueAction {
 
-    float waitTime;
-    float currentWaitTime;
+    public static final StreamCodec<RegistryFriendlyByteBuf, DialogueWait> WAIT_STREAM_CODEC = StreamCodec.composite(
+            ByteBufCodecs.FLOAT, DialogueWait::getWaitTime,
+            DialogueWait::new
+    );
+    private static final DialogueManager.DialogueActionType<DialogueWait> TYPE = DialogueManager.register(
+            ResourceLocation.fromNamespaceAndPath(BlablaLib.MOD_ID, "dialogue_wait"),
+            WAIT_STREAM_CODEC
+    );
+    @Getter
+    private final float waitTime;
+    private float currentWaitTime;
 
     public DialogueWait(float waitTime){
         this.waitTime = waitTime;
@@ -43,4 +59,7 @@ public class DialogueWait extends DialogueAction {
 
     @Override
     public boolean isSkippable() { return true; }
+
+    @Override
+    public DialogueManager.DialogueActionType<?> getType() { return TYPE; }
 }

@@ -1,16 +1,42 @@
 package io.github.gcjojo.blablalib.dialogues.actions;
 
 import com.google.gson.JsonObject;
+import io.github.gcjojo.blablalib.BlablaLib;
 import io.github.gcjojo.blablalib.client.gui.DialogueScreen;
 import io.github.gcjojo.blablalib.dialogues.DialogueAction;
+import io.github.gcjojo.blablalib.dialogues.DialogueManager;
 import io.github.gcjojo.liblib.LibLib;
+import lombok.Getter;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.resources.ResourceLocation;
 
 public class DialogueSound extends DialogueAction {
 
+    public static final StreamCodec<RegistryFriendlyByteBuf, DialogueSound> SOUND_STREAM_CODEC = StreamCodec.composite(
+            ByteBufCodecs.STRING_UTF8, DialogueSound::getSoundName,
+            ByteBufCodecs.FLOAT, DialogueSound::getPitch,
+            ByteBufCodecs.FLOAT, DialogueSound::getVolume,
+            DialogueSound::new
+    );
+    private static final DialogueManager.DialogueActionType<DialogueSound> TYPE = DialogueManager.register(
+            ResourceLocation.fromNamespaceAndPath(BlablaLib.MOD_ID, "dialogue_sound"),
+            SOUND_STREAM_CODEC
+    );
+    @Getter
     private String soundName;
+    @Getter
     private float pitch = 1.0f;
+    @Getter
     private float volume = 1.0f;
+
+    public DialogueSound(String soundName, float pitch, float volume) {
+        this.soundName = soundName;
+        this.pitch = pitch;
+        this.volume = volume;
+    }
 
     public DialogueSound(JsonObject object) {
         if (object.has("sound"))
@@ -52,4 +78,7 @@ public class DialogueSound extends DialogueAction {
     public boolean isSkippable() {
         return true;
     }
+
+    @Override
+    public DialogueManager.DialogueActionType<?> getType() { return TYPE; }
 }

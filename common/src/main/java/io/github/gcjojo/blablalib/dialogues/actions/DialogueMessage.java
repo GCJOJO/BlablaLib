@@ -1,15 +1,22 @@
 package io.github.gcjojo.blablalib.dialogues.actions;
 
 import com.google.gson.JsonObject;
+import io.github.gcjojo.blablalib.BlablaLib;
 import io.github.gcjojo.blablalib.client.gui.DialogueScreen;
 import io.github.gcjojo.blablalib.dialogues.DialogueAction;
+import io.github.gcjojo.blablalib.dialogues.DialogueManager;
 import io.github.gcjojo.blablalib.dialogues.DialogueSpeaker;
 import io.github.gcjojo.liblib.client.gui.elements.GuiRichText;
+import lombok.Getter;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.phys.Vec2;
 
@@ -19,14 +26,25 @@ import java.util.Random;
 public class DialogueMessage extends DialogueAction
 {
     private static final Font font = Minecraft.getInstance().font;
-    private final int speakerId;
-    private final String dialogueLine;
+    public static final StreamCodec<RegistryFriendlyByteBuf, DialogueMessage> MESSAGE_STREAM_CODEC = StreamCodec.composite(
+            ByteBufCodecs.INT, DialogueMessage::getSpeakerId,
+            ByteBufCodecs.STRING_UTF8, DialogueMessage::getDialogueLine,
+            DialogueMessage::new
+    );
+    private static final DialogueManager.DialogueActionType<DialogueMessage> TYPE = DialogueManager.register(
+            ResourceLocation.fromNamespaceAndPath(BlablaLib.MOD_ID, "dialogue_message"),
+            MESSAGE_STREAM_CODEC
+    );
     private final Random random = new Random();
     GuiRichText richText;
     private int charIndex = 0;
     private int tickCount = 0;
     private int characterTimer = 0;
     private int pauseTimer = 0;
+    @Getter
+    private final int speakerId;
+    @Getter
+    private final String dialogueLine;
 
     public DialogueMessage(int speakerId, String dialogueLine) {
         this.speakerId = speakerId;
@@ -128,4 +146,7 @@ public class DialogueMessage extends DialogueAction
 
     @Override
     public boolean isSkippable() { return true; }
+
+    @Override
+    public DialogueManager.DialogueActionType<?> getType() { return TYPE; }
 }

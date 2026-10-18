@@ -5,7 +5,7 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import io.github.gcjojo.blablalib.BlablaLib;
-import io.github.gcjojo.blablalib.dialogues.actions.DialogueInvalidAction;
+import io.github.gcjojo.blablalib.dialogues.actions.DialogueUnknownAction;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.SimpleJsonResourceReloadListener;
@@ -75,7 +75,7 @@ public class DialogueLoader extends SimpleJsonResourceReloadListener {
                         Arrays.stream(e.getStackTrace()).forEach(stackTraceElement -> BlablaLib.getLogger().error(stackTraceElement.toString()));
                     }
                 }
-                actions.add(new DialogueInvalidAction(obj));
+                actions.add(new DialogueUnknownAction(obj));
             });
             return Optional.of(new Dialogue(List.copyOf(actions)));
 
@@ -105,4 +105,6 @@ public class DialogueLoader extends SimpleJsonResourceReloadListener {
 
        dialogues.putAll(newDialogues);
     }
+
+
 }

@@ -5,45 +5,35 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import io.github.gcjojo.blablalib.BlablaLib;
 import io.github.gcjojo.blablalib.dialogues.DialogueAction;
+import io.github.gcjojo.liblib.math.Color;
+import io.github.gcjojo.liblib.network.LibLibNetwork;
 import io.github.gcjojo.liblib.utils.MathUtils;
+import lombok.Getter;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.core.Vec3i;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.util.FastColor;
+import net.minecraft.world.phys.Vec2;
 
 public class DialogueText extends DialogueAction {
-    enum DisplayState
-    {
-        FADE_IN,
-        HOLD,
-        FADE_OUT,
-        TRANSPARENT
-    }
-
-    enum TextAlignment{
-        LEFT,
-        CENTER,
-        RIGHT
-    }
-
+    @Getter
     private String text;
-    private float fadeInTime;
+    @Getter
+    private TextTimings timings;
+    @Getter
+    private TextTransforms transforms;
+    /*private float fadeInTime;
     private float holdTime;
     private float fadeOutTime;
     private float xPercentage;
     private float yPercentage;
-    private float scale;
-    private Vec3i color;
-    private TextAlignment alignment;
-
-    private DisplayState state;
-    private static final Font font = Minecraft.getInstance().font;
-
-    private int alpha = 0;
-    private float currentTime = 0.0f;
+    private float scale;*/
+    private Color color;
 
     public DialogueText(String text, float fadeInTime, float holdTime, float fadeOutTime, float xPercentage, float yPercentage, float scale, String color){
         this.text = text;
@@ -55,19 +45,13 @@ public class DialogueText extends DialogueAction {
         this.scale = scale;
 
         try {
-            if(color.length() == 6) {
-                int red = Integer.parseInt(color.substring(0, 2), 16);
-                int green = Integer.parseInt(color.substring(2, 4), 16);
-                int blue = Integer.parseInt(color.substring(4, 6), 16);
-                this.color = new Vec3i(red, green, blue);
-            }
+            this.color = Color.fromString(color);
         } catch (Exception e) { BlablaLib.getLogger().error(e.getMessage()); }
 
         this.alignment = TextAlignment.CENTER;
         this.alpha = 0;
         state = DisplayState.FADE_IN;
     }
-
     public DialogueText(JsonObject object){
         this.text = "";
         this.fadeInTime = 0.0f;
@@ -76,7 +60,7 @@ public class DialogueText extends DialogueAction {
         this.xPercentage = 0.0f;
         this.yPercentage = 0.0f;
         this.scale = 1.0f;
-        this.color = new Vec3i(255, 255, 255);
+        this.color = Color.WHITE;
         this.alignment = TextAlignment.CENTER;
 
         this.alpha = 0;
@@ -99,12 +83,7 @@ public class DialogueText extends DialogueAction {
         if(object.has("color")) {
             String color = object.get("color").getAsString();
             try {
-                if(color.length() == 6) {
-                    int red = Integer.parseInt(color.substring(0, 2), 16);
-                    int green = Integer.parseInt(color.substring(2, 4), 16);
-                    int blue = Integer.parseInt(color.substring(4, 6), 16);
-                    this.color = new Vec3i(red, green, blue);
-                }
+                this.color = Color.fromString(color);
             } catch (Exception e) { BlablaLib.getLogger().error(e.getMessage()); }
         }
 
@@ -117,6 +96,53 @@ public class DialogueText extends DialogueAction {
                 default -> this.alignment = TextAlignment.LEFT;
             }
         }
+    }
+    enum DisplayState {
+        FADE_IN,
+        HOLD,
+        FADE_OUT,
+        TRANSPARENT
+    }
+    enum TextAlignment {
+        LEFT,
+        CENTER,
+        RIGHT
+    }
+    private TextAlignment alignment;
+
+
+    private DisplayState state;
+    private static final Font font = Minecraft.getInstance().font;
+
+    private int alpha = 0;
+    private float currentTime = 0.0f;
+
+    public record TextTimings(float fadeInTime, float holdTime, float fadeOutTime) {
+        public static final StreamCodec<RegistryFriendlyByteBuf, TextTimings> STREAM_CODEC = StreamCodec.composite(
+                ByteBufCodecs.FLOAT, TextTimings::fadeInTime,
+                ByteBufCodecs.FLOAT, TextTimings::holdTime,
+                ByteBufCodecs.FLOAT, TextTimings::fadeOutTime,
+                TextTimings::new
+        );
+
+        public TextTimings withFadeInTime(float newFadeInTime) { return new TextTimings(newFadeInTime, holdTime(), fadeOutTime()); }
+        public TextTimings withHoldTime(float newHoldTime) { return new TextTimings(fadeInTime(), newHoldTime, fadeOutTime()); }
+        public TextTimings withFadeOutTime(float newFadeOutTime) { return new TextTimings(fadeInTime(), holdTime(), newFadeOutTime); }
+    }
+
+    public record TextTransforms(Vec2 position, float rotation, float scale) {
+        public static final StreamCodec<RegistryFriendlyByteBuf, TextTransforms> STREAM_CODEC = StreamCodec.composite(
+                LibLibNetwork.VEC2_STREAM_CODEC, TextTransforms::position,
+                ByteBufCodecs.FLOAT, TextTransforms::rotation,
+                ByteBufCodecs.FLOAT, TextTransforms::scale,
+                TextTransforms::new
+        );
+
+        public TextTransforms withX(float newX) { return new TextTransforms(new Vec2(newX, position().y), rotation(), scale()); }
+        public TextTransforms withY(float newY) { return new TextTransforms(new Vec2(position().x, newY), rotation(), scale()); }
+        public TextTransforms withPosition(Vec2 newPos) { return new TextTransforms(newPos, rotation(), scale()); }
+        public TextTransforms withRotation(float newRotation) { return new TextTransforms(position(), newRotation, scale()); }
+        public TextTransforms withScale(float newScale) { return new TextTransforms(position(), rotation(), newScale); }
     }
 
     @Override

@@ -4,7 +4,7 @@ import dev.architectury.networking.NetworkManager;
 import io.github.gcjojo.blablalib.dialogues.DialogueAction;
 import io.github.gcjojo.blablalib.dialogues.DialogueManager;
 import io.github.gcjojo.blablalib.dialogues.DialogueSpeaker;
-import io.github.gcjojo.blablalib.dialogues.actions.DialogueInvalidAction;
+import io.github.gcjojo.blablalib.dialogues.actions.DialogueUnknownAction;
 import io.github.gcjojo.blablalib.network.payloads.DialogueChoicePayload;
 import io.github.gcjojo.blablalib.network.payloads.DialogueCompletedPayload;
 import io.github.gcjojo.blablalib.network.payloads.DialogueScreenOpenedPayload;
@@ -214,8 +214,8 @@ public class DialogueScreen extends GuiScreen {
         {
             DialogueAction currentAction = dialogueActions.get(i);
 
-            if(currentAction instanceof DialogueInvalidAction){
-                switch(((DialogueInvalidAction) currentAction).getRawAction()){
+            if(currentAction instanceof DialogueUnknownAction){
+                switch(((DialogueUnknownAction) currentAction).getRawAction()){
                     case "hide_ui" -> hideGui();
                     case "show_ui" -> showGui();
                 }

@@ -3,63 +3,71 @@ package io.github.gcjojo.blablalib.dialogues.actions;
 import com.google.gson.JsonObject;
 import io.github.gcjojo.blablalib.BlablaLib;
 import io.github.gcjojo.blablalib.dialogues.DialogueAction;
+import io.github.gcjojo.blablalib.dialogues.DialogueManager;
+import io.github.gcjojo.liblib.math.Color;
+import io.github.gcjojo.liblib.network.LibLibNetwork;
 import io.github.gcjojo.liblib.utils.MathUtils;
+import lombok.Getter;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.util.FastColor;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.resources.ResourceLocation;
 
 public class DialogueFading extends DialogueAction
 {
-    private int fromColor;
-    private int toColor;
-    private float time;
+    public static final StreamCodec<RegistryFriendlyByteBuf, DialogueFading> FADE_STREAM_CODEC = StreamCodec.composite(
+            LibLibNetwork.COLOR_STREAM_CODEC, DialogueFading::getFromColor,
+            LibLibNetwork.COLOR_STREAM_CODEC, DialogueFading::getToColor,
+            ByteBufCodecs.FLOAT, DialogueFading::getTime,
+            DialogueFading::new
+    );
+    private static final DialogueManager.DialogueActionType<DialogueFading> TYPE = DialogueManager.register(
+            ResourceLocation.fromNamespaceAndPath(BlablaLib.MOD_ID, "dialogue_fade"),
+            FADE_STREAM_CODEC
+    );
+    @Getter
+    private Color fromColor;
 
     private float partialTicks = 0;
+    @Getter
+    private Color toColor;
+    @Getter
+    private float time;
 
     public DialogueFading(String from, String to, float time) {
-        this.fromColor = 0x00000000;
-        this.toColor = 0x00000000;
+        this.fromColor = Color.TRANSPARENT;
+        this.toColor = Color.TRANSPARENT;
         this.time = time;
         try{
-            if(from.length() == 8) {
-                int alpha = Integer.parseInt(from.substring(0, 2), 16);
-                int red = Integer.parseInt(from.substring(2, 4), 16);
-                int green = Integer.parseInt(from.substring(4, 6), 16);
-                int blue = Integer.parseInt(from.substring(6, 8), 16);
-                this.fromColor = FastColor.ARGB32.color(alpha, red, green, blue);
-            }
-            if(to.length() == 8) {
-                int alpha = Integer.parseInt(to.substring(0, 2), 16);
-                int red = Integer.parseInt(to.substring(2, 4), 16);
-                int green = Integer.parseInt(to.substring(4, 6), 16);
-                int blue = Integer.parseInt(to.substring(6, 8), 16);
-                this.toColor = FastColor.ARGB32.color(alpha, red, green, blue);
-            }
+            fromColor = Color.fromString(from);
+            toColor = Color.fromString(to);
         } catch (Exception e) {
             BlablaLib.getLogger().error(e.getMessage());
         }
+    }
+
+    public DialogueFading(int from, int to, float time) {
+        this.fromColor = new Color(from);
+        this.toColor = new Color(to);
+        this.time = time;
+    }
+
+    public DialogueFading(Color from, Color to, float time) {
+        this.fromColor = from;
+        this.toColor = to;
+        this.time = time;
     }
 
     public DialogueFading(JsonObject object){
         try{
             if(object.has("from")) {
                 String from = object.get("from").getAsString();
-                if(from.length() == 8) {
-                    int alpha = Integer.parseInt(from.substring(0, 2), 16);
-                    int red = Integer.parseInt(from.substring(2, 4), 16);
-                    int green = Integer.parseInt(from.substring(4, 6), 16);
-                    int blue = Integer.parseInt(from.substring(6, 8), 16);
-                    this.fromColor = FastColor.ARGB32.color(alpha, red, green, blue);
-                }
+                fromColor = Color.fromString(from);
             }
             if(object.has("to")){
                 String to = object.get("to").getAsString();
-                if(to.length() == 8) {
-                    int alpha = Integer.parseInt(to.substring(0, 2), 16);
-                    int red = Integer.parseInt(to.substring(2, 4), 16);
-                    int green = Integer.parseInt(to.substring(4, 6), 16);
-                    int blue = Integer.parseInt(to.substring(6, 8), 16);
-                    this.toColor = FastColor.ARGB32.color(alpha, red, green, blue);
-                }
+                toColor = Color.fromString(to);
             }
         } catch (Exception e) {
             BlablaLib.getLogger().error(e.getMessage());
@@ -80,9 +88,9 @@ public class DialogueFading extends DialogueAction
         partialTicks += partialTick;
         float percentage = MathUtils.clamp(partialTicks / time, 0.0f, 1.0f);
 
-        int lerpColor = FastColor.ARGB32.lerp(percentage, fromColor, toColor);
+        Color lerpColor = MathUtils.lerp(fromColor, toColor, percentage);
 
-        graphics.fill(0, 0, screen.width, screen.height, lerpColor);
+        graphics.fill(0, 0, screen.width, screen.height, lerpColor.getColorInt());
     }
 
     @Override
@@ -96,4 +104,7 @@ public class DialogueFading extends DialogueAction
 
     @Override
     public boolean isSkippable() { return true; }
+
+    @Override
+    public DialogueManager.DialogueActionType<?> getType() { return TYPE; }
 }

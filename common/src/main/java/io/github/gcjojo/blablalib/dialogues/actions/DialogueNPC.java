@@ -4,6 +4,7 @@ import com.google.gson.JsonObject;
 import dev.architectury.networking.NetworkManager;
 import io.github.gcjojo.blablalib.client.gui.DialogueScreen;
 import io.github.gcjojo.blablalib.dialogues.DialogueAction;
+import io.github.gcjojo.blablalib.dialogues.DialogueManager;
 import io.github.gcjojo.blablalib.network.payloads.DialogueSetNPCPayload;
 import net.minecraft.client.gui.GuiGraphics;
 
@@ -85,5 +86,10 @@ public class DialogueNPC extends DialogueAction {
     @Override
     public boolean isSkippable() {
         return false;
+    }
+
+    @Override
+    public DialogueManager.DialogueActionType<?> getType() {
+        return null;
     }
 }

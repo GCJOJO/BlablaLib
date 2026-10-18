@@ -1,22 +1,38 @@
 package io.github.gcjojo.blablalib.dialogues.actions;
 
 import com.google.gson.JsonObject;
+import io.github.gcjojo.blablalib.BlablaLib;
 import io.github.gcjojo.blablalib.client.gui.DialogueScreen;
 import io.github.gcjojo.blablalib.dialogues.DialogueAction;
+import io.github.gcjojo.blablalib.dialogues.DialogueManager;
+import lombok.Getter;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.ResourceLocation;
 
 public class DialogueNext extends DialogueAction {
-
+    public static final StreamCodec<RegistryFriendlyByteBuf, DialogueNext> NEXT_STREAM_CODEC = StreamCodec.composite(
+            ResourceLocation.STREAM_CODEC, DialogueNext::getNextDialogue,
+            DialogueNext::new
+    );
+    private static final DialogueManager.DialogueActionType<DialogueNext> TYPE = DialogueManager.register(
+            ResourceLocation.fromNamespaceAndPath(BlablaLib.MOD_ID, "dialogue_next"),
+            NEXT_STREAM_CODEC
+    );
+    @Getter
     ResourceLocation nextDialogue;
 
-    public DialogueNext(ResourceLocation nextSet) {
-        this.nextDialogue = nextSet;
+    public DialogueNext(ResourceLocation nextDialogue) {
+        this.nextDialogue = nextDialogue;
     }
 
-    public DialogueNext(JsonObject object){
+    public DialogueNext(JsonObject object) {
+        // "set" field will be deprecated
         if(object.has("set"))
             this.nextDialogue = ResourceLocation.tryParse(object.get("set").getAsString());
+        if(object.has("dialogue"))
+            this.nextDialogue = ResourceLocation.tryParse(object.get("dialogue").getAsString());
     }
 
     @Override
@@ -43,4 +59,7 @@ public class DialogueNext extends DialogueAction {
 
     @Override
     public boolean isSkippable() { return false; }
+
+    @Override
+    public DialogueManager.DialogueActionType<?> getType() { return TYPE; }
 }

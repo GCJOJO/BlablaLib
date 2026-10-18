@@ -4,6 +4,10 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import io.github.gcjojo.blablalib.BlablaLib;
 import io.github.gcjojo.liblib.LibLib;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.util.FastColor;
 
@@ -49,6 +53,13 @@ public class DialogueSpeaker {
         this.sounds = loadSounds(soundNames);
     }
 
+    public static final StreamCodec<RegistryFriendlyByteBuf, DialogueSpeaker> STREAM_CODEC = StreamCodec.composite(
+            ByteBufCodecs.INT, DialogueSpeaker::getId,
+            ByteBufCodecs.STRING_UTF8, DialogueSpeaker::getName,
+            ResourceLocation.STREAM_CODEC.apply(ByteBufCodecs.list()), DialogueSpeaker::getSoundsLocation,
+            ByteBufCodecs.INT, DialogueSpeaker::getColor,
+            DialogueSpeaker::new);
+
     public DialogueSpeaker(int id, String name, int color, List<SoundEvent> sounds) {
         this.id = id;
         this.name = name;
@@ -56,13 +67,18 @@ public class DialogueSpeaker {
         this.sounds = sounds;
     }
 
+    public DialogueSpeaker(int id, String name, List<ResourceLocation> soundLocations, int color) {
+        this.id = id;
+        this.name = name;
+        this.color = color;
+        this.sounds = loadSounds(soundLocations);
+    }
+
     public static List<SoundEvent> loadSounds(String[] soundNames) {
         List<SoundEvent> loadedSounds = new ArrayList<>();
         for (int i = 0; i <= soundNames.length - 1; i++) {
             String soundName = soundNames[i];
-            SoundEvent soundEvent = LibLib.getSoundPlayer().loadSound(soundName);
-            if (soundEvent == null) continue;
-            loadedSounds.add(soundEvent);
+            LibLib.getSoundPlayer().loadSound(soundName).ifPresent(loadedSounds::add);
         }
         return loadedSounds;
     }
@@ -81,5 +97,20 @@ public class DialogueSpeaker {
 
     public List<SoundEvent> getSounds() {
         return this.sounds;
+    }
+
+    public static List<SoundEvent> loadSounds(List<ResourceLocation> soundLocations) {
+        List<SoundEvent> loadedSounds = new ArrayList<>();
+        for (var location : soundLocations) {
+            LibLib.getSoundPlayer().loadSound(location).ifPresent(loadedSounds::add);
+        }
+        return loadedSounds;
+    }
+
+    public List<ResourceLocation> getSoundsLocation() {
+        List<ResourceLocation> locations = new ArrayList<>();
+        for(var sound : getSounds())
+            locations.add(sound.getLocation());
+        return locations;
     }
 }

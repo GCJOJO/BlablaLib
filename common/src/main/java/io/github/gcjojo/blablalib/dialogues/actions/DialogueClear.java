@@ -1,20 +1,36 @@
 package io.github.gcjojo.blablalib.dialogues.actions;
 
 import com.google.gson.JsonObject;
+import io.github.gcjojo.blablalib.BlablaLib;
 import io.github.gcjojo.blablalib.client.gui.DialogueScreen;
 import io.github.gcjojo.blablalib.dialogues.DialogueAction;
+import io.github.gcjojo.blablalib.dialogues.DialogueManager;
+import lombok.Getter;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.ResourceLocation;
 
 import java.util.Optional;
 
 public class DialogueClear extends DialogueAction {
-
+    public static final StreamCodec<RegistryFriendlyByteBuf, DialogueClear> CLEAR_STREAM_CODEC = StreamCodec.composite(
+            ByteBufCodecs.optional(ResourceLocation.STREAM_CODEC), DialogueClear::getClearedClass,
+            DialogueClear::new
+    );
+    private static final DialogueManager.DialogueActionType<DialogueClear> TYPE = DialogueManager.register(
+            ResourceLocation.tryBuild(BlablaLib.MOD_ID, "dialogue_clear"),
+            CLEAR_STREAM_CODEC
+    );
+    @Getter
     Optional<ResourceLocation> clearedClass = Optional.empty();
 
     public DialogueClear(ResourceLocation clearedClass) {
         this.clearedClass = Optional.ofNullable(clearedClass);
     }
+
+    public DialogueClear(Optional<ResourceLocation> clearedClass) { this.clearedClass = clearedClass; }
 
     public DialogueClear(JsonObject object){
         if(object.has("cleared_actions"))
@@ -55,4 +71,7 @@ public class DialogueClear extends DialogueAction {
 
     @Override
     public boolean isSkippable() { return true; }
+
+    @Override
+    public DialogueManager.DialogueActionType<?> getType() { return TYPE; }
 }

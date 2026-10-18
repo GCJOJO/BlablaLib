@@ -3,6 +3,8 @@ package io.github.gcjojo.blablalib.dialogues;
 import com.google.gson.JsonObject;
 import io.github.gcjojo.blablalib.client.gui.DialogueScreen;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
 
 public abstract class DialogueAction
 {
@@ -24,4 +26,9 @@ public abstract class DialogueAction
 
     public abstract boolean isBlocking();
     public abstract boolean isSkippable();
+
+    public static final StreamCodec<RegistryFriendlyByteBuf, DialogueAction> STREAM_CODEC =
+            DialogueManager.TYPE_CODEC.dispatch(DialogueAction::getType, DialogueManager.DialogueActionType::codec);
+
+    public abstract DialogueManager.DialogueActionType<?> getType();
 }

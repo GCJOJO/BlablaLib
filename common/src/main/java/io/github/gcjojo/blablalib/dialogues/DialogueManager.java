@@ -7,6 +7,8 @@ import io.github.gcjojo.blablalib.BlablaLib;
 import io.github.gcjojo.blablalib.dialogues.actions.*;
 import lombok.Getter;
 import net.minecraft.client.Minecraft;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
 
@@ -16,7 +18,62 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 
 public class DialogueManager {
-    public record ActionOverload<T extends DialogueAction>(Class<? extends T> overloadClass){ }
+    // Claude Slop
+    public static final StreamCodec<RegistryFriendlyByteBuf, DialogueActionType<?>> TYPE_CODEC =
+        ResourceLocation.STREAM_CODEC.<DialogueActionType<?>>map(TYPES::get, DialogueActionType::id).cast();
+    private static final Map<ResourceLocation, DialogueActionType<?>> TYPES = new HashMap<>();
+
+    public static <T extends DialogueAction> DialogueActionType<T> register(ResourceLocation id, StreamCodec<RegistryFriendlyByteBuf, T> codec) {
+        DialogueActionType<T> type = new DialogueActionType<>(id, codec);
+        TYPES.put(id, type);
+        return type;
+    }
+
+    public static List<DialogueAction> loadDialogue(ResourceLocation dialoguePath) {
+        try {
+            String dialogueName = dialoguePath.getPath();
+            String dialogueNamespace = dialoguePath.getNamespace();
+            JsonObject root = getDialogueFile(dialoguePath.getNamespace());
+            if (root == null || !root.has(dialogueName)) return null;
+            List<DialogueAction> actions = new ArrayList<>();
+
+            root.getAsJsonArray(dialogueName).forEach(element -> {
+                JsonObject obj = element.getAsJsonObject();
+                if(!obj.has("action"))
+                    return;
+                ResourceLocation action = ResourceLocation.tryParse(obj.get("action").getAsString());
+                if(dialogueActionClasses.containsKey(action)) {
+
+                    Class<? extends DialogueAction> actionClass = dialogueActionClasses.get(action);
+                    if(dialogueActionOverloads.containsKey(dialogueNamespace) && dialogueActionOverloads.get(dialogueNamespace).containsKey(action))
+                        actionClass = dialogueActionOverloads.get(dialogueNamespace).get(action).overloadClass();
+
+                    try {
+                        try {
+                            Constructor<? extends DialogueAction> constructor = actionClass.getConstructor(JsonObject.class);
+                            actions.add(constructor.newInstance(obj));
+                            return;
+                        } catch (NoSuchMethodException e) {
+                            Constructor<? extends DialogueAction> constructor = actionClass.getConstructor();
+                            actions.add(constructor.newInstance());
+                            return;
+                        }
+                    } catch (InstantiationException | IllegalAccessException | InvocationTargetException |
+                             NoSuchMethodException e) {
+                        BlablaLib.getLogger().error(e.getMessage());
+                        Arrays.stream(e.getStackTrace()).forEach(stackTraceElement -> BlablaLib.getLogger().error(stackTraceElement.toString()));
+                    }
+                }
+                actions.add(new DialogueUnknownAction(obj));
+            });
+            return actions;
+
+        } catch (Exception e) {
+            BlablaLib.getLogger().error(e.getMessage());
+            Arrays.stream(e.getStackTrace()).forEach(stackTraceElement -> BlablaLib.getLogger().error(stackTraceElement.toString()));
+            return null;
+        }
+    }
 
     @Getter
     private static final Map<ResourceLocation, Class<? extends DialogueAction>> dialogueActionClasses = new HashMap<>();
@@ -62,51 +119,7 @@ public class DialogueManager {
         return put != null;
     }
 
-    public static List<DialogueAction> loadDialogue(ResourceLocation dialoguePath) {
-        try {
-            String dialogueName = dialoguePath.getPath();
-            String dialogueNamespace = dialoguePath.getNamespace();
-            JsonObject root = getDialogueFile(dialoguePath.getNamespace());
-            if (root == null || !root.has(dialogueName)) return null;
-            List<DialogueAction> actions = new ArrayList<>();
-
-            root.getAsJsonArray(dialogueName).forEach(element -> {
-                JsonObject obj = element.getAsJsonObject();
-                if(!obj.has("action"))
-                    return;
-                ResourceLocation action = ResourceLocation.tryParse(obj.get("action").getAsString());
-                if(dialogueActionClasses.containsKey(action)) {
-
-                    Class<? extends DialogueAction> actionClass = dialogueActionClasses.get(action);
-                    if(dialogueActionOverloads.containsKey(dialogueNamespace) && dialogueActionOverloads.get(dialogueNamespace).containsKey(action))
-                        actionClass = dialogueActionOverloads.get(dialogueNamespace).get(action).overloadClass();
-
-                    try {
-                        try {
-                            Constructor<? extends DialogueAction> constructor = actionClass.getConstructor(JsonObject.class);
-                            actions.add(constructor.newInstance(obj));
-                            return;
-                        } catch (NoSuchMethodException e) {
-                            Constructor<? extends DialogueAction> constructor = actionClass.getConstructor();
-                            actions.add(constructor.newInstance());
-                            return;
-                        }
-                    } catch (InstantiationException | IllegalAccessException | InvocationTargetException |
-                             NoSuchMethodException e) {
-                        BlablaLib.getLogger().error(e.getMessage());
-                        Arrays.stream(e.getStackTrace()).forEach(stackTraceElement -> BlablaLib.getLogger().error(stackTraceElement.toString()));
-                    }
-                }
-                actions.add(new DialogueInvalidAction(obj));
-            });
-            return actions;
-
-        } catch (Exception e) {
-            BlablaLib.getLogger().error(e.getMessage());
-            Arrays.stream(e.getStackTrace()).forEach(stackTraceElement -> BlablaLib.getLogger().error(stackTraceElement.toString()));
-            return null;
-        }
-    }
+    public record ActionOverload<T extends DialogueAction>(Class<? extends T> overloadClass) { }
 
     public static List<DialogueSpeaker> loadSpeakers(ResourceLocation dialoguePath) {
         try {
@@ -163,4 +176,6 @@ public class DialogueManager {
 
         return dialoguePaths;
     }
+
+    public record DialogueActionType<T extends DialogueAction>(ResourceLocation id, StreamCodec<RegistryFriendlyByteBuf, T> codec) { }
 }

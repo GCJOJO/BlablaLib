@@ -2,14 +2,34 @@ package io.github.gcjojo.blablalib.dialogues.actions;
 
 import com.google.gson.JsonObject;
 import dev.architectury.networking.NetworkManager;
+import io.github.gcjojo.blablalib.BlablaLib;
 import io.github.gcjojo.blablalib.client.gui.DialogueScreen;
 import io.github.gcjojo.blablalib.dialogues.DialogueAction;
+import io.github.gcjojo.blablalib.dialogues.DialogueManager;
 import io.github.gcjojo.blablalib.network.payloads.DialogueCommandPayload;
+import lombok.Getter;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.resources.ResourceLocation;
 
 public class DialogueExecuteCommand extends DialogueAction {
+    public static final StreamCodec<RegistryFriendlyByteBuf, DialogueExecuteCommand> COMMAND_STREAM_CODEC = StreamCodec.composite(
+            ByteBufCodecs.STRING_UTF8, DialogueExecuteCommand::getCommand,
+            DialogueExecuteCommand::new
+    );
+    private static final DialogueManager.DialogueActionType<DialogueExecuteCommand> TYPE = DialogueManager.register(
+            ResourceLocation.fromNamespaceAndPath(BlablaLib.MOD_ID, "dialogue_execute_command"),
+            COMMAND_STREAM_CODEC
+    );
+    @Getter
     private String command;
+
+    public DialogueExecuteCommand(String command) {
+        this.command = command;
+    }
 
     public DialogueExecuteCommand(JsonObject object){
         if(object.has("command")) {
@@ -50,4 +70,7 @@ public class DialogueExecuteCommand extends DialogueAction {
     public boolean isSkippable() {
         return true;
     }
+
+    @Override
+    public DialogueManager.DialogueActionType<?> getType() { return TYPE; }
 }

@@ -2,22 +2,47 @@ package io.github.gcjojo.blablalib.dialogues.actions;
 
 import com.google.gson.JsonObject;
 import dev.architectury.networking.NetworkManager;
+import io.github.gcjojo.blablalib.BlablaLib;
 import io.github.gcjojo.blablalib.client.gui.DialogueScreen;
 import io.github.gcjojo.blablalib.dialogues.DialogueAction;
+import io.github.gcjojo.blablalib.dialogues.DialogueManager;
 import io.github.gcjojo.blablalib.network.payloads.DialogueSetQuestStatePayload;
 import io.github.gcjojo.blablalib.network.payloads.DialogueSetTaskStatePayload;
 import io.netty.buffer.Unpooled;
+import lombok.Getter;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.ResourceLocation;
 
 import java.util.Optional;
 
 public class DialogueQuestStateAction extends DialogueAction {
+    public static StreamCodec<RegistryFriendlyByteBuf, DialogueQuestStateAction> QUEST_STATE_STREAM_CODEC = StreamCodec.composite(
+            ByteBufCodecs.optional(ResourceLocation.STREAM_CODEC), DialogueQuestStateAction::getQuestId,
+            ByteBufCodecs.optional(ResourceLocation.STREAM_CODEC), DialogueQuestStateAction::getTaskId,
+            ByteBufCodecs.STRING_UTF8, DialogueQuestStateAction::getNewState,
+            DialogueQuestStateAction::new
+    );
+    private static DialogueManager.DialogueActionType<DialogueQuestStateAction> TYPE = DialogueManager.register(
+            ResourceLocation.fromNamespaceAndPath(BlablaLib.MOD_ID, "dialogue_quest_state"),
+            QUEST_STATE_STREAM_CODEC
+    );
+    @Getter
     private Optional<ResourceLocation> questId = Optional.empty();
     // If present will target the task instead of the quest
+    @Getter
     private Optional<ResourceLocation> taskId = Optional.empty();
+    @Getter
     private String newState;
+
+    public DialogueQuestStateAction(Optional<ResourceLocation> questId, Optional<ResourceLocation> taskId, String newState) {
+        this.questId = questId;
+        this.taskId = taskId;
+        this.newState = newState;
+    }
 
     public DialogueQuestStateAction(JsonObject json) {
         if (json.has("quest"))
@@ -75,4 +100,7 @@ public class DialogueQuestStateAction extends DialogueAction {
     public boolean isSkippable() {
         return false;
     }
+
+    @Override
+    public DialogueManager.DialogueActionType<?> getType() { return TYPE; }
 }
