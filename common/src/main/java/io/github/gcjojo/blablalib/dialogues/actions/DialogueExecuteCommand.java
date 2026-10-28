@@ -3,6 +3,7 @@ package io.github.gcjojo.blablalib.dialogues.actions;
 import com.google.gson.JsonObject;
 import dev.architectury.networking.NetworkManager;
 import io.github.gcjojo.blablalib.BlablaLib;
+import io.github.gcjojo.blablalib.client.gui.DialogueScreen;
 import io.github.gcjojo.blablalib.dialogues.DialogueAction;
 import io.github.gcjojo.blablalib.dialogues.DialogueManager;
 import io.github.gcjojo.blablalib.network.payloads.DialogueCommandPayload;
@@ -37,8 +38,9 @@ public class DialogueExecuteCommand extends DialogueAction {
     }
 
     @Override
-    public void setup(DialogueScreenOld screen){
+    public void setup(DialogueScreen screen){
         super.setup(screen);
+        // TODO DO THIS SERVER SIDE
         if(this.command != null) {
             if (this.command.contains("<PLAYER>"))
                 this.command = this.command.replace("<PLAYER>", Minecraft.getInstance().player.getName().getString());

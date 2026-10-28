@@ -4,82 +4,159 @@ import com.google.gson.JsonObject;
 import io.github.gcjojo.blablalib.BlablaLib;
 import io.github.gcjojo.blablalib.dialogues.DialogueAction;
 import io.github.gcjojo.blablalib.dialogues.DialogueManager;
+import io.github.gcjojo.liblib.math.Color;
+import io.github.gcjojo.liblib.network.LibLibNetwork;
+import io.github.gcjojo.liblib.tween.Easing;
+import io.github.gcjojo.liblib.tween.Easings;
+import io.github.gcjojo.liblib.utils.MathUtils;
+import lombok.Getter;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.Mth;
 
 import java.util.Optional;
 
 public class DialogueMoveImage extends DialogueAction {
 
-    private int imageId;
-    private float animTime;
-    private Optional<Float> xPercentageStart = Optional.empty();
-    private Optional<Float> yPercentageStart = Optional.empty();
-    private Optional<Float> xPercentageEnd = Optional.empty();
-    private Optional<Float> yPercentageEnd = Optional.empty();
-    private Optional<Float> scaleStart = Optional.empty();
-    private Optional<Float> scaleEnd = Optional.empty();
-    private Optional<Integer> alphaStart = Optional.empty();
-    private Optional<Integer> alphaEnd = Optional.empty();
-
-    // TODO
-    public static final StreamCodec<RegistryFriendlyByteBuf, DialogueMoveImage> MOVE_IMAGE_STREAM_CODEC = StreamCodec.unit(new DialogueMoveImage());
-
+    public static final StreamCodec<RegistryFriendlyByteBuf, DialogueMoveImage> MOVE_IMAGE_STREAM_CODEC = StreamCodec.composite(
+            ByteBufCodecs.INT, DialogueMoveImage::getImageId,
+            PositionAnimation.STREAM_CODEC, DialogueMoveImage::getPosition,
+            RotationAnimation.STREAM_CODEC, DialogueMoveImage::getRotation,
+            ScaleAnimation.STREAM_CODEC, DialogueMoveImage::getScale,
+            ColorAnimation.STREAM_CODEC, DialogueMoveImage::getColor,
+            DialogueMoveImage::new
+    );
     private static final DialogueManager.DialogueActionType<DialogueMoveImage> TYPE = DialogueManager.registerActionType(
             ResourceLocation.fromNamespaceAndPath(BlablaLib.MOD_ID, "dialogue_move_image"),
             MOVE_IMAGE_STREAM_CODEC
     );
-
-    private boolean animateX = false;
-    private boolean animateY = false;
-    private boolean animateScale = false;
-    private boolean animateAlpha = false;
-
+    @Getter
+    private int imageId;
+    @Getter
+    private PositionAnimation position;
+    @Getter
+    private RotationAnimation rotation;
+    @Getter
+    private ScaleAnimation scale;
+    @Getter
+    private ColorAnimation color;
     private float currentTime;
 
-    public DialogueMoveImage() {
-        this.imageId = -1;
-        this.animTime = 0;
-        this.currentTime = 1;
+    public DialogueMoveImage(int newImageId, PositionAnimation positionAnimation, RotationAnimation rotationAnimation, ScaleAnimation scaleAnimation, ColorAnimation colorAnimation) {
+        imageId = newImageId;
+        position = positionAnimation;
+        rotation = rotationAnimation;
+        scale = scaleAnimation;
+        color = colorAnimation;
+
+
     }
 
     public DialogueMoveImage(JsonObject object){
         if(object.has("id"))
             this.imageId = object.get("id").getAsInt();
-        if(object.has("anim_time"))
-            this.animTime = object.get("anim_time").getAsFloat();
-        if(object.has("x_start"))
-            this.xPercentageStart = Optional.of(object.get("x_start").getAsFloat());
-        if(object.has("y_start"))
-            this.yPercentageStart = Optional.of(object.get("y_start").getAsFloat());
-        if(object.has("x_end"))
-            this.xPercentageEnd = Optional.of(object.get("x_end").getAsFloat());
-        if(object.has("y_end"))
-            this.yPercentageEnd = Optional.of(object.get("y_end").getAsFloat());
-        if(object.has("scale_start"))
-            this.scaleStart = Optional.of(object.get("scale_start").getAsFloat());
-        if(object.has("scale_end"))
-            this.scaleEnd = Optional.of(object.get("scale_end").getAsFloat());
-        if(object.has("alpha_start"))
-            this.alphaStart = Optional.of(object.get("alpha_start").getAsInt());
-        if(object.has("alpha_end"))
-            this.alphaEnd = Optional.of(object.get("alpha_end").getAsInt());
 
-        this.animateX = this.xPercentageStart.isPresent() && this.xPercentageEnd.isPresent();
-        this.animateY = this.yPercentageStart.isPresent() && this.yPercentageEnd.isPresent();
-        this.animateScale = this.scaleStart.isPresent() && this.scaleEnd.isPresent();
-        this.animateAlpha = this.alphaStart.isPresent() && this.alphaEnd.isPresent();
+        if(object.has("position")) {
+            JsonObject positionObject = object.getAsJsonObject("position");
+            float time = 0;
+            Optional<Float> xStart = Optional.empty();
+            Optional<Float> yStart = Optional.empty();
+            Optional<Float> xEnd = Optional.empty();
+            Optional<Float> yEnd = Optional.empty();
+            Easing easing = Easing.LINEAR;
+
+            if(positionObject.has("time"))
+                time = positionObject.get("time").getAsFloat();
+
+            if(positionObject.has("x_start"))
+                xStart = Optional.of(positionObject.get("x_start").getAsFloat());
+            if(positionObject.has("y_start"))
+                yStart = Optional.of(positionObject.get("y_start").getAsFloat());
+            if(positionObject.has("x_end"))
+                xEnd = Optional.of(positionObject.get("x_end").getAsFloat());
+            if(positionObject.has("y_end"))
+                yEnd = Optional.of(positionObject.get("y_end").getAsFloat());
+            if(positionObject.has("easing"))
+                easing = Easings.get((positionObject.get("easing").getAsString()));
+
+            position = new PositionAnimation(time, xStart, yStart, xEnd, yEnd, easing);
+        }
+
+        if(object.has("rotation")) {
+            JsonObject rotationObject = object.getAsJsonObject("rotation");
+            float time = 0;
+            Optional<Float> angleStart = Optional.empty();
+            Optional<Float> angleEnd = Optional.empty();
+            Easing easing = Easing.LINEAR;
+
+            if(rotationObject.has("time"))
+                time = rotationObject.get("time").getAsFloat();
+
+            if(rotationObject.has("angle_start"))
+                angleStart = Optional.of(rotationObject.get("angle_start").getAsFloat());
+            if(rotationObject.has("angle_end"))
+                angleEnd = Optional.of(rotationObject.get("angle_end").getAsFloat());
+            if(rotationObject.has("easing"))
+                easing = Easings.get((rotationObject.get("easing").getAsString()));
+
+            rotation = new RotationAnimation(time, angleStart, angleEnd, easing);
+        }
+
+        if(object.has("scale")) {
+            JsonObject scaleObject = object.getAsJsonObject("scale");
+            float time = 0;
+            Optional<Float> scaleStart = Optional.empty();
+            Optional<Float> scaleEnd = Optional.empty();
+            Easing easing = Easing.LINEAR;
+
+            if(scaleObject.has("time"))
+                time = scaleObject.get("time").getAsFloat();
+
+            if(scaleObject.has("scale_start"))
+                scaleStart = Optional.of(scaleObject.get("scale_start").getAsFloat());
+            if(scaleObject.has("scale_end"))
+                scaleEnd = Optional.of(scaleObject.get("scale_end").getAsFloat());
+            if(scaleObject.has("easing"))
+                easing = Easings.get((scaleObject.get("easing").getAsString()));
+
+            scale = new ScaleAnimation(time, scaleStart, scaleEnd, easing);
+        }
+
+        if(object.has("color")) {
+            JsonObject colorObject = object.getAsJsonObject("color");
+            float time = 0;
+            Optional<Color> colorStart = Optional.empty();
+            Optional<Color> colorEnd = Optional.empty();
+            Easing easing = Easing.LINEAR;
+
+            if(colorObject.has("time"))
+                time = colorObject.get("time").getAsFloat();
+
+            if(colorObject.has("color_start"))
+                colorStart = Optional.of(Color.fromString(colorObject.get("color_start").getAsString()));
+            if(colorObject.has("color_end"))
+                colorEnd = Optional.of(Color.fromString(colorObject.get("color_end").getAsString()));
+            if(colorObject.has("easing"))
+                easing = Easings.get((colorObject.get("easing").getAsString()));
+
+            color = new ColorAnimation(time, colorStart, colorEnd, easing);
+        }
+    }
+
+    public DialogueMoveImage() {
+        this.imageId = -1;
+        this.currentTime = 1;
+    }
+
+    public float maxTime() {
+        return Math.max(position.time(), Math.max(rotation.time(), Math.max(scale.time(), color.time())));
     }
 
     @Override
-    public void step() { }
-
-    @Override
     public void draw(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
-        if(currentTime >= animTime)
+        if(currentTime >= maxTime())
             return;
 
         Optional<DialogueAction> imageAction = screen.getCurrentActions().stream()
@@ -89,19 +166,109 @@ public class DialogueMoveImage extends DialogueAction {
         if(imageAction.isEmpty() || !(imageAction.get() instanceof DialogueImage image))
             return;
 
-        float animPercentage = currentTime / animTime;
+        float newX = position.lerpX(currentTime, image.getX());
+        float newY = position.lerpY(currentTime, image.getY());
+        float newRot = rotation.lerpRotation(currentTime, image.getRotation());
+        float newScale = scale.lerpScale(currentTime, image.getScale());
+        Color newColor = color.lerpColor(currentTime, Color.WHITE);
 
-        float xPercentage = animateX ? Mth.lerp(animPercentage, xPercentageStart.get(), xPercentageEnd.get()) : image.getX();
-        float yPercentage = animateY ? Mth.lerp(animPercentage, yPercentageStart.get(), yPercentageEnd.get()) : image.getY();
-        float scale = animateScale ? Mth.lerp(animPercentage, scaleStart.get(), scaleEnd.get()) : image.getScale();
-        int alpha = animateAlpha ? (int) Mth.lerp(animPercentage, (float) alphaStart.get(), (float) alphaEnd.get()) : image.getAlpha();
-
-        image.setX(xPercentage);
-        image.setY(yPercentage);
-        image.setScale(scale);
-        image.setAlpha(alpha);
+        image.setX(newX);
+        image.setY(newY);
+        image.setRotation(newRot);
+        image.setScale(newScale);
+        // TODO Change this to a full setColor()
+        image.setAlpha(newColor.alpha);
 
         currentTime += partialTick;
+    }
+
+    @Override
+    public void step() { }
+
+    public record PositionAnimation(float time, Optional<Float> xStart, Optional<Float> yStart, Optional<Float> xEnd, Optional<Float> yEnd, Easing easing) {
+        public static final StreamCodec<RegistryFriendlyByteBuf, PositionAnimation> STREAM_CODEC = StreamCodec.composite(
+                ByteBufCodecs.FLOAT, PositionAnimation::time,
+                ByteBufCodecs.optional(ByteBufCodecs.FLOAT), PositionAnimation::xStart,
+                ByteBufCodecs.optional(ByteBufCodecs.FLOAT), PositionAnimation::yStart,
+                ByteBufCodecs.optional(ByteBufCodecs.FLOAT), PositionAnimation::xEnd,
+                ByteBufCodecs.optional(ByteBufCodecs.FLOAT), PositionAnimation::yEnd,
+                LibLibNetwork.EasingStreamCodec.CODEC, PositionAnimation::easing,
+                PositionAnimation::new
+        );
+
+        public boolean animatesX() {
+            return xStart.isPresent() && xEnd.isPresent();
+        }
+
+        public boolean animatesY() {
+            return yStart.isPresent() && yEnd.isPresent();
+        }
+
+        public float lerpX(float currentTime, float imageX) {
+            if(!animatesX()) return imageX;
+            float progress = easing.apply(currentTime / time);
+            return MathUtils.lerp(xStart.get(), xEnd.get(), progress);
+        }
+
+        public float lerpY(float currentTime, float imageY) {
+            if(!animatesY()) return imageY;
+            float progress = easing.apply(currentTime / time);
+            return MathUtils.lerp(yStart.get(), yEnd.get(), progress);
+        }
+    }
+
+    public record RotationAnimation(float time, Optional<Float> angleStart, Optional<Float> angleEnd, Easing easing) {
+        public static final StreamCodec<RegistryFriendlyByteBuf, RotationAnimation> STREAM_CODEC = StreamCodec.composite(
+                ByteBufCodecs.FLOAT, RotationAnimation::time,
+                ByteBufCodecs.optional(ByteBufCodecs.FLOAT), RotationAnimation::angleStart,
+                ByteBufCodecs.optional(ByteBufCodecs.FLOAT), RotationAnimation::angleEnd,
+                LibLibNetwork.EasingStreamCodec.CODEC, RotationAnimation::easing,
+                RotationAnimation::new
+        );
+
+        public boolean animatesRotation() { return angleStart.isPresent() && angleEnd.isPresent(); }
+
+        public float lerpRotation(float currentTime, float imageRotation) {
+            if(!animatesRotation()) return imageRotation;
+            float progress = easing.apply(currentTime / time);
+            return MathUtils.lerp(angleStart.get(), angleEnd.get(), progress);
+        }
+    }
+
+    public record ScaleAnimation(float time, Optional<Float> scaleStart, Optional<Float> scaleEnd, Easing easing) {
+        public static final StreamCodec<RegistryFriendlyByteBuf, ScaleAnimation> STREAM_CODEC = StreamCodec.composite(
+                ByteBufCodecs.FLOAT, ScaleAnimation::time,
+                ByteBufCodecs.optional(ByteBufCodecs.FLOAT), ScaleAnimation::scaleStart,
+                ByteBufCodecs.optional(ByteBufCodecs.FLOAT), ScaleAnimation::scaleEnd,
+                LibLibNetwork.EasingStreamCodec.CODEC, ScaleAnimation::easing,
+                ScaleAnimation::new
+        );
+
+        public boolean animatesScale() { return scaleStart.isPresent() && scaleEnd.isPresent(); }
+
+        public float lerpScale(float currentTime, float imageScale) {
+            if(!animatesScale()) return imageScale;
+            float progress = easing.apply(currentTime / time);
+            return MathUtils.lerp(scaleStart.get(), scaleEnd.get(), progress);
+        }
+    }
+
+    public record ColorAnimation(float time, Optional<Color> colorStart, Optional<Color> colorEnd, Easing easing) {
+        public static final StreamCodec<RegistryFriendlyByteBuf, ColorAnimation> STREAM_CODEC = StreamCodec.composite(
+                ByteBufCodecs.FLOAT, ColorAnimation::time,
+                ByteBufCodecs.optional(LibLibNetwork.COLOR_STREAM_CODEC), ColorAnimation::colorStart,
+                ByteBufCodecs.optional(LibLibNetwork.COLOR_STREAM_CODEC), ColorAnimation::colorEnd,
+                LibLibNetwork.EasingStreamCodec.CODEC, ColorAnimation::easing,
+                ColorAnimation::new
+        );
+
+        public boolean animatesColor() { return colorStart.isPresent() && colorEnd.isPresent(); }
+
+        public Color lerpColor(float currentTime, Color imageColor) {
+            if(!animatesColor()) return imageColor;
+            float progress = easing.apply(currentTime / time);
+            return MathUtils.lerp(colorStart.get(), colorEnd.get(), progress);
+        }
     }
 
     @Override

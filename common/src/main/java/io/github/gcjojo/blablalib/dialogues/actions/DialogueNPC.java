@@ -2,6 +2,7 @@ package io.github.gcjojo.blablalib.dialogues.actions;
 
 import com.google.gson.JsonObject;
 import dev.architectury.networking.NetworkManager;
+import io.github.gcjojo.blablalib.client.gui.DialogueScreen;
 import io.github.gcjojo.blablalib.dialogues.DialogueAction;
 import io.github.gcjojo.blablalib.dialogues.DialogueManager;
 import io.github.gcjojo.blablalib.network.payloads.DialogueSetNPCPayload;
@@ -44,7 +45,7 @@ public class DialogueNPC extends DialogueAction {
     }
 
     @Override
-    public void setup(DialogueScreenOld screen) {
+    public void setup(DialogueScreen screen) {
         super.setup(screen);
         if(npcId == -1)
         {

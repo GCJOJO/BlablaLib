@@ -5,6 +5,7 @@ import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import io.github.gcjojo.blablalib.BlablaLib;
+import io.github.gcjojo.blablalib.dialogues.DialogueLoader;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
@@ -13,34 +14,20 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class DialogueCommand {
-
-    private static final Map<UUID, List<ResourceLocation>> playerDialogueLists = new HashMap<>();
     private static final List<DialogueTransformation> transformations = new ArrayList<>();
 
-    public static void registerPlayerDialogueList(ServerPlayer player, List<ResourceLocation> dialogueList) {
-        if(playerDialogueLists.containsKey(player.getUUID()))
-            return;
-        playerDialogueLists.put(player.getUUID(), dialogueList);
-    }
-
-    public static void disconnectPlayer(ServerPlayer player) {
-        if(player == null) return;
-
-        playerDialogueLists.remove(player.getUUID());
-    }
-
     private static CompletableFuture<Suggestions> suggestDialogues(CommandContext<CommandSourceStack> context, SuggestionsBuilder builder) {
-        ServerPlayer player = context.getSource().getPlayer();
-        if(player == null) return builder.buildFuture();
 
+        DialogueLoader.dialogues.forEach((dialogueId, dialogue) -> {
+            builder.suggest(dialogueId.toString());
+        });
 
-        if(playerDialogueLists.containsKey(player.getUUID()))
-            playerDialogueLists.get(player.getUUID()).forEach(dialoguePath -> builder.suggest(dialoguePath.toString()));
         return builder.buildFuture();
     }
 

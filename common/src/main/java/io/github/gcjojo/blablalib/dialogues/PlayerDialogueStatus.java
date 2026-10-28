@@ -1,6 +1,7 @@
 package io.github.gcjojo.blablalib.dialogues;
 
 import lombok.Getter;
+import lombok.Setter;
 
 import java.util.UUID;
 
@@ -10,7 +11,11 @@ public class PlayerDialogueStatus {
     @Getter
     private Dialogue currentDialogue = null;
     @Getter
+    @Setter
     private int actionIndex = 0;
+    @Getter
+    @Setter
+    private int lastReceivedActionIndex = 0;
 
     public PlayerDialogueStatus(UUID newPlayerId) {
         playerId = newPlayerId;

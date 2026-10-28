@@ -5,6 +5,7 @@ import io.github.gcjojo.blablalib.BlablaLib;
 import io.github.gcjojo.blablalib.dialogues.actions.*;
 import io.github.gcjojo.blablalib.network.payloads.DialogueActionsPayload;
 import io.github.gcjojo.blablalib.network.payloads.DialogueSpeakersPayload;
+import io.github.gcjojo.blablalib.network.payloads.OpenDialoguePayload;
 import lombok.Getter;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
@@ -34,9 +35,20 @@ public class DialogueManager {
         status.setCurrentDialogue(dialogue);
         STATUSES.put(player.getUUID(), status);
 
-        NetworkManager.sendToPlayer(player, new DialogueSpeakersPayload(speakers));
+        NetworkManager.sendToPlayer(player, new OpenDialoguePayload(dialogue.getDialogueId()));
 
+        NetworkManager.sendToPlayer(player, new DialogueSpeakersPayload(speakers));
         sendNextActions(player);
+    }
+
+    public static Optional<PlayerDialogueStatus> getPlayerStatus(ServerPlayer player) {
+        if(!STATUSES.containsKey(player.getUUID()))
+            return Optional.empty();
+        return Optional.ofNullable(STATUSES.get(player.getUUID()));
+    }
+
+    public static void resetPlayerStatus(ServerPlayer player) {
+        STATUSES.remove(player.getUUID());
     }
 
     public static final StreamCodec<RegistryFriendlyByteBuf, DialogueActionType<?>> TYPE_CODEC =
@@ -49,19 +61,24 @@ public class DialogueManager {
         PlayerDialogueStatus status = STATUSES.get(player.getUUID());
         Dialogue currentDialogue = status.getCurrentDialogue();
 
-        List<DialogueAction> actionsToSend = currentDialogue.getDialogueActions().subList(status.getActionIndex(), currentDialogue.getDialogueActions().size());
+        int blockingActions = 0;
+        int lastSendActionIndex = status.getLastReceivedActionIndex();
+
+        List<DialogueAction> actionsToSend = currentDialogue.getDialogueActions().subList(lastSendActionIndex, currentDialogue.getDialogueActions().size());
         List<DialogueAction> sentActions = new ArrayList<>();
 
-        int blockingActions = 0;
         for(DialogueAction action : actionsToSend) {
             if(blockingActions >= BLOCKING_ACTIONS_SEND_AMOUNT)
                 break;
 
             sentActions.add(action);
 
+            lastSendActionIndex++;
+
             if(action.isBlocking())
                 blockingActions++;
         }
+        status.setLastReceivedActionIndex(lastSendActionIndex);
 
         NetworkManager.sendToPlayer(player, new DialogueActionsPayload(blockingActions, sentActions));
     }

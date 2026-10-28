@@ -3,18 +3,15 @@ package io.github.gcjojo.blablalib;
 import com.mojang.logging.LogUtils;
 import dev.architectury.event.EventResult;
 import dev.architectury.event.events.common.InteractionEvent;
-import dev.architectury.event.events.common.PlayerEvent;
-import dev.architectury.networking.NetworkManager;
 import dev.architectury.registry.level.entity.EntityAttributeRegistry;
 import io.github.gcjojo.blablalib.api.BlablaLibAPIImpl;
-import io.github.gcjojo.blablalib.commands.DialogueCommand;
+import io.github.gcjojo.blablalib.dialogues.Dialogue;
+import io.github.gcjojo.blablalib.dialogues.DialogueLoader;
 import io.github.gcjojo.blablalib.dialogues.DialogueManager;
-import io.github.gcjojo.blablalib.entities.BlablaLibEntityDataSerializers;
 import io.github.gcjojo.blablalib.entities.BlablaLibEntityTypes;
 import io.github.gcjojo.blablalib.entities.NPC;
 import io.github.gcjojo.blablalib.events.BlablalibEvents;
 import io.github.gcjojo.blablalib.network.BlablaLibNetwork;
-import io.github.gcjojo.blablalib.network.payloads.OpenDialoguePayload;
 import io.github.gcjojo.liblib.LibLib;
 import io.github.gcjojo.liblib.factory.PlayerDataRegistry;
 import net.minecraft.resources.ResourceLocation;
@@ -54,8 +51,6 @@ public final class BlablaLib {
             return EventResult.pass();
         });
 
-        PlayerEvent.PLAYER_QUIT.register(DialogueCommand::disconnectPlayer);
-
         InteractionEvent.INTERACT_ENTITY.register((Player player, Entity entity, InteractionHand hand) -> {
             if(entity instanceof NPC npc)
                 return EventResult.interrupt(npc.playerInteraction(player, hand));
@@ -78,11 +73,14 @@ public final class BlablaLib {
         openDialogue(player, currentDialogue);
     }
 
-    public static void openDialogue(ServerPlayer player, ResourceLocation dialogue) {
+    public static void openDialogue(ServerPlayer player, ResourceLocation dialogueId) {
         if (isPlayerInDialogue(player)) return;
-        setPlayerDialogue(player, dialogue);
+        setPlayerDialogue(player, dialogueId);
 
-        NetworkManager.sendToPlayer(player, new OpenDialoguePayload(dialogue));
+        Dialogue dialogue = DialogueLoader.dialogues.get(dialogueId);
+        if(dialogue == null) return;
+
+        DialogueManager.playDialogue(player, dialogue);
     }
 
     public static BlablaLibPlayerSaveData getPlayerData(ServerPlayer player) {

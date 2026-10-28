@@ -6,29 +6,21 @@ import dev.architectury.networking.NetworkManager;
 import dev.architectury.platform.Platform;
 import io.github.gcjojo.blablalib.BlablaLib;
 import io.github.gcjojo.blablalib.client.gui.DialogueScreen;
-import io.github.gcjojo.blablalib.commands.DialogueCommand;
 import io.github.gcjojo.blablalib.dialogues.DialogueManager;
 import io.github.gcjojo.blablalib.events.BlablalibEvents;
 import io.github.gcjojo.blablalib.network.payloads.*;
 import io.github.gcjojo.liblib.LibLib;
 import net.fabricmc.api.EnvType;
+import net.minecraft.client.Minecraft;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 
-import java.util.List;
-
 public class BlablaLibNetwork {
 
     public static void registerPackets() {
-
-        NetworkManager.registerReceiver(NetworkManager.Side.C2S, DialogueListPayload.TYPE, DialogueListPayload.STREAM_CODEC, (payload, context) -> {
-            if (!(context.getPlayer() instanceof ServerPlayer)) return;
-            List<ResourceLocation> dialoguePaths = List.copyOf(payload.dialogueList());
-            DialogueCommand.registerPlayerDialogueList((ServerPlayer) context.getPlayer(), dialoguePaths);
-        });
 
         NetworkManager.registerReceiver(NetworkManager.Side.C2S, DialogueScreenOpenedPayload.TYPE, DialogueScreenOpenedPayload.STREAM_CODEC, (payload, context) -> {
             Player player = context.getPlayer();
@@ -53,13 +45,26 @@ public class BlablaLibNetwork {
         NetworkManager.registerReceiver(NetworkManager.Side.C2S, DialogueCompletedPayload.TYPE, DialogueCompletedPayload.STREAM_CODEC, (payload, context) -> {
             Player player = context.getPlayer();
 
-            ResourceLocation dialogueId = DialogueManager.getDialogueForPlayer(player);
+            if(!(player instanceof ServerPlayer serverPlayer)) return;
 
-            BlablaLib.setPlayerLastReadDialogue((ServerPlayer) player, dialogueId);
-            BlablaLib.setPlayerIsInDialogue((ServerPlayer) player, false);
+            DialogueManager.getPlayerStatus(serverPlayer).ifPresent(status -> {
+                ResourceLocation dialogueId = status.getCurrentDialogue().getDialogueId();
+                BlablaLib.setPlayerLastReadDialogue(serverPlayer, dialogueId);
+                BlablaLib.setPlayerIsInDialogue(serverPlayer, false);
 
-            if (player instanceof ServerPlayer)
-                BlablalibEvents.DIALOGUE_COMPLETED.invoker().dialogueCompleted((ServerPlayer) player, dialogueId);
+                BlablalibEvents.DIALOGUE_COMPLETED.invoker().dialogueCompleted(serverPlayer, dialogueId);
+            });
+
+            DialogueManager.resetPlayerStatus(serverPlayer);
+        });
+
+        NetworkManager.registerReceiver(NetworkManager.Side.C2S, DialogueAdvancedPayload.TYPE, DialogueAdvancedPayload.STREAM_CODEC, (payload, context) -> {
+            if(!(context.getPlayer() instanceof ServerPlayer player)) return;
+
+            DialogueManager.getPlayerStatus(player).ifPresent(status -> {
+                status.setActionIndex(payload.newActionIndex());
+                DialogueManager.sendNextActions(player);
+            });
         });
 
         NetworkManager.registerReceiver(NetworkManager.Side.C2S, DialogueCommandPayload.TYPE, DialogueCommandPayload.STREAM_CODEC, (payload, context) -> {
@@ -120,13 +125,28 @@ public class BlablaLibNetwork {
         if (Platform.getEnv() == EnvType.CLIENT) return;
 
         NetworkManager.registerS2CPayloadType(OpenDialoguePayload.TYPE, OpenDialoguePayload.STREAM_CODEC);
-
+        NetworkManager.registerS2CPayloadType(DialogueActionsPayload.TYPE, DialogueActionsPayload.STREAM_CODEC);
+        NetworkManager.registerS2CPayloadType(DialogueSpeakersPayload.TYPE, DialogueSpeakersPayload.STREAM_CODEC);
     }
 
     public static void registerClientPackets() {
         NetworkManager.registerReceiver(NetworkManager.Side.S2C, OpenDialoguePayload.TYPE, OpenDialoguePayload.STREAM_CODEC, (payload, context) -> {
             if (payload.dialogueId() != null)
-                context.queue(DialogueScreen::new);
+                context.queue(() -> Minecraft.getInstance().setScreen(new DialogueScreen(payload.dialogueId())));
+        });
+
+        NetworkManager.registerReceiver(NetworkManager.Side.S2C, DialogueActionsPayload.TYPE, DialogueActionsPayload.STREAM_CODEC, (payload, context) -> {
+            context.queue(() -> {
+                if(!(Minecraft.getInstance().screen instanceof DialogueScreen dialogueScreen)) return;
+                dialogueScreen.receiveActions(payload.actions());
+            });
+        });
+
+        NetworkManager.registerReceiver(NetworkManager.Side.S2C, DialogueSpeakersPayload.TYPE, DialogueSpeakersPayload.STREAM_CODEC, (payload, context) -> {
+            context.queue(() -> {
+                if(!(Minecraft.getInstance().screen instanceof DialogueScreen dialogueScreen)) return;
+                dialogueScreen.receiveSpeakers(payload.speakers());
+            });
         });
     }
 }

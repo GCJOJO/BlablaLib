@@ -2,6 +2,7 @@ package io.github.gcjojo.blablalib.dialogues.actions;
 
 import com.google.gson.JsonObject;
 import io.github.gcjojo.blablalib.BlablaLib;
+import io.github.gcjojo.blablalib.client.gui.DialogueScreen;
 import io.github.gcjojo.blablalib.dialogues.DialogueAction;
 import io.github.gcjojo.blablalib.dialogues.DialogueManager;
 import net.minecraft.client.gui.GuiGraphics;
@@ -27,7 +28,7 @@ public class DialogueStartQuestAction extends DialogueAction {
     }
 
     @Override
-    public void setup(DialogueScreenOld screen) {
+    public void setup(DialogueScreen screen) {
         super.setup(screen);
     }
 

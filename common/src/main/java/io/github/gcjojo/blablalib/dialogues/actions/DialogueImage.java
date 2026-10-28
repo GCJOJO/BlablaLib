@@ -122,7 +122,7 @@ public class DialogueImage extends DialogueAction {
 
         // Merci copislop AKA copiflop >:(
         RenderSystem.enableBlend();
-        RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, (float) this.alpha / 255);
+        RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, (float) this.alpha / 255f);
         graphics.blit(image, -initialWidth / 2, -initialHeight / 2, 0, 0, initialWidth, initialHeight, initialWidth, initialHeight);
         RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
         RenderSystem.disableBlend();

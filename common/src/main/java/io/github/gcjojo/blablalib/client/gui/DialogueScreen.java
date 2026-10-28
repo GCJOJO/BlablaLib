@@ -29,6 +29,8 @@ public class DialogueScreen extends GuiScreen {
     private final List<DialogueSpeaker> speakers = new ArrayList<>(List.of(DialogueSpeaker.DEFAULT_SPEAKER));
     private float currentFadingTime = -1.0f;
     private boolean guiVisible = true;
+    @Getter
+    private final List<DialogueAction> dialogueActions = new ArrayList<>();
 
     /**
      *  The number of ticks to wait before a new character is drawn
@@ -39,13 +41,15 @@ public class DialogueScreen extends GuiScreen {
     @Setter
     @Getter
     private int waitMultiplier = 8;
-    private final List<DialogueAction> dialogueActions = new ArrayList<>();
+    @Getter
     private final List<DialogueAction> currentActions = new ArrayList<>();
+    private ResourceLocation dialogueId;
     private boolean queueEndDialogue = false;
     private int actionIndex = 0;
 
-    public DialogueScreen() {
+    public DialogueScreen(ResourceLocation dialogueId) {
         super(Component.literal("Dialogue"));
+        this.dialogueId = dialogueId;
     }
 
     public void receiveSpeakers(List<DialogueSpeaker> newSpeakers) {
