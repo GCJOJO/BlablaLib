@@ -2,7 +2,6 @@ package io.github.gcjojo.blablalib.dialogues.actions;
 
 import com.google.gson.JsonObject;
 import io.github.gcjojo.blablalib.BlablaLib;
-import io.github.gcjojo.blablalib.client.gui.DialogueScreen;
 import io.github.gcjojo.blablalib.dialogues.DialogueAction;
 import io.github.gcjojo.blablalib.dialogues.DialogueManager;
 import lombok.Getter;
@@ -16,7 +15,7 @@ public class DialogueNext extends DialogueAction {
             ResourceLocation.STREAM_CODEC, DialogueNext::getNextDialogue,
             DialogueNext::new
     );
-    private static final DialogueManager.DialogueActionType<DialogueNext> TYPE = DialogueManager.register(
+    private static final DialogueManager.DialogueActionType<DialogueNext> TYPE = DialogueManager.registerActionType(
             ResourceLocation.fromNamespaceAndPath(BlablaLib.MOD_ID, "dialogue_next"),
             NEXT_STREAM_CODEC
     );
@@ -36,7 +35,7 @@ public class DialogueNext extends DialogueAction {
     }
 
     @Override
-    public void setup(DialogueScreen screen) {
+    public void setup(DialogueScreenOld screen) {
         super.setup(screen);
         if(nextDialogue != null)
             screen.queueChangeSet(nextDialogue);

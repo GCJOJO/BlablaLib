@@ -5,18 +5,16 @@ import io.github.gcjojo.blablalib.dialogues.DialogueAction;
 import io.github.gcjojo.blablalib.dialogues.DialogueManager;
 import io.github.gcjojo.blablalib.dialogues.DialogueSpeaker;
 import io.github.gcjojo.blablalib.dialogues.actions.DialogueUnknownAction;
-import io.github.gcjojo.blablalib.network.payloads.DialogueChoicePayload;
+import io.github.gcjojo.blablalib.network.payloads.DialogueAdvancedPayload;
 import io.github.gcjojo.blablalib.network.payloads.DialogueCompletedPayload;
-import io.github.gcjojo.blablalib.network.payloads.DialogueScreenOpenedPayload;
 import io.github.gcjojo.liblib.client.gui.GuiScreen;
+import io.github.gcjojo.liblib.math.Color;
+import io.github.gcjojo.liblib.utils.MathUtils;
 import lombok.Getter;
 import lombok.Setter;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.gui.components.Button;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.FastColor;
 import net.minecraft.util.Mth;
 import org.jetbrains.annotations.NotNull;
 
@@ -26,15 +24,9 @@ import java.util.List;
 public class DialogueScreen extends GuiScreen {
 
     private static final float endFade = 7.5f;
-    @Getter
-    private final List<DialogueAction> currentActions = new ArrayList<>();
-    private final List<Button> buttons = new ArrayList<>();
-    private List<DialogueAction> dialogueActions;
-    private int actionIndex = -1;
-    private List<DialogueSpeaker> dialogueSpeakers;
-    private ResourceLocation currentDialogue;
+
     private boolean advanceDialogueAtTickEnd = false;
-    private ResourceLocation queuedNextDialogue = null;
+    private final List<DialogueSpeaker> speakers = new ArrayList<>(List.of(DialogueSpeaker.DEFAULT_SPEAKER));
     private float currentFadingTime = -1.0f;
     private boolean guiVisible = true;
 
@@ -47,80 +39,21 @@ public class DialogueScreen extends GuiScreen {
     @Setter
     @Getter
     private int waitMultiplier = 8;
+    private final List<DialogueAction> dialogueActions = new ArrayList<>();
+    private final List<DialogueAction> currentActions = new ArrayList<>();
+    private boolean queueEndDialogue = false;
+    private int actionIndex = 0;
 
-    public DialogueScreen(ResourceLocation dialoguePath) {
+    public DialogueScreen() {
         super(Component.literal("Dialogue"));
-        this.currentDialogue = dialoguePath;
-        var actions = DialogueManager.loadDialogue(dialoguePath);
-        if(actions == null || actions.isEmpty())
-        {
-            this.onClose();
-            return;
-        }
-        this.dialogueActions = actions;
-
-        var speakers = DialogueManager.loadSpeakers(dialoguePath);
-        if(speakers == null || speakers.isEmpty())
-        {
-            this.onClose();
-            return;
-        }
-        this.dialogueSpeakers = speakers;
     }
 
-    public DialogueScreen(ResourceLocation dialoguePath, List<DialogueAction> actions, List<DialogueSpeaker> speakers) {
-        super(Component.literal("Dialogue"));
-        this.currentDialogue = dialoguePath;
-        this.dialogueActions = actions;
-        this.dialogueSpeakers = speakers;
-        if(!actions.isEmpty())
-            NetworkManager.sendToServer(new DialogueScreenOpenedPayload());
+    public void receiveSpeakers(List<DialogueSpeaker> newSpeakers) {
+        speakers.addAll(newSpeakers);
     }
 
-    public static void openDialogueScreen(ResourceLocation dialoguePath) {
-        List<DialogueAction> actions = DialogueManager.loadDialogue(dialoguePath);
-        List<DialogueSpeaker> speakers = DialogueManager.loadSpeakers(dialoguePath);
-        if(actions != null && !actions.isEmpty() && speakers != null)
-            Minecraft.getInstance().tell(() -> Minecraft.getInstance().setScreen(new DialogueScreen(dialoguePath, actions, speakers)));
-    }
-
-    @Override
-    protected void init() {
-        super.init();
-        if(actionIndex == -1)
-            advanceDialogue();
-
-        buttons.forEach(this::addRenderableWidget);
-    }
-
-    public void drawButton(Button button)
-    {
-        this.addRenderableWidget(button);
-        buttons.add(button);
-    }
-
-    public void handleChoiceSelection(ResourceLocation nextSet, ResourceLocation saveSet, String action) {
-        NetworkManager.sendToServer(new DialogueChoicePayload(nextSet, saveSet, action));
-        queueAdvanceDialogue();
-    }
-
-    public void changeToDialogue(ResourceLocation dialoguePath) {
-        List<DialogueAction> newActions = DialogueManager.loadDialogue(dialoguePath);
-        if(newActions == null) {
-            this.onClose();
-            return;
-        }
-        List<DialogueSpeaker> newSpeakers = DialogueManager.loadSpeakers(dialoguePath);
-        if(newSpeakers == null) {
-            this.onClose();
-            return;
-        }
-
-        currentDialogue = dialoguePath;
-        actionIndex = -1;
-        dialogueActions = newActions;
-        dialogueSpeakers = newSpeakers;
-        advanceDialogue();
+    public void receiveActions(List<DialogueAction> newActions) {
+        dialogueActions.addAll(newActions);
     }
 
     @Override
@@ -130,20 +63,23 @@ public class DialogueScreen extends GuiScreen {
             this.advanceDialogue();
         }
 
-        if(queuedNextDialogue != null){
-            changeToDialogue(queuedNextDialogue);
-            queuedNextDialogue = null;
+        if(queueEndDialogue) {
+            this.queueEndDialogue = false;
+            this.endDialogue();
+            return;
         }
 
         if(actionIndex >= dialogueActions.size())
             return;
 
         currentActions.forEach(DialogueAction::step);
-
     }
 
     @Override
     public void render(@NotNull GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
+        Color gradientTopColor = new Color(0, 0, 0, 0x11);
+        Color gradientBottomColor = new Color(0, 0, 0, 0xDD);
+
         if(this.currentFadingTime >= 0.0){
             if(this.currentFadingTime >= endFade || !this.guiVisible){
                 this.onClose();
@@ -152,12 +88,12 @@ public class DialogueScreen extends GuiScreen {
 
             float fadePercentage = currentFadingTime / endFade;
 
-            int topColor = Mth.lerpInt(fadePercentage, 0x11, 0x00);
-            int bottomColor = Mth.lerpInt(fadePercentage, 0xDD, 0x00);
             int topPoint = Mth.lerpInt(fadePercentage, 0, (int)(this.height * 0.5));
 
             graphics.fillGradient(0, topPoint, this.width, this.height,
-                    FastColor.ARGB32.color(topColor, 0, 0, 0), FastColor.ARGB32.color(bottomColor, 0, 0, 0));
+                    MathUtils.lerp(gradientTopColor, Color.TRANSPARENT, fadePercentage).getColorInt(),
+                    MathUtils.lerp(gradientBottomColor, Color.TRANSPARENT, fadePercentage).getColorInt());
+
             currentFadingTime += partialTick;
             return;
         }
@@ -167,7 +103,7 @@ public class DialogueScreen extends GuiScreen {
         if(actionIndex >= dialogueActions.size())
             return;
         if(guiVisible)
-            graphics.fillGradient(0, 0, this.width, this.height, 0x11000000, 0xDD000000);
+            graphics.fillGradient(0, 0, this.width, this.height, gradientTopColor.getColorInt(), gradientBottomColor.getColorInt());
 
         currentActions.forEach(action -> action.draw(graphics, mouseX, mouseY, partialTick));
     }
@@ -196,13 +132,8 @@ public class DialogueScreen extends GuiScreen {
 
     public void queueAdvanceDialogue() { this.advanceDialogueAtTickEnd = true; }
 
-    public void queueChangeSet(ResourceLocation nextDialogue) { this.queuedNextDialogue = nextDialogue; }
-
     public void advanceDialogue() {
-        clearElements();
         actionIndex++;
-        buttons.forEach(button -> button.visible = false);
-        buttons.clear();
         if (dialogueActions.isEmpty() || actionIndex >= dialogueActions.size()) {
             endDialogue();
             return;
@@ -230,12 +161,12 @@ public class DialogueScreen extends GuiScreen {
                 break;
             }
         }
+
+        NetworkManager.sendToServer(new DialogueAdvancedPayload(actionIndex));
     }
 
-    public DialogueSpeaker getDialogueSpeaker(int id){
-        if (dialogueSpeakers.isEmpty())
-            return DialogueSpeaker.DEFAULT_SPEAKER;
-        for(var speaker : this.dialogueSpeakers)
+    public DialogueSpeaker getDialogueSpeaker(ResourceLocation id) {
+        for(var speaker : speakers)
             if(speaker.getId() == id) return speaker;
         return DialogueSpeaker.DEFAULT_SPEAKER;
     }
@@ -262,10 +193,12 @@ public class DialogueScreen extends GuiScreen {
             advanceDialogue();
     }
 
+    public void queueEndDialogue() { queueEndDialogue = true; }
+
     public void endDialogue(){
         clearActions();
         currentFadingTime = 0.0f;
 
-        NetworkManager.sendToServer(new DialogueCompletedPayload(currentDialogue));
+        NetworkManager.sendToServer(new DialogueCompletedPayload());
     }
 }

@@ -2,7 +2,6 @@ package io.github.gcjojo.blablalib.dialogues.actions;
 
 import com.google.gson.JsonObject;
 import io.github.gcjojo.blablalib.BlablaLib;
-import io.github.gcjojo.blablalib.client.gui.DialogueScreen;
 import io.github.gcjojo.blablalib.dialogues.DialogueAction;
 import io.github.gcjojo.blablalib.dialogues.DialogueManager;
 import lombok.Getter;
@@ -21,7 +20,7 @@ public class DialogueTimings extends DialogueAction {
             ByteBufCodecs.INT, DialogueTimings::getWaitMultiplier,
             DialogueTimings::new
     );
-    private static final DialogueManager.DialogueActionType<DialogueTimings> TYPE = DialogueManager.register(
+    private static final DialogueManager.DialogueActionType<DialogueTimings> TYPE = DialogueManager.registerActionType(
             ResourceLocation.fromNamespaceAndPath(BlablaLib.MOD_ID, "dialogue_timings"),
             TIMINGS_STREAM_CODEC
     );
@@ -43,7 +42,7 @@ public class DialogueTimings extends DialogueAction {
     }
 
     @Override
-    public void setup(DialogueScreen screen) {
+    public void setup(DialogueScreenOld screen) {
         screen.setDialogueSpeed(dialogueSpeed);
         screen.setWaitMultiplier(waitMultiplier);
         screen.queueAdvanceDialogue();

@@ -2,7 +2,6 @@ package io.github.gcjojo.blablalib.dialogues.actions;
 
 import com.google.gson.JsonObject;
 import io.github.gcjojo.blablalib.BlablaLib;
-import io.github.gcjojo.blablalib.client.gui.DialogueScreen;
 import io.github.gcjojo.blablalib.dialogues.DialogueAction;
 import io.github.gcjojo.blablalib.dialogues.DialogueManager;
 import io.github.gcjojo.liblib.LibLib;
@@ -21,7 +20,7 @@ public class DialogueSound extends DialogueAction {
             ByteBufCodecs.FLOAT, DialogueSound::getVolume,
             DialogueSound::new
     );
-    private static final DialogueManager.DialogueActionType<DialogueSound> TYPE = DialogueManager.register(
+    private static final DialogueManager.DialogueActionType<DialogueSound> TYPE = DialogueManager.registerActionType(
             ResourceLocation.fromNamespaceAndPath(BlablaLib.MOD_ID, "dialogue_sound"),
             SOUND_STREAM_CODEC
     );
@@ -48,7 +47,7 @@ public class DialogueSound extends DialogueAction {
     }
 
     @Override
-    public void setup(DialogueScreen screen) {
+    public void setup(DialogueScreenOld screen) {
         super.setup(screen);
         LibLib.getSoundPlayer().playSound(this.soundName, this.pitch, this.volume);
     }

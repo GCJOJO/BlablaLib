@@ -7,6 +7,7 @@ import dev.architectury.platform.Platform;
 import io.github.gcjojo.blablalib.BlablaLib;
 import io.github.gcjojo.blablalib.client.gui.DialogueScreen;
 import io.github.gcjojo.blablalib.commands.DialogueCommand;
+import io.github.gcjojo.blablalib.dialogues.DialogueManager;
 import io.github.gcjojo.blablalib.events.BlablalibEvents;
 import io.github.gcjojo.blablalib.network.payloads.*;
 import io.github.gcjojo.liblib.LibLib;
@@ -41,10 +42,10 @@ public class BlablaLibNetwork {
             BlablaLib.setPlayerLastReadDialogue((ServerPlayer) player, BlablaLib.getPlayerDialogue((ServerPlayer) player));
 
             if (player instanceof ServerPlayer) {
-                EventResult result = BlablalibEvents.DIALOGUE_CHOICE_MADE.invoker().dialogueChoiceMade((ServerPlayer) player, payload.nextSet(), payload.saveSet(), payload.action());
+                EventResult result = BlablalibEvents.DIALOGUE_CHOICE_MADE.invoker().dialogueChoiceMade((ServerPlayer) player, payload.nextDialogue(), payload.saveDialogue(), payload.action());
                 if ((result.isPresent() && result.isTrue()) || result.isEmpty()) {
-                    BlablaLib.openDialogue((ServerPlayer) player, payload.nextSet());
-                    BlablaLib.setPlayerDialogue((ServerPlayer) player, payload.saveSet());
+                    BlablaLib.openDialogue((ServerPlayer) player, payload.nextDialogue());
+                    BlablaLib.setPlayerDialogue((ServerPlayer) player, payload.saveDialogue());
                 }
             }
         });
@@ -52,11 +53,13 @@ public class BlablaLibNetwork {
         NetworkManager.registerReceiver(NetworkManager.Side.C2S, DialogueCompletedPayload.TYPE, DialogueCompletedPayload.STREAM_CODEC, (payload, context) -> {
             Player player = context.getPlayer();
 
-            BlablaLib.setPlayerLastReadDialogue((ServerPlayer) player, payload.dialogueId());
+            ResourceLocation dialogueId = DialogueManager.getDialogueForPlayer(player);
+
+            BlablaLib.setPlayerLastReadDialogue((ServerPlayer) player, dialogueId);
             BlablaLib.setPlayerIsInDialogue((ServerPlayer) player, false);
 
             if (player instanceof ServerPlayer)
-                BlablalibEvents.DIALOGUE_COMPLETED.invoker().dialogueCompleted((ServerPlayer) player, payload.dialogueId());
+                BlablalibEvents.DIALOGUE_COMPLETED.invoker().dialogueCompleted((ServerPlayer) player, dialogueId);
         });
 
         NetworkManager.registerReceiver(NetworkManager.Side.C2S, DialogueCommandPayload.TYPE, DialogueCommandPayload.STREAM_CODEC, (payload, context) -> {
@@ -123,7 +126,7 @@ public class BlablaLibNetwork {
     public static void registerClientPackets() {
         NetworkManager.registerReceiver(NetworkManager.Side.S2C, OpenDialoguePayload.TYPE, OpenDialoguePayload.STREAM_CODEC, (payload, context) -> {
             if (payload.dialogueId() != null)
-                context.queue(() -> DialogueScreen.openDialogueScreen(payload.dialogueId()));
+                context.queue(DialogueScreen::new);
         });
     }
 }

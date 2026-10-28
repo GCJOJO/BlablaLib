@@ -3,7 +3,6 @@ package io.github.gcjojo.blablalib.dialogues.actions;
 import com.google.gson.JsonObject;
 import dev.architectury.networking.NetworkManager;
 import io.github.gcjojo.blablalib.BlablaLib;
-import io.github.gcjojo.blablalib.client.gui.DialogueScreen;
 import io.github.gcjojo.blablalib.dialogues.DialogueAction;
 import io.github.gcjojo.blablalib.dialogues.DialogueManager;
 import io.github.gcjojo.blablalib.network.payloads.DialogueSetQuestStatePayload;
@@ -26,7 +25,7 @@ public class DialogueQuestStateAction extends DialogueAction {
             ByteBufCodecs.STRING_UTF8, DialogueQuestStateAction::getNewState,
             DialogueQuestStateAction::new
     );
-    private static DialogueManager.DialogueActionType<DialogueQuestStateAction> TYPE = DialogueManager.register(
+    private static DialogueManager.DialogueActionType<DialogueQuestStateAction> TYPE = DialogueManager.registerActionType(
             ResourceLocation.fromNamespaceAndPath(BlablaLib.MOD_ID, "dialogue_quest_state"),
             QUEST_STATE_STREAM_CODEC
     );
@@ -54,7 +53,7 @@ public class DialogueQuestStateAction extends DialogueAction {
     }
 
     @Override
-    public void setup(DialogueScreen screen) {
+    public void setup(DialogueScreenOld screen) {
         super.setup(screen);
         if (!newState.isEmpty()) {
             questId.ifPresent(questId -> {

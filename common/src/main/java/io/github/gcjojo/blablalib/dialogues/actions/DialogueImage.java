@@ -26,7 +26,7 @@ public class DialogueImage extends DialogueAction {
             ImageTransforms.STREAM_CODEC, DialogueImage::getTransforms,
             DialogueImage::new
     );
-    private static final DialogueManager.DialogueActionType<DialogueImage> TYPE = DialogueManager.register(
+    private static final DialogueManager.DialogueActionType<DialogueImage> TYPE = DialogueManager.registerActionType(
           ResourceLocation.fromNamespaceAndPath(BlablaLib.MOD_ID, "dialogue_image"),
           IMAGE_STREAM_CODEC
     );

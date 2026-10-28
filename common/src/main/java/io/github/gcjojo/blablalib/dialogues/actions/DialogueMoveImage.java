@@ -28,7 +28,7 @@ public class DialogueMoveImage extends DialogueAction {
     // TODO
     public static final StreamCodec<RegistryFriendlyByteBuf, DialogueMoveImage> MOVE_IMAGE_STREAM_CODEC = StreamCodec.unit(new DialogueMoveImage());
 
-    private static final DialogueManager.DialogueActionType<DialogueMoveImage> TYPE = DialogueManager.register(
+    private static final DialogueManager.DialogueActionType<DialogueMoveImage> TYPE = DialogueManager.registerActionType(
             ResourceLocation.fromNamespaceAndPath(BlablaLib.MOD_ID, "dialogue_move_image"),
             MOVE_IMAGE_STREAM_CODEC
     );

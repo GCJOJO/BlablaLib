@@ -16,7 +16,11 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 
 public class DialogueLoader extends SimpleJsonResourceReloadListener {
+    public static final String SPEAKERS_KEY = "speakers";
+
     public static final Map<ResourceLocation, Dialogue> dialogues = new HashMap<>();
+    public static final List<DialogueSpeaker> speakers = new ArrayList<>();
+
     private static final Gson GSON = new GsonBuilder().create();
 
     public DialogueLoader() {
@@ -27,9 +31,10 @@ public class DialogueLoader extends SimpleJsonResourceReloadListener {
         Map<ResourceLocation, Dialogue> dialogues = new LinkedHashMap<>();
         String namespace = filePath.getNamespace();
 
+        loadSpeakers(json);
+
         json.keySet().forEach(dialogueName -> {
             ResourceLocation dialogueId = ResourceLocation.fromNamespaceAndPath(namespace, dialogueName);
-
             try{
                 JsonObject dialogueJson = (JsonObject) json.get(dialogueName);
                 loadDialogue(dialogueId, dialogueJson).ifPresent(dialogue -> dialogues.put(dialogueId, dialogue));
@@ -48,6 +53,7 @@ public class DialogueLoader extends SimpleJsonResourceReloadListener {
             String dialogueNamespace = dialogueId.getNamespace();
             if (json == null || !json.has(dialogueName)) return Optional.empty();
             List<DialogueAction> actions = new ArrayList<>();
+            List<ResourceLocation> referencedSpeakers = new ArrayList<>();
 
             json.getAsJsonArray(dialogueName).forEach(element -> {
                 JsonObject obj = element.getAsJsonObject();
@@ -62,11 +68,15 @@ public class DialogueLoader extends SimpleJsonResourceReloadListener {
                     try {
                         try {
                             Constructor<? extends DialogueAction> constructor = actionClass.getConstructor(JsonObject.class);
-                            actions.add(constructor.newInstance(obj));
+                            DialogueAction actionInstance = constructor.newInstance(obj);
+                            actions.add(actionInstance);
+                            actionInstance.getReferencedSpeaker().ifPresent(referencedSpeakers::add);
                             return;
                         } catch (NoSuchMethodException e) {
                             Constructor<? extends DialogueAction> constructor = actionClass.getConstructor();
-                            actions.add(constructor.newInstance());
+                            DialogueAction actionInstance = constructor.newInstance();
+                            actions.add(actionInstance);
+                            actionInstance.getReferencedSpeaker().ifPresent(referencedSpeakers::add);
                             return;
                         }
                     } catch (InstantiationException | IllegalAccessException | InvocationTargetException |
@@ -77,13 +87,22 @@ public class DialogueLoader extends SimpleJsonResourceReloadListener {
                 }
                 actions.add(new DialogueUnknownAction(obj));
             });
-            return Optional.of(new Dialogue(List.copyOf(actions)));
+            return Optional.of(new Dialogue(dialogueId, List.copyOf(actions), referencedSpeakers));
 
         } catch (Exception e) {
             BlablaLib.getLogger().error(e.getMessage());
             Arrays.stream(e.getStackTrace()).forEach(stackTraceElement -> BlablaLib.getLogger().error(stackTraceElement.toString()));
             return Optional.empty();
         }
+    }
+
+    public static void loadSpeakers(JsonObject json) {
+        json.getAsJsonArray(SPEAKERS_KEY).forEach(element -> {
+            JsonObject obj = element.getAsJsonObject();
+            DialogueSpeaker speaker = new DialogueSpeaker(obj);
+            if(speaker.isValid())
+                speakers.add(speaker);
+        });
     }
 
     @Override

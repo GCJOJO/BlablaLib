@@ -5,6 +5,9 @@ import io.github.gcjojo.blablalib.client.gui.DialogueScreen;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.resources.ResourceLocation;
+
+import java.util.Optional;
 
 public abstract class DialogueAction
 {
@@ -13,10 +16,7 @@ public abstract class DialogueAction
     public DialogueAction() { }
     public DialogueAction(JsonObject object) { }
 
-    public void setup(DialogueScreen screen)
-    {
-        this.screen = screen;
-    }
+    public void setup(DialogueScreen screen) { this.screen = screen; }
 
     public abstract void step();
     public abstract void draw(GuiGraphics graphics, int mouseX, int mouseY, float partialTick);
@@ -26,6 +26,8 @@ public abstract class DialogueAction
 
     public abstract boolean isBlocking();
     public abstract boolean isSkippable();
+
+    public Optional<ResourceLocation> getReferencedSpeaker() { return Optional.empty(); }
 
     public static final StreamCodec<RegistryFriendlyByteBuf, DialogueAction> STREAM_CODEC =
             DialogueManager.TYPE_CODEC.dispatch(DialogueAction::getType, DialogueManager.DialogueActionType::codec);

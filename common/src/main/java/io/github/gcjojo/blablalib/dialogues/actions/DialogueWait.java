@@ -17,7 +17,7 @@ public class DialogueWait extends DialogueAction {
             ByteBufCodecs.FLOAT, DialogueWait::getWaitTime,
             DialogueWait::new
     );
-    private static final DialogueManager.DialogueActionType<DialogueWait> TYPE = DialogueManager.register(
+    private static final DialogueManager.DialogueActionType<DialogueWait> TYPE = DialogueManager.registerActionType(
             ResourceLocation.fromNamespaceAndPath(BlablaLib.MOD_ID, "dialogue_wait"),
             WAIT_STREAM_CODEC
     );

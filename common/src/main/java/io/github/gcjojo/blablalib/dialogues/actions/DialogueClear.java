@@ -2,7 +2,6 @@ package io.github.gcjojo.blablalib.dialogues.actions;
 
 import com.google.gson.JsonObject;
 import io.github.gcjojo.blablalib.BlablaLib;
-import io.github.gcjojo.blablalib.client.gui.DialogueScreen;
 import io.github.gcjojo.blablalib.dialogues.DialogueAction;
 import io.github.gcjojo.blablalib.dialogues.DialogueManager;
 import lombok.Getter;
@@ -19,7 +18,7 @@ public class DialogueClear extends DialogueAction {
             ByteBufCodecs.optional(ResourceLocation.STREAM_CODEC), DialogueClear::getClearedClass,
             DialogueClear::new
     );
-    private static final DialogueManager.DialogueActionType<DialogueClear> TYPE = DialogueManager.register(
+    private static final DialogueManager.DialogueActionType<DialogueClear> TYPE = DialogueManager.registerActionType(
             ResourceLocation.tryBuild(BlablaLib.MOD_ID, "dialogue_clear"),
             CLEAR_STREAM_CODEC
     );
@@ -38,7 +37,7 @@ public class DialogueClear extends DialogueAction {
     }
 
     @Override
-    public void setup(DialogueScreen screen) {
+    public void setup(DialogueScreenOld screen) {
         super.setup(screen);
         clearedClass.ifPresentOrElse(screen::clearActions, screen::clearActions);
         screen.advanceDialogue();

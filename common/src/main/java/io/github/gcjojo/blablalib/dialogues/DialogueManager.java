@@ -1,85 +1,75 @@
 package io.github.gcjojo.blablalib.dialogues;
 
-import com.google.gson.Gson;
-import com.google.gson.JsonObject;
-import dev.architectury.platform.Platform;
+import dev.architectury.networking.NetworkManager;
 import io.github.gcjojo.blablalib.BlablaLib;
 import io.github.gcjojo.blablalib.dialogues.actions.*;
+import io.github.gcjojo.blablalib.network.payloads.DialogueActionsPayload;
+import io.github.gcjojo.blablalib.network.payloads.DialogueSpeakersPayload;
 import lombok.Getter;
-import net.minecraft.client.Minecraft;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.packs.resources.ResourceManager;
+import net.minecraft.server.level.ServerPlayer;
 
-import java.io.InputStreamReader;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 
 public class DialogueManager {
+    private static final int BLOCKING_ACTIONS_SEND_AMOUNT = 3;
+
+    private static final Map<UUID, PlayerDialogueStatus> STATUSES = new HashMap<>();
     // Claude Slop
-    public static final StreamCodec<RegistryFriendlyByteBuf, DialogueActionType<?>> TYPE_CODEC =
-        ResourceLocation.STREAM_CODEC.<DialogueActionType<?>>map(TYPES::get, DialogueActionType::id).cast();
     private static final Map<ResourceLocation, DialogueActionType<?>> TYPES = new HashMap<>();
 
-    public static <T extends DialogueAction> DialogueActionType<T> register(ResourceLocation id, StreamCodec<RegistryFriendlyByteBuf, T> codec) {
+    public static <T extends DialogueAction> DialogueActionType<T> registerActionType(ResourceLocation id, StreamCodec<RegistryFriendlyByteBuf, T> codec) {
         DialogueActionType<T> type = new DialogueActionType<>(id, codec);
         TYPES.put(id, type);
         return type;
     }
 
-    public static List<DialogueAction> loadDialogue(ResourceLocation dialoguePath) {
-        try {
-            String dialogueName = dialoguePath.getPath();
-            String dialogueNamespace = dialoguePath.getNamespace();
-            JsonObject root = getDialogueFile(dialoguePath.getNamespace());
-            if (root == null || !root.has(dialogueName)) return null;
-            List<DialogueAction> actions = new ArrayList<>();
+    public static void playDialogue(ServerPlayer player, Dialogue dialogue) {
+        List<DialogueSpeaker> speakers =
+                DialogueLoader.speakers.stream().filter(speaker -> dialogue.getDialogueSpeakersId().contains(speaker.getId())).toList();
 
-            root.getAsJsonArray(dialogueName).forEach(element -> {
-                JsonObject obj = element.getAsJsonObject();
-                if(!obj.has("action"))
-                    return;
-                ResourceLocation action = ResourceLocation.tryParse(obj.get("action").getAsString());
-                if(dialogueActionClasses.containsKey(action)) {
+        PlayerDialogueStatus status = new PlayerDialogueStatus(player.getUUID());
+        status.setCurrentDialogue(dialogue);
+        STATUSES.put(player.getUUID(), status);
 
-                    Class<? extends DialogueAction> actionClass = dialogueActionClasses.get(action);
-                    if(dialogueActionOverloads.containsKey(dialogueNamespace) && dialogueActionOverloads.get(dialogueNamespace).containsKey(action))
-                        actionClass = dialogueActionOverloads.get(dialogueNamespace).get(action).overloadClass();
+        NetworkManager.sendToPlayer(player, new DialogueSpeakersPayload(speakers));
 
-                    try {
-                        try {
-                            Constructor<? extends DialogueAction> constructor = actionClass.getConstructor(JsonObject.class);
-                            actions.add(constructor.newInstance(obj));
-                            return;
-                        } catch (NoSuchMethodException e) {
-                            Constructor<? extends DialogueAction> constructor = actionClass.getConstructor();
-                            actions.add(constructor.newInstance());
-                            return;
-                        }
-                    } catch (InstantiationException | IllegalAccessException | InvocationTargetException |
-                             NoSuchMethodException e) {
-                        BlablaLib.getLogger().error(e.getMessage());
-                        Arrays.stream(e.getStackTrace()).forEach(stackTraceElement -> BlablaLib.getLogger().error(stackTraceElement.toString()));
-                    }
-                }
-                actions.add(new DialogueUnknownAction(obj));
-            });
-            return actions;
+        sendNextActions(player);
+    }
 
-        } catch (Exception e) {
-            BlablaLib.getLogger().error(e.getMessage());
-            Arrays.stream(e.getStackTrace()).forEach(stackTraceElement -> BlablaLib.getLogger().error(stackTraceElement.toString()));
-            return null;
+    public static final StreamCodec<RegistryFriendlyByteBuf, DialogueActionType<?>> TYPE_CODEC =
+        ResourceLocation.STREAM_CODEC.<DialogueActionType<?>>map(TYPES::get, DialogueActionType::id).cast();
+
+    public static void sendNextActions(ServerPlayer player) {
+        if(!STATUSES.containsKey(player.getUUID()))
+            return;
+
+        PlayerDialogueStatus status = STATUSES.get(player.getUUID());
+        Dialogue currentDialogue = status.getCurrentDialogue();
+
+        List<DialogueAction> actionsToSend = currentDialogue.getDialogueActions().subList(status.getActionIndex(), currentDialogue.getDialogueActions().size());
+        List<DialogueAction> sentActions = new ArrayList<>();
+
+        int blockingActions = 0;
+        for(DialogueAction action : actionsToSend) {
+            if(blockingActions >= BLOCKING_ACTIONS_SEND_AMOUNT)
+                break;
+
+            sentActions.add(action);
+
+            if(action.isBlocking())
+                blockingActions++;
         }
+
+        NetworkManager.sendToPlayer(player, new DialogueActionsPayload(blockingActions, sentActions));
     }
 
     @Getter
     private static final Map<ResourceLocation, Class<? extends DialogueAction>> dialogueActionClasses = new HashMap<>();
     @Getter
     private static final Map<String, Map<ResourceLocation, ActionOverload<?>>> dialogueActionOverloads = new HashMap<>();
-
 
     public static void registerDefaultActions(){
         dialogueActionClasses.put(ResourceLocation.tryBuild(BlablaLib.MOD_ID, "clear"),          DialogueClear.class);
@@ -120,62 +110,6 @@ public class DialogueManager {
     }
 
     public record ActionOverload<T extends DialogueAction>(Class<? extends T> overloadClass) { }
-
-    public static List<DialogueSpeaker> loadSpeakers(ResourceLocation dialoguePath) {
-        try {
-            List<DialogueSpeaker> speakers = new ArrayList<>();
-            JsonObject root = getDialogueFile(dialoguePath.getNamespace());
-            if (root == null || !root.has("speakers")) return speakers;
-
-            root.getAsJsonArray("speakers").forEach(element -> {
-                JsonObject obj = element.getAsJsonObject();
-                speakers.add(new DialogueSpeaker(obj));
-            });
-
-            return speakers;
-
-        } catch (Exception e) {
-            BlablaLib.getLogger().warn("Oopsie cannot load speakers !");
-            return null;
-        }
-    }
-
-    public static JsonObject getDialogueFile(String modNamespace){
-        try {
-            ResourceLocation res = ResourceLocation.tryBuild(modNamespace, "dialogues.json");
-            var resourceOpt = Minecraft.getInstance().getResourceManager().getResource(res);
-            if (resourceOpt.isEmpty()) return null;
-
-            return new Gson().fromJson(new InputStreamReader(resourceOpt.get().open()), JsonObject.class);
-        } catch (Exception e) {
-            BlablaLib.getLogger().error(e.getMessage());
-            Arrays.stream(e.getStackTrace()).forEach(stackTraceElement -> BlablaLib.getLogger().error(stackTraceElement.toString()));
-        }
-        return null;
-    }
-
-    public static List<ResourceLocation> getDialogueList() {
-        List<ResourceLocation> dialoguePaths = new ArrayList<>();
-        ResourceManager resourceManager = Minecraft.getInstance().getResourceManager();
-        List<String> namespaces = new ArrayList<>(Platform.getModIds());
-        namespaces.addAll(resourceManager.getNamespaces());
-
-        namespaces.forEach(packId -> {
-            BlablaLib.getLogger().info("Selected pack {}", packId);
-            JsonObject root = DialogueManager.getDialogueFile(packId);
-
-            if(root == null || !root.isJsonObject()) return;
-            root.getAsJsonObject().asMap().forEach((elementName, jsonElement) -> {
-                if(elementName.equals("speakers") || !jsonElement.isJsonArray()) return;
-
-                ResourceLocation resourceLocation = ResourceLocation.tryBuild(packId, elementName);
-                if(resourceLocation != null)
-                    dialoguePaths.add(resourceLocation);
-            });
-        });
-
-        return dialoguePaths;
-    }
 
     public record DialogueActionType<T extends DialogueAction>(ResourceLocation id, StreamCodec<RegistryFriendlyByteBuf, T> codec) { }
 }

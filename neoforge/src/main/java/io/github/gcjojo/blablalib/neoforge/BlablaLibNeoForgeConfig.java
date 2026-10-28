@@ -17,11 +17,11 @@ public class BlablaLibNeoForgeConfig {
     }
 
     public final ModConfigSpec.ConfigValue<Boolean> ENABLE_COMMAND;/* = BUILDER
-            .comment("Whether or not the Blabla Lib mod should register it's default dialogue command.")
+            .comment("Whether or not the Blabla Lib mod should registerActionType it's default dialogue command.")
             .define("enable_command", false);*/
 
     private BlablaLibNeoForgeConfig(ModConfigSpec.Builder builder) {
-        ENABLE_COMMAND = builder.comment("Whether or not the Blabla Lib mod should register it's default dialogue command.")
+        ENABLE_COMMAND = builder.comment("Whether or not the Blabla Lib mod should registerActionType it's default dialogue command.")
                 .translation("blablalib.config.enable_command_value_name")
                 .define("enable_command", false);
     }

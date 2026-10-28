@@ -2,7 +2,6 @@ package io.github.gcjojo.blablalib.dialogues.actions;
 
 import com.google.gson.JsonObject;
 import io.github.gcjojo.blablalib.BlablaLib;
-import io.github.gcjojo.blablalib.client.gui.DialogueScreen;
 import io.github.gcjojo.blablalib.dialogues.DialogueAction;
 import io.github.gcjojo.blablalib.dialogues.DialogueManager;
 import net.minecraft.client.gui.GuiGraphics;
@@ -14,7 +13,7 @@ public class DialogueStartQuestAction extends DialogueAction {
 
     public static final StreamCodec<RegistryFriendlyByteBuf, DialogueStartQuestAction> QUEST_START_STREAM_CODEC = StreamCodec.unit(new DialogueStartQuestAction());
 
-    private static final DialogueManager.DialogueActionType<DialogueStartQuestAction> TYPE = DialogueManager.register(
+    private static final DialogueManager.DialogueActionType<DialogueStartQuestAction> TYPE = DialogueManager.registerActionType(
             ResourceLocation.fromNamespaceAndPath(BlablaLib.MOD_ID, "dialogue_start_quest"),
             QUEST_START_STREAM_CODEC
     );
@@ -28,7 +27,7 @@ public class DialogueStartQuestAction extends DialogueAction {
     }
 
     @Override
-    public void setup(DialogueScreen screen) {
+    public void setup(DialogueScreenOld screen) {
         super.setup(screen);
     }
 

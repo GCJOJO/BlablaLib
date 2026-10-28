@@ -21,17 +21,19 @@ import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.phys.Vec2;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Random;
 
 public class DialogueMessage extends DialogueAction
 {
     private static final Font font = Minecraft.getInstance().font;
     public static final StreamCodec<RegistryFriendlyByteBuf, DialogueMessage> MESSAGE_STREAM_CODEC = StreamCodec.composite(
-            ByteBufCodecs.INT, DialogueMessage::getSpeakerId,
+            ResourceLocation.STREAM_CODEC, DialogueMessage::getSpeakerId,
             ByteBufCodecs.STRING_UTF8, DialogueMessage::getDialogueLine,
             DialogueMessage::new
     );
-    private static final DialogueManager.DialogueActionType<DialogueMessage> TYPE = DialogueManager.register(
+
+    private static final DialogueManager.DialogueActionType<DialogueMessage> TYPE = DialogueManager.registerActionType(
             ResourceLocation.fromNamespaceAndPath(BlablaLib.MOD_ID, "dialogue_message"),
             MESSAGE_STREAM_CODEC
     );
@@ -42,17 +44,21 @@ public class DialogueMessage extends DialogueAction
     private int characterTimer = 0;
     private int pauseTimer = 0;
     @Getter
-    private final int speakerId;
+    private final ResourceLocation speakerId;
     @Getter
     private final String dialogueLine;
 
-    public DialogueMessage(int speakerId, String dialogueLine) {
+    public DialogueMessage(ResourceLocation speakerId, String dialogueLine) {
         this.speakerId = speakerId;
         this.dialogueLine = dialogueLine;
     }
 
     public DialogueMessage(JsonObject object) {
-        this.speakerId = object.has("speaker") ? object.get("speaker").getAsInt() : Integer.MAX_VALUE;
+        if(object.has("speaker"))
+            this.speakerId = ResourceLocation.tryParse(object.get("speaker").getAsString());
+        else
+            this.speakerId = null;
+
         this.dialogueLine = object.has("text") ? Component.translatable(object.get("text").getAsString()).getString() : "";
     }
 
@@ -83,7 +89,7 @@ public class DialogueMessage extends DialogueAction
         characterTimer = 0;
         charIndex++;
         richText.setDrawnCharacters(charIndex);
-        List<SoundEvent> sounds = screen.getDialogueSpeaker(this.speakerId).getSounds();
+        List<SoundEvent> sounds = screen.getDialogueSpeaker(speakerId).getSounds();
         if(!sounds.isEmpty())
             Minecraft.getInstance().getSoundManager().play(SimpleSoundInstance.forUI(sounds.get(random.nextInt(sounds.size())), 1.0F));
 
@@ -100,15 +106,13 @@ public class DialogueMessage extends DialogueAction
         int boxX = (screen.width - boxWidth) / 2;
         int boxY = screen.height - boxHeight - 20;
 
-        DialogueSpeaker speaker = screen.getDialogueSpeaker(this.speakerId);
+        DialogueSpeaker speaker = screen.getDialogueSpeaker(speakerId);
 
         graphics.fill(boxX, boxY, boxX + boxWidth, boxY + boxHeight, 0x80000000);
         String speakerTranslated = Component.translatable(speaker.getName()).getString();
-        graphics.drawString(font, speakerTranslated, boxX + 10, boxY + 5, speaker.getColor(), false);
+        graphics.drawString(font, speakerTranslated, boxX + 10, boxY + 5, speaker.getColor().getColorInt(), false);
 
         if (dialogueLine != null) {
-            //String displayedText = dialogueLine.substring(0, charIndex);
-            //graphics.drawWordWrap(font, Component.literal(displayedText), boxX + 10, boxY + 20, boxWidth - 20, 0xFFFFFF);
             richText.setWidth(boxWidth - 30);
             richText.setPosition(new Vec2(boxX + 10, boxY + 20));
 
@@ -146,6 +150,11 @@ public class DialogueMessage extends DialogueAction
 
     @Override
     public boolean isSkippable() { return true; }
+
+    @Override
+    public Optional<ResourceLocation> getReferencedSpeaker() {
+        return Optional.ofNullable(speakerId);
+    }
 
     @Override
     public DialogueManager.DialogueActionType<?> getType() { return TYPE; }

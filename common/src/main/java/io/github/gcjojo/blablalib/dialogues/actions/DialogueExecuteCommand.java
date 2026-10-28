@@ -3,7 +3,6 @@ package io.github.gcjojo.blablalib.dialogues.actions;
 import com.google.gson.JsonObject;
 import dev.architectury.networking.NetworkManager;
 import io.github.gcjojo.blablalib.BlablaLib;
-import io.github.gcjojo.blablalib.client.gui.DialogueScreen;
 import io.github.gcjojo.blablalib.dialogues.DialogueAction;
 import io.github.gcjojo.blablalib.dialogues.DialogueManager;
 import io.github.gcjojo.blablalib.network.payloads.DialogueCommandPayload;
@@ -20,7 +19,7 @@ public class DialogueExecuteCommand extends DialogueAction {
             ByteBufCodecs.STRING_UTF8, DialogueExecuteCommand::getCommand,
             DialogueExecuteCommand::new
     );
-    private static final DialogueManager.DialogueActionType<DialogueExecuteCommand> TYPE = DialogueManager.register(
+    private static final DialogueManager.DialogueActionType<DialogueExecuteCommand> TYPE = DialogueManager.registerActionType(
             ResourceLocation.fromNamespaceAndPath(BlablaLib.MOD_ID, "dialogue_execute_command"),
             COMMAND_STREAM_CODEC
     );
@@ -38,7 +37,7 @@ public class DialogueExecuteCommand extends DialogueAction {
     }
 
     @Override
-    public void setup(DialogueScreen screen){
+    public void setup(DialogueScreenOld screen){
         super.setup(screen);
         if(this.command != null) {
             if (this.command.contains("<PLAYER>"))

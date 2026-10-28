@@ -22,7 +22,7 @@ public class DialogueFading extends DialogueAction
             ByteBufCodecs.FLOAT, DialogueFading::getTime,
             DialogueFading::new
     );
-    private static final DialogueManager.DialogueActionType<DialogueFading> TYPE = DialogueManager.register(
+    private static final DialogueManager.DialogueActionType<DialogueFading> TYPE = DialogueManager.registerActionType(
             ResourceLocation.fromNamespaceAndPath(BlablaLib.MOD_ID, "dialogue_fade"),
             FADE_STREAM_CODEC
     );

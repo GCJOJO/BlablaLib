@@ -19,7 +19,7 @@ public class DialogueUnknownAction extends DialogueAction {
             DialogueUnknownAction::new
     );
 
-    private static final DialogueManager.DialogueActionType<DialogueUnknownAction> TYPE = DialogueManager.register(
+    private static final DialogueManager.DialogueActionType<DialogueUnknownAction> TYPE = DialogueManager.registerActionType(
             ResourceLocation.fromNamespaceAndPath(BlablaLib.MOD_ID, "dialogue_unknown"),
             UNKNOWN_STREAM_CODEC
     );

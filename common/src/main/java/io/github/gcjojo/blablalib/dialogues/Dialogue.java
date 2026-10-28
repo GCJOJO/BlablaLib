@@ -1,19 +1,21 @@
 package io.github.gcjojo.blablalib.dialogues;
 
 import lombok.Getter;
-import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.resources.ResourceLocation;
 
 import java.util.List;
 
 public class Dialogue {
     @Getter
+    protected final ResourceLocation dialogueId;
+    @Getter
     protected final List<DialogueAction> dialogueActions;
+    @Getter
+    protected final List<ResourceLocation> dialogueSpeakersId;
 
-    public Dialogue(List<DialogueAction> actions){
+    public Dialogue(ResourceLocation id, List<DialogueAction> actions, List<ResourceLocation> speakersId) {
+        dialogueId = id;
         dialogueActions = actions;
-    }
-
-    public void play(ServerPlayer player){
-
+        dialogueSpeakersId = speakersId;
     }
 }
