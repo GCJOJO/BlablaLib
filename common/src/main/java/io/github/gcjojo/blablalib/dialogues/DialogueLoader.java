@@ -1,9 +1,6 @@
 package io.github.gcjojo.blablalib.dialogues;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
+import com.google.gson.*;
 import io.github.gcjojo.blablalib.BlablaLib;
 import io.github.gcjojo.blablalib.dialogues.actions.DialogueUnknownAction;
 import net.minecraft.resources.ResourceLocation;
@@ -36,8 +33,8 @@ public class DialogueLoader extends SimpleJsonResourceReloadListener {
         json.keySet().forEach(dialogueName -> {
             ResourceLocation dialogueId = ResourceLocation.fromNamespaceAndPath(namespace, dialogueName);
             try{
-                JsonObject dialogueJson = (JsonObject) json.get(dialogueName);
-                loadDialogue(dialogueId, dialogueJson).ifPresent(dialogue -> dialogues.put(dialogueId, dialogue));
+                JsonElement dialogueJson = json.get(dialogueName);
+                loadDialogue(dialogueId, dialogueJson.getAsJsonArray()).ifPresent(dialogue -> dialogues.put(dialogueId, dialogue));
             }
             catch (Exception e){
                 BlablaLib.getLogger().warn("Error when trying to load dialogue {}\n{}", dialogueId, e.toString());
@@ -47,15 +44,14 @@ public class DialogueLoader extends SimpleJsonResourceReloadListener {
         return dialogues;
     }
 
-    public static Optional<Dialogue> loadDialogue(ResourceLocation dialogueId, JsonObject json){
+    public static Optional<Dialogue> loadDialogue(ResourceLocation dialogueId, JsonArray jsonArray){
         try {
             String dialogueName = dialogueId.getPath();
             String dialogueNamespace = dialogueId.getNamespace();
-            if (json == null || !json.has(dialogueName)) return Optional.empty();
             List<DialogueAction> actions = new ArrayList<>();
             List<ResourceLocation> referencedSpeakers = new ArrayList<>();
 
-            json.getAsJsonArray(dialogueName).forEach(element -> {
+            jsonArray.forEach(element -> {
                 JsonObject obj = element.getAsJsonObject();
                 if(!obj.has("action"))
                     return;

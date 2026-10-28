@@ -35,12 +35,15 @@ public class DialogueSpeaker {
     @Getter
     private final List<SoundEvent> sounds;
     @Getter
-    private Color color;
+    private Color color = Color.WHITE;
 
     public DialogueSpeaker(JsonObject obj) {
         String colorStr = obj.get("color").getAsString();
         try {
             this.color = Color.fromString(colorStr);
+            // TODO TEMP FIX
+            if(this.color == null)
+                this.color = Color.WHITE;
         } catch (Exception e) {
             BlablaLib.getLogger().warn("Unable to parse color {}", colorStr);
         }

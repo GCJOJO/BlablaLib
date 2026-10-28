@@ -1,9 +1,9 @@
 {
   "speakers": [
     {
-      "id": 0,
+      "id": "blablalib:dog",
       "name": "blablalib.speaker.dog",
-      "color": "FFFFFFFF",
+      "color": "#FFFFFFFF",
       "sounds": []
     }
   ],
@@ -32,7 +32,7 @@
     { "action": "blablalib:sound", "sound": "entity.wolf.whine" },
     {
       "action": "blablalib:message",
-      "speaker": 0,
+      "speaker": "blablalib:dog",
       "text": "blablalib.dogcheck.woof"
     },
     {
@@ -83,7 +83,7 @@
     { "action": "blablalib:sound", "sound": "entity.wolf.growl" },
     {
       "action": "blablalib:message",
-      "speaker": 0,
+      "speaker": "blablalib:dog",
       "text": "blablalib.dogcheck.jumpscare"
     },
     {
@@ -118,29 +118,29 @@
   ],
 
   "test_choice" : [
-    { "action": "blablalib:message", "speaker": "0", "text": "Test Choice" },
+    { "action": "blablalib:message", "speaker": "blablalib:dog", "text": "Test Choice" },
     { "action": "blablalib:choice", "option1": "Choice 1", "action1": "none", "next1": "choice1", "save1": "choice1", "option2": "Choice 2", "action2": "none", "next2": "choice2", "save2": "choice2" }
   ],
 
   "choice1": [
-    { "action": "blablalib:message", "speaker": 0, "text": "Choice 1" },
+    { "action": "blablalib:message", "speaker": "blablalib:dog", "text": "Choice 1" },
     { "action": "blablalib:hide_ui" },
     { "action": "blablalib:wait", "time": 90}
   ],
 
   "choice2": [
-    { "action": "blablalib:message", "speaker": 0, "text": "Choice 2" }
+    { "action": "blablalib:message", "speaker": "blablalib:dog", "text": "Choice 2" }
   ],
 
   "test_npc": [
     { "action": "blablalib:npc", "npc":  0, "model": "blablalib:geometry.npc" },
-    { "action": "blablalib:message", "speaker":  0, "text": "Hey there I will change model !" },
+    { "action": "blablalib:message", "speaker":  "blablalib:dog", "text": "Hey there I will change model !" },
     { "action": "blablalib:npc", "npc":  0, "model": "blablalib:geometry.test_model" }
   ],
 
   "test_speed" : [
-    { "action": "blablalib:message", "speaker": 0, "text": "Very long message to test the new Dialogue Timings Action. I am a very very long message please do not read me." },
+    { "action": "blablalib:message", "speaker": "blablalib:dog", "text": "Very long message to test the new Dialogue Timings Action. I am a very very long message please do not read me." },
     { "action": "blablalib:timings", "speed": 10, "wait": 16 },
-    { "action": "blablalib:message", "speaker": 0, "text": "Very long message to test the new Dialogue Timings Action. I am a very very long message please do not read me." }
+    { "action": "blablalib:message", "speaker": "blablalib:dog", "text": "Very long message to test the new Dialogue Timings Action. I am a very very long message please do not read me." }
   ]
 }
