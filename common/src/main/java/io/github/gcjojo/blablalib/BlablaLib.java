@@ -3,6 +3,7 @@ package io.github.gcjojo.blablalib;
 import com.mojang.logging.LogUtils;
 import dev.architectury.event.EventResult;
 import dev.architectury.event.events.common.InteractionEvent;
+import dev.architectury.registry.ReloadListenerRegistry;
 import dev.architectury.registry.level.entity.EntityAttributeRegistry;
 import io.github.gcjojo.blablalib.api.BlablaLibAPIImpl;
 import io.github.gcjojo.blablalib.dialogues.Dialogue;
@@ -17,6 +18,7 @@ import io.github.gcjojo.liblib.factory.PlayerDataRegistry;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.packs.PackType;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
@@ -56,6 +58,8 @@ public final class BlablaLib {
                 return EventResult.interrupt(npc.playerInteraction(player, hand));
             return EventResult.pass();
         });
+
+        ReloadListenerRegistry.register(PackType.SERVER_DATA, new DialogueLoader(), ResourceLocation.fromNamespaceAndPath(BlablaLib.MOD_ID, "dialogues"));
     }
 
     public static void initClient() {
