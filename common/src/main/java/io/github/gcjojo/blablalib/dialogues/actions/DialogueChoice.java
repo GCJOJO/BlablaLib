@@ -80,7 +80,7 @@ public class DialogueChoice extends DialogueAction {
                 String name = null;
                 ResourceLocation nextDialogue = null;
                 ResourceLocation saveDialogue = null;
-                String action = null;
+                String action = "";
 
                 if(choiceObject.has("name"))
                     name = choiceObject.get("name").getAsString();
@@ -105,8 +105,8 @@ public class DialogueChoice extends DialogueAction {
         float xPos = (screen.width * 0.5f) - (buttonWidth * 0.5f);
         float yPos = (screen.height * 0.5f) - (buttonHeight * options.size());
 
-        buttonContainer = new GuiScrollbarContainer(screen, buttonWidth + 2, (buttonHeight + 2) * options.size(), GuiBoxContainer.BoxDirection.Vertical);
-        buttonContainer.setChildrenMargin(2);
+        buttonContainer = new GuiScrollbarContainer(screen, buttonWidth + 2, (buttonHeight + 8) * options.size(), GuiBoxContainer.BoxDirection.Vertical);
+        buttonContainer.setChildrenMargin(8);
         buttonContainer.setPosition(new Vec2(xPos, yPos));
         buttons.clear();
 
@@ -115,7 +115,7 @@ public class DialogueChoice extends DialogueAction {
             GuiButton newButton = new GuiButton(screen, Component.translatable(option.name()), () -> handleButtonClick(option));
             newButton.setWidth(buttonWidth);
             newButton.setHeight(buttonHeight);
-            newButton.setDrawOffset(new Vec2(newButton.getWidth() * 0.5f,  buttonIndex * newButton.getHeight() + newButton.getHeight() * 0.5f));
+            newButton.setDrawOffset(new Vec2(newButton.getWidth() * 0.5f,  buttonIndex * (newButton.getHeight() + 4) + newButton.getHeight() * 0.5f));
             buttonContainer.addChild(newButton);
 
             buttonIndex++;
