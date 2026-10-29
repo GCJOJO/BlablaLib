@@ -140,7 +140,7 @@
   ],
 
   "choice2": [
-    { "action": "blablalib:message", "speaker": "blablalib:dog", "text": "Choice 2" },
+    { "action": "blablalib:message", "speaker": "blablalib:dog", "text": "Choice 2" }
   ],
 
   "test_three_choices" : [
