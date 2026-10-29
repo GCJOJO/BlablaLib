@@ -130,7 +130,7 @@
 
   "test_choice" : [
     { "action": "blablalib:message", "speaker": "blablalib:dog", "text": "Test Choice" },
-    { "action": "blablalib:choice", "option1": "Choice 1", "action1": "none", "next1": "choice1", "save1": "choice1", "option2": "Choice 2", "action2": "none", "next2": "choice2", "save2": "choice2" }
+    { "action": "blablalib:choice", "option1": "Choice 1", "action1": "none", "next1": "blablalib:choice1", "save1": "blablalib:choice1", "option2": "Choice 2", "action2": "none", "next2": "blablalib:choice2", "save2": "blablalib:choice2" }
   ],
 
   "choice1": [
@@ -140,7 +140,39 @@
   ],
 
   "choice2": [
-    { "action": "blablalib:message", "speaker": "blablalib:dog", "text": "Choice 2" }
+    { "action": "blablalib:message", "speaker": "blablalib:dog", "text": "Choice 2" },
+    {
+      "action": "blablalib:choice",
+      "options" : [
+        {
+          "name" : "Good Choice",
+          "next" : "blablalib:good_choice",
+          "save" : "blablalib:good_choice"
+        },
+        {
+          "name" : "Middle Choice",
+          "next" : "blablalib:middle_choice",
+          "save" : "blablalib:middle_choice"
+        },
+        {
+          "name" : "Bad Choice",
+          "next" : "blablalib:bad_choice",
+          "save" : "blablalib:bad_choice"
+        }
+      ]
+    }
+  ],
+
+  "good_choice" : [
+    { "action" : "blablalib:message" , "speaker" : "blablalib:dog", "text" : "Good choice !" }
+  ],
+
+  "middle_choice" : [
+    { "action" : "blablalib:message" , "speaker" : "blablalib:dog", "text" : "It's a choice..." }
+  ],
+
+  "bad_choice" : [
+    { "action" : "blablalib:message" , "speaker" : "blablalib:dog", "text" : "You chose the bad one ! >:(" }
   ],
 
   "test_npc": [
