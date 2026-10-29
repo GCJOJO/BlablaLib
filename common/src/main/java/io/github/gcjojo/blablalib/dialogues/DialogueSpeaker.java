@@ -3,7 +3,7 @@ package io.github.gcjojo.blablalib.dialogues;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import io.github.gcjojo.blablalib.BlablaLib;
-import io.github.gcjojo.liblib.LibLib;
+import io.github.gcjojo.liblib.client.SoundPlayer;
 import io.github.gcjojo.liblib.math.Color;
 import io.github.gcjojo.liblib.network.LibLibNetwork;
 import lombok.Getter;
@@ -40,10 +40,7 @@ public class DialogueSpeaker {
     public DialogueSpeaker(JsonObject obj) {
         String colorStr = obj.get("color").getAsString();
         try {
-            this.color = Color.fromString(colorStr);
-            // TODO TEMP FIX
-            if(this.color == null)
-                this.color = Color.WHITE;
+            this.color = Color.fromString(colorStr, Color.WHITE);
         } catch (Exception e) {
             BlablaLib.getLogger().warn("Unable to parse color {}", colorStr);
         }
@@ -83,7 +80,7 @@ public class DialogueSpeaker {
         List<SoundEvent> loadedSounds = new ArrayList<>();
         for (int i = 0; i <= soundNames.length - 1; i++) {
             String soundName = soundNames[i];
-            LibLib.getSoundPlayer().loadSound(soundName).ifPresent(loadedSounds::add);
+            SoundPlayer.loadSound(soundName).ifPresent(loadedSounds::add);
         }
         return loadedSounds;
     }
@@ -91,7 +88,7 @@ public class DialogueSpeaker {
     public static List<SoundEvent> loadSounds(List<ResourceLocation> soundLocations) {
         List<SoundEvent> loadedSounds = new ArrayList<>();
         for (var location : soundLocations) {
-            LibLib.getSoundPlayer().loadSound(location).ifPresent(loadedSounds::add);
+            SoundPlayer.loadSound(location).ifPresent(loadedSounds::add);
         }
         return loadedSounds;
     }

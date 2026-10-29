@@ -15,15 +15,18 @@
       "fade_in_time": 10,
       "width": 1915,
       "height": 1915,
+      "x" : 50,
       "y": 40,
       "alpha": 0
     },
     {
       "action": "blablalib:image_move",
       "id": 0,
-      "anim_time": 10,
-      "alpha_start": 0,
-      "alpha_end": 255
+      "color" : {
+        "time" : 10,
+        "from" : "#FFFFFF00",
+        "to" : "#FFFFFFFF"
+      }
     },
     {
       "action": "blablalib:wait",
@@ -38,9 +41,12 @@
     {
       "action": "blablalib:image_move",
       "id": 0,
-      "anim_time": 10,
-      "alpha_start": 255,
-      "alpha_end": 0
+
+      "color" : {
+        "time" : 10,
+        "from" : "#FFFFFFFF",
+        "to" : "#FFFFFF00"
+      }
     },
     {
       "action": "blablalib:wait",
@@ -55,8 +61,8 @@
     },
     {
       "action": "blablalib:fade",
-      "from": "00000000",
-      "to": "FF000000",
+      "from": "#00000000",
+      "to": "#000000FF",
       "time": 10
     },
     {
@@ -76,9 +82,11 @@
     {
       "action": "blablalib:image_move",
       "id": 0,
-      "anim_time": 5,
-      "y_start": 200,
-      "y_end": 40
+      "position" : {
+        "time" : 5,
+        "y_start" : 200,
+        "y_end" : 40
+      }
     },
     { "action": "blablalib:sound", "sound": "entity.wolf.growl" },
     {
@@ -88,20 +96,23 @@
     },
     {
       "action": "blablalib:clear",
-      "cleared_actions": "fade"
+      "cleared_actions": "blablalib:fade"
     },
     {
       "action": "blablalib:fade",
-      "from": "FF000000",
-      "to": "00000000",
+      "from": "#000000FF",
+      "to": "#00000000",
       "time": 10
     },
     {
       "action": "blablalib:image_move",
       "id": 0,
-      "anim_time": 10,
-      "alpha_start": 255,
-      "alpha_end": 0
+
+      "color" : {
+        "time" : 10,
+        "from" : "#FFFFFFFF",
+        "to" : "#FFFFFF00"
+      }
     },
     {
       "action": "blablalib:wait",

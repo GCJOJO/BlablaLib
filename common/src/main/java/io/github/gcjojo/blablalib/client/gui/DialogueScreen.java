@@ -58,6 +58,7 @@ public class DialogueScreen extends GuiScreen {
 
     public void receiveActions(List<DialogueAction> newActions) {
         dialogueActions.addAll(newActions);
+        refreshActions();
     }
 
     @Override
@@ -145,6 +146,12 @@ public class DialogueScreen extends GuiScreen {
 
         currentActions.removeIf(DialogueAction::isBlocking);
 
+        refreshActions();
+
+        NetworkManager.sendToServer(new DialogueAdvancedPayload(actionIndex));
+    }
+
+    public void refreshActions() {
         for(int i = actionIndex; i <= dialogueActions.size() - 1; i++)
         {
             DialogueAction currentAction = dialogueActions.get(i);
@@ -165,8 +172,6 @@ public class DialogueScreen extends GuiScreen {
                 break;
             }
         }
-
-        NetworkManager.sendToServer(new DialogueAdvancedPayload(actionIndex));
     }
 
     public DialogueSpeaker getDialogueSpeaker(ResourceLocation id) {

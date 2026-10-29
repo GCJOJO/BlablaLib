@@ -35,13 +35,14 @@ public class DialogueMoveImage extends DialogueAction {
     @Getter
     private int imageId;
     @Getter
-    private PositionAnimation position;
+    private PositionAnimation position = PositionAnimation.DEFAULT;
     @Getter
-    private RotationAnimation rotation;
+    private RotationAnimation rotation = RotationAnimation.DEFAULT;
     @Getter
-    private ScaleAnimation scale;
+    private ScaleAnimation scale = ScaleAnimation.DEFAULT;
     @Getter
-    private ColorAnimation color;
+    private ColorAnimation color = ColorAnimation.DEFAULT;
+
     private float currentTime;
 
     public DialogueMoveImage(int newImageId, PositionAnimation positionAnimation, RotationAnimation rotationAnimation, ScaleAnimation scaleAnimation, ColorAnimation colorAnimation) {
@@ -50,8 +51,6 @@ public class DialogueMoveImage extends DialogueAction {
         rotation = rotationAnimation;
         scale = scaleAnimation;
         color = colorAnimation;
-
-
     }
 
     public DialogueMoveImage(JsonObject object){
@@ -94,10 +93,10 @@ public class DialogueMoveImage extends DialogueAction {
             if(rotationObject.has("time"))
                 time = rotationObject.get("time").getAsFloat();
 
-            if(rotationObject.has("angle_start"))
-                angleStart = Optional.of(rotationObject.get("angle_start").getAsFloat());
-            if(rotationObject.has("angle_end"))
-                angleEnd = Optional.of(rotationObject.get("angle_end").getAsFloat());
+            if(rotationObject.has("from"))
+                angleStart = Optional.of(rotationObject.get("from").getAsFloat());
+            if(rotationObject.has("to"))
+                angleEnd = Optional.of(rotationObject.get("to").getAsFloat());
             if(rotationObject.has("easing"))
                 easing = Easings.get((rotationObject.get("easing").getAsString()));
 
@@ -114,10 +113,10 @@ public class DialogueMoveImage extends DialogueAction {
             if(scaleObject.has("time"))
                 time = scaleObject.get("time").getAsFloat();
 
-            if(scaleObject.has("scale_start"))
-                scaleStart = Optional.of(scaleObject.get("scale_start").getAsFloat());
-            if(scaleObject.has("scale_end"))
-                scaleEnd = Optional.of(scaleObject.get("scale_end").getAsFloat());
+            if(scaleObject.has("from"))
+                scaleStart = Optional.of(scaleObject.get("from").getAsFloat());
+            if(scaleObject.has("to"))
+                scaleEnd = Optional.of(scaleObject.get("to").getAsFloat());
             if(scaleObject.has("easing"))
                 easing = Easings.get((scaleObject.get("easing").getAsString()));
 
@@ -134,10 +133,10 @@ public class DialogueMoveImage extends DialogueAction {
             if(colorObject.has("time"))
                 time = colorObject.get("time").getAsFloat();
 
-            if(colorObject.has("color_start"))
-                colorStart = Optional.of(Color.fromString(colorObject.get("color_start").getAsString()));
-            if(colorObject.has("color_end"))
-                colorEnd = Optional.of(Color.fromString(colorObject.get("color_end").getAsString()));
+            if(colorObject.has("from"))
+                colorStart = Optional.ofNullable(Color.fromString(colorObject.get("from").getAsString()));
+            if(colorObject.has("to"))
+                colorEnd = Optional.ofNullable(Color.fromString(colorObject.get("to").getAsString()));
             if(colorObject.has("easing"))
                 easing = Easings.get((colorObject.get("easing").getAsString()));
 
@@ -196,6 +195,8 @@ public class DialogueMoveImage extends DialogueAction {
                 PositionAnimation::new
         );
 
+        public static PositionAnimation DEFAULT = new PositionAnimation(0f, Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(), Easing.LINEAR);
+
         public boolean animatesX() {
             return xStart.isPresent() && xEnd.isPresent();
         }
@@ -226,6 +227,8 @@ public class DialogueMoveImage extends DialogueAction {
                 RotationAnimation::new
         );
 
+        public static RotationAnimation DEFAULT = new RotationAnimation(0f, Optional.empty(), Optional.empty(), Easing.LINEAR);
+
         public boolean animatesRotation() { return angleStart.isPresent() && angleEnd.isPresent(); }
 
         public float lerpRotation(float currentTime, float imageRotation) {
@@ -244,6 +247,8 @@ public class DialogueMoveImage extends DialogueAction {
                 ScaleAnimation::new
         );
 
+        public static ScaleAnimation DEFAULT = new ScaleAnimation(0f, Optional.empty(), Optional.empty(), Easing.LINEAR);
+
         public boolean animatesScale() { return scaleStart.isPresent() && scaleEnd.isPresent(); }
 
         public float lerpScale(float currentTime, float imageScale) {
@@ -261,6 +266,8 @@ public class DialogueMoveImage extends DialogueAction {
                 LibLibNetwork.EasingStreamCodec.CODEC, ColorAnimation::easing,
                 ColorAnimation::new
         );
+
+        public static ColorAnimation DEFAULT = new ColorAnimation(0f, Optional.empty(), Optional.empty(), Easing.LINEAR);
 
         public boolean animatesColor() { return colorStart.isPresent() && colorEnd.isPresent(); }
 

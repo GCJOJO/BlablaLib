@@ -39,9 +39,9 @@ public class DialogueFading extends DialogueAction
         this.fromColor = Color.TRANSPARENT;
         this.toColor = Color.TRANSPARENT;
         this.time = time;
-        try{
-            fromColor = Color.fromString(from);
-            toColor = Color.fromString(to);
+        try {
+            fromColor = Color.fromString(from, Color.TRANSPARENT);
+            toColor = Color.fromString(to, Color.TRANSPARENT);
         } catch (Exception e) {
             BlablaLib.getLogger().error(e.getMessage());
         }
@@ -63,11 +63,11 @@ public class DialogueFading extends DialogueAction
         try{
             if(object.has("from")) {
                 String from = object.get("from").getAsString();
-                fromColor = Color.fromString(from);
+                fromColor = Color.fromString(from, Color.TRANSPARENT);
             }
             if(object.has("to")){
                 String to = object.get("to").getAsString();
-                toColor = Color.fromString(to);
+                toColor = Color.fromString(to, Color.TRANSPARENT);
             }
         } catch (Exception e) {
             BlablaLib.getLogger().error(e.getMessage());

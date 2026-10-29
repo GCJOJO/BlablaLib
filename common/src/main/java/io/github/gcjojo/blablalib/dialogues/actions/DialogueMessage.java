@@ -67,7 +67,6 @@ public class DialogueMessage extends DialogueAction
         super.setup(screen);
         richText = new GuiRichText(screen, Component.literal(dialogueLine));
 
-        screen.addElement(richText);
         richText.setDrawnCharacters(0);
 
         if(this.dialogueLine.isEmpty())
@@ -116,11 +115,15 @@ public class DialogueMessage extends DialogueAction
             richText.setWidth(boxWidth - 30);
             richText.setPosition(new Vec2(boxX + 10, boxY + 20));
 
+            richText.draw(graphics, mouseX, mouseY, partialTick, Vec2.ZERO);
+
             if (charIndex >= dialogueLine.length() && (tickCount % 20 < 10)) {
                 graphics.drawString(font, "▼", boxX + boxWidth - 15, boxY + boxHeight - 15, 0xFFFFFF, false);
             }
         }
     }
+
+
 
     @Override
     public void mouseClicked(double mouseX, double mouseY, int button) {

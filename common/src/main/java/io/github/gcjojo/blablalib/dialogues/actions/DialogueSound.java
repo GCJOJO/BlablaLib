@@ -5,7 +5,7 @@ import io.github.gcjojo.blablalib.BlablaLib;
 import io.github.gcjojo.blablalib.client.gui.DialogueScreen;
 import io.github.gcjojo.blablalib.dialogues.DialogueAction;
 import io.github.gcjojo.blablalib.dialogues.DialogueManager;
-import io.github.gcjojo.liblib.LibLib;
+import io.github.gcjojo.liblib.client.SoundPlayer;
 import lombok.Getter;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.RegistryFriendlyByteBuf;
@@ -50,7 +50,7 @@ public class DialogueSound extends DialogueAction {
     @Override
     public void setup(DialogueScreen screen) {
         super.setup(screen);
-        LibLib.getSoundPlayer().playSound(this.soundName, this.pitch, this.volume);
+        SoundPlayer.playSound(this.soundName, this.pitch, this.volume);
     }
 
     @Override
