@@ -1,21 +1,18 @@
 package io.github.gcjojo.blablalib.dialogues.actions;
 
 import com.google.gson.JsonObject;
-import dev.architectury.networking.NetworkManager;
 import io.github.gcjojo.blablalib.BlablaLib;
 import io.github.gcjojo.blablalib.client.gui.DialogueScreen;
 import io.github.gcjojo.blablalib.dialogues.DialogueAction;
 import io.github.gcjojo.blablalib.dialogues.DialogueManager;
-import io.github.gcjojo.blablalib.network.payloads.DialogueSetQuestStatePayload;
-import io.github.gcjojo.blablalib.network.payloads.DialogueSetTaskStatePayload;
-import io.netty.buffer.Unpooled;
+import io.github.gcjojo.liblib.LibLib;
 import lombok.Getter;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerPlayer;
 
 import java.util.Optional;
 
@@ -56,24 +53,19 @@ public class DialogueQuestStateAction extends DialogueAction {
     @Override
     public void setup(DialogueScreen screen) {
         super.setup(screen);
-        // TODO DO THIS SERVER SIDE
+        screen.queueAdvanceDialogue();
+    }
+
+    @Override
+    public void actionCompleted(ServerPlayer player) {
         if (!newState.isEmpty()) {
             questId.ifPresent(questId -> {
-                taskId.ifPresentOrElse(taskId -> {
-                    FriendlyByteBuf buf = new FriendlyByteBuf(Unpooled.buffer());
-                    buf.writeResourceLocation(questId);
-                    buf.writeResourceLocation(taskId);
-                    buf.writeUtf(newState);
-                    NetworkManager.sendToServer(new DialogueSetTaskStatePayload(questId, taskId, newState));
-                }, () -> {
-                    FriendlyByteBuf buf = new FriendlyByteBuf(Unpooled.buffer());
-                    buf.writeResourceLocation(questId);
-                    buf.writeUtf(newState);
-                    NetworkManager.sendToServer(new DialogueSetQuestStatePayload(questId, newState));
-                });
+                taskId.ifPresentOrElse(
+                        taskId -> LibLib.getQuestsLibAPI().setTaskCompletionState(player, questId, taskId, newState),
+                        () -> LibLib.getQuestsLibAPI().setQuestCompletionState(player, questId, newState)
+                );
             });
         }
-        screen.queueAdvanceDialogue();
     }
 
     @Override

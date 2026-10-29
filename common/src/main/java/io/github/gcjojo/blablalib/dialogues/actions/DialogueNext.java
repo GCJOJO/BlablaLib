@@ -10,6 +10,7 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerPlayer;
 
 public class DialogueNext extends DialogueAction {
     public static final StreamCodec<RegistryFriendlyByteBuf, DialogueNext> NEXT_STREAM_CODEC = StreamCodec.composite(
@@ -40,6 +41,11 @@ public class DialogueNext extends DialogueAction {
         super.setup(screen);
         //if(nextDialogue != null)
         //    screen.queueChange(nextDialogue);
+    }
+
+    @Override
+    public void actionCompleted(ServerPlayer player) {
+        BlablaLib.openDialogue(player, nextDialogue);
     }
 
     @Override

@@ -176,7 +176,7 @@ public class DialogueScreen extends GuiScreen {
 
     public DialogueSpeaker getDialogueSpeaker(ResourceLocation id) {
         for(var speaker : speakers)
-            if(speaker.getId() == id) return speaker;
+            if(speaker.getId().equals(id)) return speaker;
         return DialogueSpeaker.DEFAULT_SPEAKER;
     }
 

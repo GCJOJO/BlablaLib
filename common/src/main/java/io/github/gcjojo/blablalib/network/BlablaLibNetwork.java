@@ -1,6 +1,5 @@
 package io.github.gcjojo.blablalib.network;
 
-import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import dev.architectury.event.EventResult;
 import dev.architectury.networking.NetworkManager;
 import dev.architectury.platform.Platform;
@@ -9,12 +8,9 @@ import io.github.gcjojo.blablalib.client.gui.DialogueScreen;
 import io.github.gcjojo.blablalib.dialogues.DialogueManager;
 import io.github.gcjojo.blablalib.events.BlablalibEvents;
 import io.github.gcjojo.blablalib.network.payloads.*;
-import io.github.gcjojo.liblib.LibLib;
 import net.fabricmc.api.EnvType;
 import net.minecraft.client.Minecraft;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 
@@ -61,45 +57,9 @@ public class BlablaLibNetwork {
         NetworkManager.registerReceiver(NetworkManager.Side.C2S, DialogueAdvancedPayload.TYPE, DialogueAdvancedPayload.STREAM_CODEC, (payload, context) -> {
             if(!(context.getPlayer() instanceof ServerPlayer player)) return;
 
-            DialogueManager.getPlayerStatus(player).ifPresent(status -> {
-                status.setActionIndex(payload.newActionIndex());
-                DialogueManager.sendNextActions(player);
-            });
+            DialogueManager.playerDialogueAdvanced(player, payload.newActionIndex());
         });
 
-        NetworkManager.registerReceiver(NetworkManager.Side.C2S, DialogueCommandPayload.TYPE, DialogueCommandPayload.STREAM_CODEC, (payload, context) -> {
-            Player player = context.getPlayer();
-            if (!(player instanceof ServerPlayer)) return;
-
-            String command = payload.command();
-            context.queue(() -> {
-                MinecraftServer server = player.getServer();
-                if (server == null) return;
-
-                String formattedCommand = "execute positioned as %s rotated as %s run %s".formatted(player.getName().getString(), player.getName().getString(), command);
-                try {
-                    int success = server.getCommands().getDispatcher().execute(formattedCommand, server.createCommandSourceStack().withEntity(player).withLevel((ServerLevel) player.level()));
-                    BlablaLib.getLogger().warn(String.valueOf(success));
-                } catch (CommandSyntaxException e) {
-                    throw new RuntimeException(e);
-                }
-            });
-        });
-
-        NetworkManager.registerReceiver(NetworkManager.Side.C2S, DialogueSetQuestStatePayload.TYPE, DialogueSetQuestStatePayload.STREAM_CODEC, (payload, context) -> {
-            Player player = context.getPlayer();
-            ResourceLocation questId = payload.questId();
-            String newState = payload.newState();
-            LibLib.getQuestsLibAPI().setQuestCompletionState(player, questId, newState);
-        });
-
-        NetworkManager.registerReceiver(NetworkManager.Side.C2S, DialogueSetTaskStatePayload.TYPE, DialogueSetTaskStatePayload.STREAM_CODEC, (payload, context) -> {
-            Player player = context.getPlayer();
-            ResourceLocation questId = payload.questId();
-            ResourceLocation taskId = payload.taskId();
-            String newState = payload.newState();
-            LibLib.getQuestsLibAPI().setTaskCompletionState(player, questId, taskId, newState);
-        });
 
         NetworkManager.registerReceiver(NetworkManager.Side.C2S, DialogueSetNPCPayload.TYPE, DialogueSetNPCPayload.STREAM_CODEC, (payload, context) -> {
             ServerPlayer player = (ServerPlayer) context.getPlayer();

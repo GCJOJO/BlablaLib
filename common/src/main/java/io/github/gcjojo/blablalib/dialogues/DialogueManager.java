@@ -83,6 +83,21 @@ public class DialogueManager {
         NetworkManager.sendToPlayer(player, new DialogueActionsPayload(blockingActions, sentActions));
     }
 
+    public static void playerDialogueAdvanced(ServerPlayer player, int newActionIndex) {
+        DialogueManager.getPlayerStatus(player).ifPresent(status -> {
+            int oldActionIndex = status.getActionIndex();
+
+            List<DialogueAction> actions = status.getCurrentDialogue().getDialogueActions();
+            for(int i = oldActionIndex; i <= newActionIndex; i++) {
+                DialogueAction action = actions.get(i);
+                action.actionCompleted(player);
+            }
+
+            status.setActionIndex(newActionIndex);
+            DialogueManager.sendNextActions(player);
+        });
+    }
+
     @Getter
     private static final Map<ResourceLocation, Class<? extends DialogueAction>> dialogueActionClasses = new HashMap<>();
     @Getter

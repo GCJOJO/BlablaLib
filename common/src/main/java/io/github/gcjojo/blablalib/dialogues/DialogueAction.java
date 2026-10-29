@@ -6,6 +6,7 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerPlayer;
 
 import java.util.Optional;
 
@@ -26,6 +27,8 @@ public abstract class DialogueAction
 
     public abstract boolean isBlocking();
     public abstract boolean isSkippable();
+
+    public void actionCompleted(ServerPlayer player) { }
 
     public Optional<ResourceLocation> getReferencedSpeaker() { return Optional.empty(); }
 

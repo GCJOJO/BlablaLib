@@ -1,19 +1,20 @@
 package io.github.gcjojo.blablalib.dialogues.actions;
 
 import com.google.gson.JsonObject;
-import dev.architectury.networking.NetworkManager;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import io.github.gcjojo.blablalib.BlablaLib;
 import io.github.gcjojo.blablalib.client.gui.DialogueScreen;
 import io.github.gcjojo.blablalib.dialogues.DialogueAction;
 import io.github.gcjojo.blablalib.dialogues.DialogueManager;
-import io.github.gcjojo.blablalib.network.payloads.DialogueCommandPayload;
 import lombok.Getter;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 
 public class DialogueExecuteCommand extends DialogueAction {
     public static final StreamCodec<RegistryFriendlyByteBuf, DialogueExecuteCommand> COMMAND_STREAM_CODEC = StreamCodec.composite(
@@ -40,14 +41,27 @@ public class DialogueExecuteCommand extends DialogueAction {
     @Override
     public void setup(DialogueScreen screen){
         super.setup(screen);
-        // TODO DO THIS SERVER SIDE
+        screen.queueAdvanceDialogue();
+    }
+
+    @Override
+    public void actionCompleted(ServerPlayer player) {
         if(this.command != null) {
             if (this.command.contains("<PLAYER>"))
-                this.command = this.command.replace("<PLAYER>", Minecraft.getInstance().player.getName().getString());
+                this.command = this.command.replace("<PLAYER>", player.getName().getString());
 
-            NetworkManager.sendToServer(new DialogueCommandPayload(command));
+            MinecraftServer server = player.getServer();
+
+            if (server == null) return;
+
+            String formattedCommand = "execute positioned as %s rotated as %s run %s".formatted(player.getName().getString(), player.getName().getString(), command);
+            try {
+                int success = server.getCommands().getDispatcher().execute(formattedCommand, server.createCommandSourceStack().withEntity(player).withLevel((ServerLevel) player.level()));
+                BlablaLib.getLogger().warn(String.valueOf(success));
+            } catch (CommandSyntaxException e) {
+                throw new RuntimeException(e);
+            }
         }
-        screen.queueAdvanceDialogue();
     }
 
     @Override
