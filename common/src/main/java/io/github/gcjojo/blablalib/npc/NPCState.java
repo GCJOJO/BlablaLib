@@ -1,5 +1,8 @@
 package io.github.gcjojo.blablalib.npc;
 
+import io.github.gcjojo.blablalib.npc.definitions.NPCDefinition;
+import io.github.gcjojo.blablalib.npc.definitions.NPCVariableDefinition;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;

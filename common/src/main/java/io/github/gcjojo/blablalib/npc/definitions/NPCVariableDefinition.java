@@ -1,8 +1,9 @@
-package io.github.gcjojo.blablalib.npc;
+package io.github.gcjojo.blablalib.npc.definitions;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import io.github.gcjojo.blablalib.npc.VariableType;
 
 // Maybe change Object -> T
 public record NPCVariableDefinition<T>(String variableName, VariableType type, T defaultValue) {

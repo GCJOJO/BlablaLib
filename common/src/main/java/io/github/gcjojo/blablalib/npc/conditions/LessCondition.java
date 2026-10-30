@@ -2,7 +2,6 @@ package io.github.gcjojo.blablalib.npc.conditions;
 
 import com.mojang.serialization.MapCodec;
 import io.github.gcjojo.blablalib.npc.ConditionType;
-import io.github.gcjojo.blablalib.npc.TransitionConditions;
 
 public class LessCondition extends NumericComparisonCondition {
 

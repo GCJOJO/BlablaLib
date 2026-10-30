@@ -1,7 +1,9 @@
-package io.github.gcjojo.blablalib.npc;
+package io.github.gcjojo.blablalib.npc.definitions;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import io.github.gcjojo.blablalib.npc.NPCVisualState;
+import io.github.gcjojo.blablalib.npc.StateTransition;
 
 import java.util.List;
 

@@ -1,9 +1,9 @@
-package io.github.gcjojo.blablalib.npc;
+package io.github.gcjojo.blablalib.npc.conditions;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import io.github.gcjojo.blablalib.BlablaLib;
-import io.github.gcjojo.blablalib.npc.conditions.*;
+import io.github.gcjojo.blablalib.npc.ConditionType;
 import net.minecraft.resources.ResourceLocation;
 
 import java.util.*;
@@ -53,5 +53,16 @@ public class TransitionConditions {
         register(GREATER_THAN_OR_EQUAL);
         register(LESS);
         register(LESS_THAN_OR_EQUAL);
+        register(IsInDialogueCondition.TYPE);
+        register(NotCondition.TYPE);
+        register(AndCondition.TYPE);
+        register(OrCondition.TYPE);
+        register(XorCondition.TYPE);
+        register(RandomCondition.TYPE);
+        register(CountCondition.TYPE);
+        register(AnyCondition.TYPE);
+        register(AllCondition.TYPE);
+
+        register(QuestCondition.TYPE);
     }
 }

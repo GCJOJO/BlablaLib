@@ -1,5 +1,6 @@
 package io.github.gcjojo.blablalib.npc;
 
+import io.github.gcjojo.blablalib.npc.definitions.NPCVariableDefinition;
 import lombok.Getter;
 import lombok.Setter;
 

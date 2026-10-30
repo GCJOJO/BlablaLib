@@ -1,4 +1,4 @@
-package io.github.gcjojo.blablalib.npc;
+package io.github.gcjojo.blablalib.npc.definitions;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;

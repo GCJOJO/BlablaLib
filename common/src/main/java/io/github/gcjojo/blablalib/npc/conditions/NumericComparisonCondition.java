@@ -4,8 +4,8 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import io.github.gcjojo.blablalib.npc.NPCState;
-import io.github.gcjojo.blablalib.npc.TransitionCondition;
 import lombok.Getter;
+import net.minecraft.server.level.ServerPlayer;
 
 import java.util.Optional;
 import java.util.function.BiFunction;
@@ -32,7 +32,7 @@ public abstract class NumericComparisonCondition extends TransitionCondition {
     protected abstract boolean compare(double currentValue, double targetValue);
 
     @Override
-    public boolean canTransition(NPCState state) {
+    public boolean canTransition(ServerPlayer player, NPCState state) {
         Optional<Object> currentValue = state.getVariableValue(variableName);
         if(currentValue.isEmpty()) return false;
         if(!(currentValue.get() instanceof Number number)) return false;

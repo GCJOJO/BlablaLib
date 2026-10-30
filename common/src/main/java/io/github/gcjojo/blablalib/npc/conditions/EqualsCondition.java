@@ -9,9 +9,9 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import io.github.gcjojo.blablalib.BlablaLib;
 import io.github.gcjojo.blablalib.npc.ConditionType;
 import io.github.gcjojo.blablalib.npc.NPCState;
-import io.github.gcjojo.blablalib.npc.TransitionCondition;
 import lombok.Getter;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerPlayer;
 
 import java.util.Optional;
 
@@ -30,18 +30,16 @@ public class EqualsCondition extends TransitionCondition {
 
     @Getter
     private final String variableName;
-    private final JsonElement value;
     @Getter
     private final Dynamic<?> rawDynamicValue;
 
     public EqualsCondition(String variableName, JsonElement value) {
         this.variableName = variableName;
-        this.value = value;
         this.rawDynamicValue = new Dynamic<>(JsonOps.INSTANCE, value);
     }
 
     @Override
-    public boolean canTransition(NPCState state) {
+    public boolean canTransition(ServerPlayer player, NPCState state) {
         Optional<Object> currentValue = state.getVariableValue(variableName);
         if(currentValue.isEmpty()) return false;
         if(!(currentValue.get() instanceof Boolean boolValue)) return false;
