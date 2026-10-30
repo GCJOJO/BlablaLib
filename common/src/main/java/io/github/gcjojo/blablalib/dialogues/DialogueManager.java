@@ -107,12 +107,12 @@ public class DialogueManager {
         dialogueActionClasses.put(ResourceLocation.tryBuild(BlablaLib.MOD_ID, "clear"),          DialogueClear.class);
         dialogueActionClasses.put(ResourceLocation.tryBuild(BlablaLib.MOD_ID, "wait"),           DialogueWait.class);
         dialogueActionClasses.put(ResourceLocation.tryBuild(BlablaLib.MOD_ID, "choice"),         DialogueChoice.class);
-        dialogueActionClasses.put(ResourceLocation.tryBuild(BlablaLib.MOD_ID, "change_set"),     DialogueNext.class);
+        dialogueActionClasses.put(ResourceLocation.tryBuild(BlablaLib.MOD_ID, "change_set"),     DialogueNext.class);               // Backwards compatibility
         dialogueActionClasses.put(ResourceLocation.tryBuild(BlablaLib.MOD_ID, "next_dialogue"),  DialogueNext.class);
         dialogueActionClasses.put(ResourceLocation.tryBuild(BlablaLib.MOD_ID, "fade"),           DialogueFading.class);
         dialogueActionClasses.put(ResourceLocation.tryBuild(BlablaLib.MOD_ID, "message"),        DialogueMessage.class);
         dialogueActionClasses.put(ResourceLocation.tryBuild(BlablaLib.MOD_ID, "image"),          DialogueImage.class);
-        dialogueActionClasses.put(ResourceLocation.tryBuild(BlablaLib.MOD_ID, "credit"),         DialogueText.class);
+        dialogueActionClasses.put(ResourceLocation.tryBuild(BlablaLib.MOD_ID, "credit"),         DialogueText.class);               // Backwards compatibility
         dialogueActionClasses.put(ResourceLocation.tryBuild(BlablaLib.MOD_ID, "text"),           DialogueText.class);
         dialogueActionClasses.put(ResourceLocation.tryBuild(BlablaLib.MOD_ID, "image_move"),     DialogueMoveImage.class);
         dialogueActionClasses.put(ResourceLocation.tryBuild(BlablaLib.MOD_ID, "command"),        DialogueExecuteCommand.class);
@@ -121,6 +121,7 @@ public class DialogueManager {
         dialogueActionClasses.put(ResourceLocation.tryBuild(BlablaLib.MOD_ID, "npc"),            DialogueNPC.class);
 
         dialogueActionClasses.put(ResourceLocation.tryBuild(BlablaLib.MOD_ID, "quest_state"),    DialogueQuestStateAction.class);
+        dialogueActionClasses.put(ResourceLocation.tryBuild(BlablaLib.MOD_ID, "play_cutscene"),  DialoguePlayCutscene.class);
     }
 
     public static Class<? extends DialogueAction> getActionClass(ResourceLocation action) {
