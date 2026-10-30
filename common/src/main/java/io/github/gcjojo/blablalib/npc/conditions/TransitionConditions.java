@@ -47,7 +47,7 @@ public class TransitionConditions {
             ResourceLocation.fromNamespaceAndPath(BlablaLib.MOD_ID, "less_than_or_equal"),
             LessThanOrEqualCondition.CODEC);
 
-    static {
+    public static void registerConditions() {
         register(EqualsCondition.TYPE);
         register(GREATER);
         register(GREATER_THAN_OR_EQUAL);

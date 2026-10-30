@@ -12,7 +12,7 @@ import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.ResourceLocation;
 
-// TODO Change this to instead interact with NPC Variables
+
 
 public class DialogueNPC extends DialogueAction {
     @Getter

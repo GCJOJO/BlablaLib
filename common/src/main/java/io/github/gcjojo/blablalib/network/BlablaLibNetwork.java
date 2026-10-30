@@ -6,14 +6,12 @@ import dev.architectury.platform.Platform;
 import io.github.gcjojo.blablalib.BlablaLib;
 import io.github.gcjojo.blablalib.client.gui.DialogueScreen;
 import io.github.gcjojo.blablalib.dialogues.DialogueManager;
-import io.github.gcjojo.blablalib.entities.NPC;
 import io.github.gcjojo.blablalib.events.BlablalibEvents;
 import io.github.gcjojo.blablalib.network.payloads.*;
 import net.fabricmc.api.EnvType;
 import net.minecraft.client.Minecraft;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 
 public class BlablaLibNetwork {
@@ -63,20 +61,12 @@ public class BlablaLibNetwork {
         });
 
 
-        NetworkManager.registerReceiver(NetworkManager.Side.C2S, NPCVisualStatePayload.TYPE, NPCVisualStatePayload.STREAM_CODEC, (payload, context) -> {
-            ServerPlayer player = (ServerPlayer) context.getPlayer();
-
-            Entity entity = player.serverLevel().getEntity(payload.entityId());
-            if(!(entity instanceof NPC npc)) return;
-
-            npc.setClientState(payload.newVisualState());
-        });
-
         if (Platform.getEnv() == EnvType.CLIENT) return;
 
         NetworkManager.registerS2CPayloadType(OpenDialoguePayload.TYPE, OpenDialoguePayload.STREAM_CODEC);
         NetworkManager.registerS2CPayloadType(DialogueActionsPayload.TYPE, DialogueActionsPayload.STREAM_CODEC);
         NetworkManager.registerS2CPayloadType(DialogueSpeakersPayload.TYPE, DialogueSpeakersPayload.STREAM_CODEC);
+        NetworkManager.registerS2CPayloadType(NPCVisualStatePayload.TYPE, NPCVisualStatePayload.STREAM_CODEC);
     }
 
     public static void registerClientPackets() {
@@ -97,6 +87,12 @@ public class BlablaLibNetwork {
                 if(!(Minecraft.getInstance().screen instanceof DialogueScreen dialogueScreen)) return;
                 dialogueScreen.receiveSpeakers(payload.speakers());
             });
+        });
+
+        NetworkManager.registerReceiver(NetworkManager.Side.S2C, NPCVisualStatePayload.TYPE, NPCVisualStatePayload.STREAM_CODEC, (payload, context) -> {
+            context.queue(() ->
+                BlablaLib.dirtyNpcClientStates.put(payload.entityId(), payload.newVisualState())
+            );
         });
     }
 }

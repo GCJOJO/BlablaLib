@@ -3,6 +3,7 @@ package io.github.gcjojo.blablalib.entities;
 import dev.architectury.networking.NetworkManager;
 import io.github.gcjojo.blablalib.BlablaLib;
 import io.github.gcjojo.blablalib.network.payloads.NPCVisualStatePayload;
+import io.github.gcjojo.blablalib.npc.NPCDefinitionLoader;
 import io.github.gcjojo.blablalib.npc.NPCState;
 import io.github.gcjojo.blablalib.npc.NPCVisualState;
 import io.github.gcjojo.blablalib.npc.definitions.NPCDefinition;
@@ -13,6 +14,7 @@ import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.EntityType;
@@ -26,7 +28,10 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
 
 public class NPC extends LivingEntity {
     // Server-Side
@@ -39,7 +44,7 @@ public class NPC extends LivingEntity {
 
     // Client Side
     @Setter
-    protected NPCVisualState clientState;
+    protected NPCVisualState clientState = NPCVisualState.DEFAULT;
 
     public NPC(EntityType<? extends LivingEntity> entityType, Level level) {
         super(entityType, level);
@@ -78,6 +83,7 @@ public class NPC extends LivingEntity {
 
     public void setDefinitionId(ResourceLocation newId) {
         entityData.set(NPC_DEFINITION_ID, newId.toString());
+        refreshDefinition();
     }
 
     public String getModelNamespace() {
@@ -122,7 +128,16 @@ public class NPC extends LivingEntity {
 
     @Override
     public void tick() {
-        for(ServerPlayer player : Objects.requireNonNull(getServer()).getPlayerList().getPlayers()) {
+        super.tick();
+
+        Level level = level();
+        if(level.isClientSide())
+            return;
+
+        MinecraftServer server = getServer();
+        if(server == null) return;
+
+        for(ServerPlayer player : server.getPlayerList().getPlayers()) {
             NPCState state = getCurrentState(player);
             if(state.updateState(player))
                 NetworkManager.sendToPlayer(player, new NPCVisualStatePayload(getUUID(), state.currentStateDefinition.visualState()));
@@ -139,6 +154,24 @@ public class NPC extends LivingEntity {
     public void readAdditionalSaveData(CompoundTag compound) {
         super.readAdditionalSaveData(compound);
         this.entityData.set(NPC_DEFINITION_ID, compound.getString("Definition"));
+        refreshDefinition();
+    }
+
+    public void refreshDefinition() {
+        ResourceLocation definitionId = ResourceLocation.tryParse(entityData.get(NPC_DEFINITION_ID));
+        if(definitionId == null || !NPCDefinitionLoader.DEFINITIONS.containsKey(definitionId)) return;
+
+        npcDefinition = NPCDefinitionLoader.DEFINITIONS.get(definitionId);
+        stateForPlayers.replaceAll((uuid, state) -> new NPCState(npcDefinition));
+        setCustomName(npcDefinition.name());
+
+        MinecraftServer server = getServer();
+        if(server == null) return;
+
+        for(ServerPlayer player : server.getPlayerList().getPlayers()) {
+            NPCState state = getCurrentState(player);
+            NetworkManager.sendToPlayer(player, new NPCVisualStatePayload(getUUID(), state.currentStateDefinition.visualState()));
+        }
     }
 
     @Override

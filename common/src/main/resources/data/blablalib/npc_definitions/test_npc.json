@@ -26,8 +26,9 @@
   "states": [
     {
       "state_name": "idle",
+      "dialogue" : "blablalib:test_three_choices",
       "visual_state": {
-        "model": "minecraft:villager",
+        "model": "blablalib:npc",
         "texture": "minecraft:textures/entity/villager/villager.png",
         "animation": "idle"
       },
@@ -44,8 +45,9 @@
     },
     {
       "state_name": "talking",
+      "dialogue" : "blablalib:test_choice",
       "visual_state": {
-        "model": "minecraft:villager",
+        "model": "blablalib:npc",
         "texture": "minecraft:textures/entity/villager/villager.png",
         "animation": "talk"
       },
@@ -54,7 +56,7 @@
           "target_state": "idle",
           "condition": {
             "type": "blablalib:not",
-            "condition" : {
+            "inner" : {
               "type" : "blablalib:is_in_dialogue"
             }
           }

@@ -52,7 +52,8 @@ public class NPCState {
         NPCStateDefinition newState = null;
 
         int steps = MAX_TRANSITION_STEPS;
-        while(steps-- > 0) {
+        while(steps > 0) {
+            steps--;
             newState = findNextValidState(player);
             if(newState == null)
                 return false;

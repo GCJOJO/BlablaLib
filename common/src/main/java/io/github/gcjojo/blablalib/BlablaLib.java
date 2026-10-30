@@ -2,6 +2,7 @@ package io.github.gcjojo.blablalib;
 
 import com.mojang.logging.LogUtils;
 import dev.architectury.event.EventResult;
+import dev.architectury.event.events.client.ClientTickEvent;
 import dev.architectury.event.events.common.InteractionEvent;
 import dev.architectury.registry.ReloadListenerRegistry;
 import dev.architectury.registry.level.entity.EntityAttributeRegistry;
@@ -14,6 +15,8 @@ import io.github.gcjojo.blablalib.entities.NPC;
 import io.github.gcjojo.blablalib.events.BlablalibEvents;
 import io.github.gcjojo.blablalib.network.BlablaLibNetwork;
 import io.github.gcjojo.blablalib.npc.NPCDefinitionLoader;
+import io.github.gcjojo.blablalib.npc.NPCVisualState;
+import io.github.gcjojo.blablalib.npc.conditions.TransitionConditions;
 import io.github.gcjojo.liblib.LibLib;
 import io.github.gcjojo.liblib.factory.PlayerDataRegistry;
 import net.minecraft.resources.ResourceLocation;
@@ -26,16 +29,15 @@ import net.minecraft.world.entity.player.Player;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 public final class BlablaLib {
     public static final String MOD_ID = "blablalib";
     public static final ResourceLocation BLABLALIB_DIALOGUE_DATA_ID = ResourceLocation.tryBuild(MOD_ID, "dialogue_data");
     private static final Logger LOGGER = LogUtils.getLogger();
     private static final Map<UUID, Map<Integer, UUID>> playerNPCs = new HashMap<>();
+
+    public static final Map<UUID, NPCVisualState> dirtyNpcClientStates = new HashMap<>();
 
     public static void init() {
         BlablaLibNetwork.registerPackets();
@@ -60,12 +62,32 @@ public final class BlablaLib {
             return EventResult.pass();
         });
 
+        TransitionConditions.registerConditions();
+
         ReloadListenerRegistry.register(PackType.SERVER_DATA, new DialogueLoader(), ResourceLocation.fromNamespaceAndPath(BlablaLib.MOD_ID, "dialogues"));
         ReloadListenerRegistry.register(PackType.SERVER_DATA, new NPCDefinitionLoader(), ResourceLocation.fromNamespaceAndPath(BlablaLib.MOD_ID, "npc_definitions"));
     }
 
     public static void initClient() {
         BlablaLibNetwork.registerClientPackets();
+
+        ClientTickEvent.CLIENT_LEVEL_PRE.register(level -> {
+            List<UUID> modifiedNpcs = new ArrayList<>();
+
+            for (Entity entity : level.entitiesForRendering()) {
+                for(UUID npcId : dirtyNpcClientStates.keySet()) {
+                    if (entity.getUUID().equals(npcId)) {
+                        if(entity instanceof NPC npc) {
+                            npc.setClientState(dirtyNpcClientStates.get(npcId));
+                            modifiedNpcs.add(npcId);
+                            break;
+                        }
+                    }
+                }
+            }
+
+            modifiedNpcs.forEach(dirtyNpcClientStates::remove);
+        });
     }
 
     public static Logger getLogger() {
