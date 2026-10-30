@@ -83,7 +83,7 @@ public class DialogueExecuteCommand extends DialogueAction {
 
     @Override
     public boolean isSkippable() {
-        return true;
+        return false;
     }
 
     @Override
