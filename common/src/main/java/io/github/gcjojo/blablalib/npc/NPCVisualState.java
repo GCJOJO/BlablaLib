@@ -24,7 +24,8 @@ public record NPCVisualState(
                     .apply(instance, NPCVisualState::new));
 
     private static final Gson GSON = new GsonBuilder().create();
-    public static NPCVisualState EMPTY = new NPCVisualState("", "", "");
+    public static final NPCVisualState EMPTY = new NPCVisualState("", "", "");
+    public static final NPCVisualState DEFAULT = new NPCVisualState("blablalib:npc", "blablalib:npc/default.png", "");
 
     public static NPCVisualState fromCompoundTag(CompoundTag nbt){
         String model = "";

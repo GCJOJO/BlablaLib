@@ -6,12 +6,14 @@ import dev.architectury.platform.Platform;
 import io.github.gcjojo.blablalib.BlablaLib;
 import io.github.gcjojo.blablalib.client.gui.DialogueScreen;
 import io.github.gcjojo.blablalib.dialogues.DialogueManager;
+import io.github.gcjojo.blablalib.entities.NPC;
 import io.github.gcjojo.blablalib.events.BlablalibEvents;
 import io.github.gcjojo.blablalib.network.payloads.*;
 import net.fabricmc.api.EnvType;
 import net.minecraft.client.Minecraft;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 
 public class BlablaLibNetwork {
@@ -61,25 +63,13 @@ public class BlablaLibNetwork {
         });
 
 
-        NetworkManager.registerReceiver(NetworkManager.Side.C2S, DialogueSetNPCPayload.TYPE, DialogueSetNPCPayload.STREAM_CODEC, (payload, context) -> {
+        NetworkManager.registerReceiver(NetworkManager.Side.C2S, NPCVisualStatePayload.TYPE, NPCVisualStatePayload.STREAM_CODEC, (payload, context) -> {
             ServerPlayer player = (ServerPlayer) context.getPlayer();
 
-            int npcId = payload.npcId();
-            String newModel = payload.npcModel();
-            String newTexture = payload.npcTexture();
-            String newAnimation = payload.npcAnimation();
-            boolean loopAnimation = payload.loopAnimation();
+            Entity entity = player.serverLevel().getEntity(payload.entityId());
+            if(!(entity instanceof NPC npc)) return;
 
-            if(!BlablaLib.playerHasNPC(player, npcId)) return;
-
-            BlablaLib.getPlayerNPC(player, npcId).ifPresent(npc -> {
-                if(!newModel.isEmpty())
-                    npc.setCurrentModel(newModel);
-                if(!newTexture.isEmpty())
-                    npc.setCurrentTexture(newTexture);
-                if(!newAnimation.isEmpty())
-                    npc.setCurrentAnimation(newAnimation, loopAnimation);
-            });
+            npc.setClientState(payload.newVisualState());
         });
 
         if (Platform.getEnv() == EnvType.CLIENT) return;

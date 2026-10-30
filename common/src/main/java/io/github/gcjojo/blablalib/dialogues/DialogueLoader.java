@@ -114,7 +114,7 @@ public class DialogueLoader extends SimpleJsonResourceReloadListener {
                         JsonObject json = (JsonObject) entry.getValue();
                         newDialogues.putAll(loadDialogueFile(filePath, json));
                     } catch (Exception e) {
-                        BlablaLib.getLogger().error("Cannot load quest file {}\n{}", entry.getKey().toString(), e.toString());
+                        BlablaLib.getLogger().error("Cannot load dialogue file {}\n{}", entry.getKey().toString(), e.toString());
                     }
                 });
 

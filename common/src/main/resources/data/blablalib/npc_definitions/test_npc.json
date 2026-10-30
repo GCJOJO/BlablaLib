@@ -22,6 +22,7 @@
       "defaultValue": "minecraft:emerald"
     }
   ],
+  "root_state" : "idle",
   "states": [
     {
       "state_name": "idle",
@@ -52,7 +53,10 @@
         {
           "target_state": "idle",
           "condition": {
-            "type": "mon_mod:dialogue_ended"
+            "type": "blablalib:not",
+            "condition" : {
+              "type" : "blablalib:is_in_dialogue"
+            }
           }
         }
       ]

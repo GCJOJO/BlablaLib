@@ -13,6 +13,7 @@ import io.github.gcjojo.blablalib.entities.BlablaLibEntityTypes;
 import io.github.gcjojo.blablalib.entities.NPC;
 import io.github.gcjojo.blablalib.events.BlablalibEvents;
 import io.github.gcjojo.blablalib.network.BlablaLibNetwork;
+import io.github.gcjojo.blablalib.npc.NPCDefinitionLoader;
 import io.github.gcjojo.liblib.LibLib;
 import io.github.gcjojo.liblib.factory.PlayerDataRegistry;
 import net.minecraft.resources.ResourceLocation;
@@ -60,6 +61,7 @@ public final class BlablaLib {
         });
 
         ReloadListenerRegistry.register(PackType.SERVER_DATA, new DialogueLoader(), ResourceLocation.fromNamespaceAndPath(BlablaLib.MOD_ID, "dialogues"));
+        ReloadListenerRegistry.register(PackType.SERVER_DATA, new NPCDefinitionLoader(), ResourceLocation.fromNamespaceAndPath(BlablaLib.MOD_ID, "npc_definitions"));
     }
 
     public static void initClient() {

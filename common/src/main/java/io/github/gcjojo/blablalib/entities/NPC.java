@@ -1,7 +1,13 @@
 package io.github.gcjojo.blablalib.entities;
 
+import dev.architectury.networking.NetworkManager;
 import io.github.gcjojo.blablalib.BlablaLib;
+import io.github.gcjojo.blablalib.network.payloads.NPCVisualStatePayload;
+import io.github.gcjojo.blablalib.npc.NPCState;
 import io.github.gcjojo.blablalib.npc.NPCVisualState;
+import io.github.gcjojo.blablalib.npc.definitions.NPCDefinition;
+import io.github.gcjojo.blablalib.npc.definitions.NPCStateDefinition;
+import lombok.Setter;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
@@ -18,19 +24,25 @@ import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
+import org.jetbrains.annotations.NotNull;
 
-import java.util.Collections;
+import java.util.*;
 
 public class NPC extends LivingEntity {
-    protected static final EntityDataAccessor<NPCVisualState> DEFAULT_STATE = SynchedEntityData.defineId(NPC.class, BlablaLibEntityDataSerializers.npcDefinition());
-    protected static final EntityDataAccessor<NPCVisualState> CURRENT_STATE = SynchedEntityData.defineId(NPC.class, BlablaLibEntityDataSerializers.npcDefinition());
-    protected static final EntityDataAccessor<Boolean> LOOP_CURRENT_ANIMATION = SynchedEntityData.defineId(NPC.class, EntityDataSerializers.BOOLEAN);
+    // Server-Side
+    private static final EntityDataAccessor<String> NPC_DEFINITION_ID =
+            SynchedEntityData.defineId(NPC.class, EntityDataSerializers.STRING);
+
+    protected NPCDefinition npcDefinition = NPCDefinition.DEFAULT;
+    protected final Map<UUID, NPCState> stateForPlayers = new HashMap<>();
+
+
+    // Client Side
+    @Setter
+    protected NPCVisualState clientState;
 
     public NPC(EntityType<? extends LivingEntity> entityType, Level level) {
         super(entityType, level);
-        setCurrentModel("blablalib:geometry.npc");
-        setCurrentTexture("blablalib:textures/entity/npc/default.png");
-        setCurrentDialogue("blablalib:test_npc");
     }
 
     public static AttributeSupplier.Builder createAttributes() {
@@ -45,7 +57,7 @@ public class NPC extends LivingEntity {
             return true;
         }
 
-        ResourceLocation dialogueId = ResourceLocation.tryParse(getCurrentState().dialogue());
+        ResourceLocation dialogueId = getCurrentStateDefinition(player).dialogueId();
         if(dialogueId != null && player instanceof ServerPlayer serverPlayer) {
             BlablaLib.setPlayerNPC(serverPlayer, this, 0);
             BlablaLib.openDialogue(serverPlayer, dialogueId);
@@ -57,110 +69,93 @@ public class NPC extends LivingEntity {
     @Override
     protected void defineSynchedData(SynchedEntityData.Builder builder) {
         super.defineSynchedData(builder);
-        builder.define(DEFAULT_STATE, NPCVisualState.EMPTY);
-        builder.define(CURRENT_STATE, NPCVisualState.EMPTY);
-        builder.define(LOOP_CURRENT_ANIMATION, false);
+        builder.define(NPC_DEFINITION_ID, "");
+    }
+
+    public ResourceLocation getDefinitionId() {
+        return ResourceLocation.tryParse(entityData.get(NPC_DEFINITION_ID));
+    }
+
+    public void setDefinitionId(ResourceLocation newId) {
+        entityData.set(NPC_DEFINITION_ID, newId.toString());
     }
 
     public String getModelNamespace() {
-        String modelId = getCurrentState().modelLocation();
+        String modelId = clientState.modelLocation();
         if(modelId.contains(":"))
             return modelId.split(":")[0];
         return ResourceLocation.DEFAULT_NAMESPACE;
     }
 
     public String getModelPath(){
-        String modelId = getCurrentState().modelLocation();
+        String modelId = clientState.modelLocation();
         if(modelId.contains(":"))
             return modelId.split(":")[1];
         return modelId;
     }
 
     public String getTextureNamespace() {
-        String textureId = getCurrentState().textureLocation();
+        String textureId = clientState.textureLocation();
         if(textureId.contains(":"))
             return textureId.split(":")[0];
         return ResourceLocation.DEFAULT_NAMESPACE;
     }
 
     public String getTexturePath() {
-        String textureId = getCurrentState().textureLocation();
+        String textureId = clientState.textureLocation();
         if(textureId.contains(":"))
             return textureId.split(":")[1];
         return textureId;
     }
 
-    public NPCVisualState getDefaultState() {
-        return this.entityData.get(DEFAULT_STATE);
+    public NPCStateDefinition getRootState() {
+        return npcDefinition.getRootState();
     }
 
-    public NPCVisualState getCurrentState() {
-        return this.entityData.get(CURRENT_STATE);
+    public NPCState getCurrentState(Player player) {
+        return stateForPlayers.computeIfAbsent(player.getUUID(), uuid -> new NPCState(npcDefinition));
     }
 
-    public void setCurrentModel(String newModel){
-        this.entityData.set(CURRENT_STATE, getCurrentState().withModel(newModel));
+    public NPCStateDefinition getCurrentStateDefinition(Player player) {
+        return getCurrentState(player).currentStateDefinition;
     }
 
-    public void setDefaultModel(String newModel) {
-        this.entityData.set(DEFAULT_STATE, getDefaultState().withModel(newModel));
-    }
-
-    public void setCurrentTexture(String newTexture){
-        this.entityData.set(CURRENT_STATE, getCurrentState().withTexture(newTexture));
-    }
-
-    public void setDefaultTexture(String newTexture) {
-        this.entityData.set(DEFAULT_STATE, getDefaultState().withTexture(newTexture));
-    }
-
-    public void setCurrentAnimation(String newAnimation, boolean loop){
-        this.entityData.set(CURRENT_STATE, getCurrentState().withAnimation(newAnimation));
-        this.entityData.set(LOOP_CURRENT_ANIMATION, loop);
-    }
-
-    public void setDefaultAnimation(String newAnimation) {
-        this.entityData.set(DEFAULT_STATE, getDefaultState().withAnimation(newAnimation));
-    }
-
-    public void setCurrentDialogue(String newDialogue){
-        this.entityData.set(CURRENT_STATE, getCurrentState().withDialogue(newDialogue));
-    }
-
-    public void setDefaultDialogue(String newDialogue) {
-        this.entityData.set(DEFAULT_STATE, getDefaultState().withDialogue(newDialogue));
+    @Override
+    public void tick() {
+        for(ServerPlayer player : Objects.requireNonNull(getServer()).getPlayerList().getPlayers()) {
+            NPCState state = getCurrentState(player);
+            if(state.updateState(player))
+                NetworkManager.sendToPlayer(player, new NPCVisualStatePayload(getUUID(), state.currentStateDefinition.visualState()));
+        }
     }
 
     @Override
     public void addAdditionalSaveData(CompoundTag compound) {
         super.addAdditionalSaveData(compound);
-        compound.put("DefaultState", this.entityData.get(DEFAULT_STATE).toCompoundTag());
-        compound.put("CurrentState", this.entityData.get(CURRENT_STATE).toCompoundTag());
+        compound.putString("Definition", this.entityData.get(NPC_DEFINITION_ID));
     }
 
     @Override
     public void readAdditionalSaveData(CompoundTag compound) {
         super.readAdditionalSaveData(compound);
-
+        this.entityData.set(NPC_DEFINITION_ID, compound.getString("Definition"));
     }
 
     @Override
-    public Iterable<ItemStack> getArmorSlots() {
+    public @NotNull Iterable<ItemStack> getArmorSlots() {
         return Collections.singleton(ItemStack.EMPTY);
     }
 
     @Override
-    public ItemStack getItemBySlot(EquipmentSlot equipmentSlot) {
+    public @NotNull ItemStack getItemBySlot(EquipmentSlot equipmentSlot) {
         return ItemStack.EMPTY;
     }
 
     @Override
-    public void setItemSlot(EquipmentSlot equipmentSlot, ItemStack itemStack) {
-
-    }
+    public void setItemSlot(EquipmentSlot equipmentSlot, ItemStack itemStack) { }
 
     @Override
-    public HumanoidArm getMainArm() {
+    public @NotNull HumanoidArm getMainArm() {
         return HumanoidArm.RIGHT;
     }
 }
