@@ -1,0 +1,61 @@
+{
+  "name": "Bob",
+  "variables": [
+    {
+      "type": "bool",
+      "name": "is_quest_completed",
+      "defaultValue": false
+    },
+    {
+      "type": "number",
+      "name": "reputation",
+      "defaultValue": 100.0
+    },
+    {
+      "type": "string",
+      "name": "player_dialogue_state",
+      "defaultValue": "greeting"
+    },
+    {
+      "type": "resource_location",
+      "name": "preferred_shop",
+      "defaultValue": "minecraft:emerald"
+    }
+  ],
+  "states": [
+    {
+      "state_name": "idle",
+      "visual_state": {
+        "model": "minecraft:villager",
+        "texture": "minecraft:textures/entity/villager/villager.png",
+        "animation": "idle"
+      },
+      "transitions": [
+        {
+          "target_state": "talking",
+          "condition": {
+            "type": "blablalib:equals",
+            "variable" : "is_quest_completed",
+            "value" : true
+          }
+        }
+      ]
+    },
+    {
+      "state_name": "talking",
+      "visual_state": {
+        "model": "minecraft:villager",
+        "texture": "minecraft:textures/entity/villager/villager.png",
+        "animation": "talk"
+      },
+      "transitions": [
+        {
+          "target_state": "idle",
+          "condition": {
+            "type": "mon_mod:dialogue_ended"
+          }
+        }
+      ]
+    }
+  ]
+}

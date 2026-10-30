@@ -1,6 +1,7 @@
 package io.github.gcjojo.blablalib.entities;
 
 import io.github.gcjojo.blablalib.BlablaLib;
+import io.github.gcjojo.blablalib.npc.NPCVisualState;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
@@ -21,8 +22,8 @@ import net.minecraft.world.level.Level;
 import java.util.Collections;
 
 public class NPC extends LivingEntity {
-    protected static final EntityDataAccessor<NPCDefinition> DEFAULT_STATE = SynchedEntityData.defineId(NPC.class, BlablaLibEntityDataSerializers.npcDefinition());
-    protected static final EntityDataAccessor<NPCDefinition> CURRENT_STATE = SynchedEntityData.defineId(NPC.class, BlablaLibEntityDataSerializers.npcDefinition());
+    protected static final EntityDataAccessor<NPCVisualState> DEFAULT_STATE = SynchedEntityData.defineId(NPC.class, BlablaLibEntityDataSerializers.npcDefinition());
+    protected static final EntityDataAccessor<NPCVisualState> CURRENT_STATE = SynchedEntityData.defineId(NPC.class, BlablaLibEntityDataSerializers.npcDefinition());
     protected static final EntityDataAccessor<Boolean> LOOP_CURRENT_ANIMATION = SynchedEntityData.defineId(NPC.class, EntityDataSerializers.BOOLEAN);
 
     public NPC(EntityType<? extends LivingEntity> entityType, Level level) {
@@ -56,8 +57,8 @@ public class NPC extends LivingEntity {
     @Override
     protected void defineSynchedData(SynchedEntityData.Builder builder) {
         super.defineSynchedData(builder);
-        builder.define(DEFAULT_STATE, NPCDefinition.EMPTY);
-        builder.define(CURRENT_STATE, NPCDefinition.EMPTY);
+        builder.define(DEFAULT_STATE, NPCVisualState.EMPTY);
+        builder.define(CURRENT_STATE, NPCVisualState.EMPTY);
         builder.define(LOOP_CURRENT_ANIMATION, false);
     }
 
@@ -89,11 +90,11 @@ public class NPC extends LivingEntity {
         return textureId;
     }
 
-    public NPCDefinition getDefaultState() {
+    public NPCVisualState getDefaultState() {
         return this.entityData.get(DEFAULT_STATE);
     }
 
-    public NPCDefinition getCurrentState() {
+    public NPCVisualState getCurrentState() {
         return this.entityData.get(CURRENT_STATE);
     }
 
