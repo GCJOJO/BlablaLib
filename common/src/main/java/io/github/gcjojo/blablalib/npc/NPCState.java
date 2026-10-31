@@ -6,7 +6,6 @@ import io.github.gcjojo.blablalib.npc.definitions.NPCStateDefinition;
 import io.github.gcjojo.blablalib.npc.definitions.NPCVariableDefinition;
 import net.minecraft.server.level.ServerPlayer;
 
-import javax.swing.text.html.ObjectView;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -89,8 +88,8 @@ public class NPCState {
     }
 
     @SuppressWarnings("unchecked")
-    private static <V> void setVariableValueInternal(NPCVariable<V> varDef, Object value) {
-        varDef.setValue((V) value);
+    private static <V> void setVariableValueInternal(NPCVariable<V> var, Object value) {
+        var.setValue((V) value);
     }
 
     public Optional<Object> getVariableValue(String variable) {
