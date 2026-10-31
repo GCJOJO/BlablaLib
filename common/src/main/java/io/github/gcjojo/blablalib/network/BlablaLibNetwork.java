@@ -61,32 +61,12 @@ public class BlablaLibNetwork {
         });
 
 
-        NetworkManager.registerReceiver(NetworkManager.Side.C2S, DialogueSetNPCPayload.TYPE, DialogueSetNPCPayload.STREAM_CODEC, (payload, context) -> {
-            ServerPlayer player = (ServerPlayer) context.getPlayer();
-
-            int npcId = payload.npcId();
-            String newModel = payload.npcModel();
-            String newTexture = payload.npcTexture();
-            String newAnimation = payload.npcAnimation();
-            boolean loopAnimation = payload.loopAnimation();
-
-            if(!BlablaLib.playerHasNPC(player, npcId)) return;
-
-            BlablaLib.getPlayerNPC(player, npcId).ifPresent(npc -> {
-                if(!newModel.isEmpty())
-                    npc.setCurrentModel(newModel);
-                if(!newTexture.isEmpty())
-                    npc.setCurrentTexture(newTexture);
-                if(!newAnimation.isEmpty())
-                    npc.setCurrentAnimation(newAnimation, loopAnimation);
-            });
-        });
-
         if (Platform.getEnv() == EnvType.CLIENT) return;
 
         NetworkManager.registerS2CPayloadType(OpenDialoguePayload.TYPE, OpenDialoguePayload.STREAM_CODEC);
         NetworkManager.registerS2CPayloadType(DialogueActionsPayload.TYPE, DialogueActionsPayload.STREAM_CODEC);
         NetworkManager.registerS2CPayloadType(DialogueSpeakersPayload.TYPE, DialogueSpeakersPayload.STREAM_CODEC);
+        NetworkManager.registerS2CPayloadType(NPCVisualStatePayload.TYPE, NPCVisualStatePayload.STREAM_CODEC);
     }
 
     public static void registerClientPackets() {
@@ -107,6 +87,12 @@ public class BlablaLibNetwork {
                 if(!(Minecraft.getInstance().screen instanceof DialogueScreen dialogueScreen)) return;
                 dialogueScreen.receiveSpeakers(payload.speakers());
             });
+        });
+
+        NetworkManager.registerReceiver(NetworkManager.Side.S2C, NPCVisualStatePayload.TYPE, NPCVisualStatePayload.STREAM_CODEC, (payload, context) -> {
+            context.queue(() ->
+                BlablaLib.dirtyNpcClientStates.put(payload.entityId(), payload.newVisualState())
+            );
         });
     }
 }

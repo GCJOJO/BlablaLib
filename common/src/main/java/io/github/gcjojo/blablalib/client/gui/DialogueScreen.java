@@ -9,6 +9,8 @@ import io.github.gcjojo.blablalib.network.payloads.DialogueAdvancedPayload;
 import io.github.gcjojo.blablalib.network.payloads.DialogueCompletedPayload;
 import io.github.gcjojo.liblib.client.gui.GuiScreen;
 import io.github.gcjojo.liblib.math.Color;
+import io.github.gcjojo.liblib.tween.TweenManager;
+import io.github.gcjojo.liblib.tween.TweenSequence;
 import io.github.gcjojo.liblib.utils.MathUtils;
 import lombok.Getter;
 import lombok.Setter;
@@ -50,6 +52,21 @@ public class DialogueScreen extends GuiScreen {
     public DialogueScreen(ResourceLocation dialogueId) {
         super(Component.literal("Dialogue"));
         this.dialogueId = dialogueId;
+
+        // TODO Maybe replace Tween with something else IDK ???
+
+        TweenSequence exitIfEmptySequence = TweenManager.createTweenSequence(TweenManager.TweenSide.CLIENT);
+
+        exitIfEmptySequence.setParallel(false);
+        exitIfEmptySequence.tweenWait(2);
+        exitIfEmptySequence.tweenCallback(this::exitScreenIfEmpty);
+
+        exitIfEmptySequence.play();
+    }
+
+    public void exitScreenIfEmpty() {
+        if(dialogueActions.isEmpty())
+            onClose();
     }
 
     public void receiveSpeakers(List<DialogueSpeaker> newSpeakers) {
