@@ -3,7 +3,7 @@
   "variables": [
     {
       "type": "bool",
-      "name": "is_quest_completed",
+      "name": "has_said_hello",
       "defaultValue": false
     },
     {
@@ -26,41 +26,33 @@
   "states": [
     {
       "state_name": "idle",
-      "dialogue" : "blablalib:test_three_choices",
+      "dialogue" : "blablalib:test_npc_first_dialogue",
       "visual_state": {
-        "model": "blablalib:npc",
-        "texture": "minecraft:textures/entity/villager/villager.png",
+        "model": "blablalib:geometry.npc",
+        "texture": "blablalib:textures/entity/npc/default.png",
         "animation": "idle"
       },
       "transitions": [
         {
-          "target_state": "talking",
+          "target_state": "has_said_hello",
           "condition": {
             "type": "blablalib:equals",
-            "variable" : "is_quest_completed",
+            "variable" : "has_said_hello",
             "value" : true
           }
         }
       ]
     },
     {
-      "state_name": "talking",
-      "dialogue" : "blablalib:test_choice",
+      "state_name": "has_said_hello",
+      "dialogue" : "blablalib:test_npc_said_hello",
       "visual_state": {
-        "model": "blablalib:npc",
-        "texture": "minecraft:textures/entity/villager/villager.png",
+        "model": "blablalib:geometry.npc",
+        "texture": "blablalib:textures/entity/npc/default.png",
         "animation": "talk"
       },
       "transitions": [
-        {
-          "target_state": "idle",
-          "condition": {
-            "type": "blablalib:not",
-            "inner" : {
-              "type" : "blablalib:is_in_dialogue"
-            }
-          }
-        }
+
       ]
     }
   ]

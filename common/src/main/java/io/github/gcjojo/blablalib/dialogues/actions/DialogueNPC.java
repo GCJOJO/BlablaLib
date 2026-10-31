@@ -12,7 +12,6 @@ import io.github.gcjojo.blablalib.npc.VariableType;
 import lombok.Getter;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.RegistryFriendlyByteBuf;
-import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
@@ -37,10 +36,10 @@ public class DialogueNPC extends DialogueAction {
         @Override
         public @NotNull DialogueNPC decode(RegistryFriendlyByteBuf buf) {
             int npcId = buf.readVarInt();
-            String varName = ByteBufCodecs.STRING_UTF8.decode(buf);
-            VariableType varType = VariableType.CODEC.decode(JsonOps.INSTANCE, JsonOps.INSTANCE.createString(buf.readUtf())).getOrThrow().getFirst();
+            String varName = buf.readUtf();
+            VariableType varType = VariableType.STREAM_CODEC.decode(buf);
 
-            Object value = ByteBufCodecs.fromCodecWithRegistries(varType.getValueCodec()).decode(buf);
+            Object value = varType.getValueStreamCodec().decode(buf);
 
             return new DialogueNPC(npcId, varName, varType, value);
         }
@@ -48,16 +47,10 @@ public class DialogueNPC extends DialogueAction {
         @Override
         public void encode(RegistryFriendlyByteBuf buf, DialogueNPC action) {
             buf.writeInt(action.targetNpcId);
-            ByteBufCodecs.STRING_UTF8.encode(buf, action.getVariableName());
-            buf.writeUtf(action.variableType.getSerializedName());
+            buf.writeUtf(action.variableName);
+            VariableType.STREAM_CODEC.encode(buf, action.variableType);
 
-            encodeValue(buf, action.variableType, action.newValue);
-        }
-
-        @SuppressWarnings("unchecked")
-        private <T> void encodeValue(RegistryFriendlyByteBuf buf, VariableType type, Object value) {
-            ((StreamCodec<RegistryFriendlyByteBuf, T>) ByteBufCodecs.fromCodecWithRegistries(type.getValueCodec()))
-                    .encode(buf, (T) value);
+            action.variableType.getValueStreamCodec().encode(buf, action.newValue);
         }
     };
 
@@ -102,7 +95,7 @@ public class DialogueNPC extends DialogueAction {
             if(!state.hasVariable(variableName)) return;
             if(state.getVariableType(variableName) != variableType) return;
 
-
+            state.setVariableValue(variableName, newValue);
         });
     }
 

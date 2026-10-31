@@ -178,10 +178,13 @@
     { "action" : "blablalib:message" , "speaker" : "blablalib:dog", "text" : "You chose the bad one ! >:(" }
   ],
 
-  "test_npc": [
-    { "action": "blablalib:npc", "npc":  0, "model": "blablalib:geometry.npc" },
-    { "action": "blablalib:message", "speaker":  "blablalib:dog", "text": "Hey there I will change model !" },
-    { "action": "blablalib:npc", "npc":  0, "model": "blablalib:geometry.test_model" }
+  "test_npc_first_dialogue": [
+    { "action": "blablalib:message", "speaker":  "blablalib:dog", "text": "Hey there I am an NPC !" },
+    { "action": "blablalib:npc", "npc":  0, "variable" : "has_said_hello", "type":  "bool", "value": true }
+  ],
+
+  "test_npc_said_hello" : [
+    { "action": "blablalib:message", "speaker":  "blablalib:dog", "text": "I changed dialogue !" }
   ],
 
   "test_speed" : [
