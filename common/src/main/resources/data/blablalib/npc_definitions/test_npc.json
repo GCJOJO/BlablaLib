@@ -1,0 +1,59 @@
+{
+  "name": "Bob",
+  "variables": [
+    {
+      "type": "bool",
+      "name": "has_said_hello",
+      "defaultValue": false
+    },
+    {
+      "type": "number",
+      "name": "reputation",
+      "defaultValue": 100.0
+    },
+    {
+      "type": "string",
+      "name": "player_dialogue_state",
+      "defaultValue": "greeting"
+    },
+    {
+      "type": "resource_location",
+      "name": "preferred_shop",
+      "defaultValue": "minecraft:emerald"
+    }
+  ],
+  "root_state" : "idle",
+  "states": [
+    {
+      "state_name": "idle",
+      "dialogue" : "blablalib:test_npc_first_dialogue",
+      "visual_state": {
+        "model": "blablalib:geometry.npc",
+        "texture": "blablalib:textures/entity/npc/default.png",
+        "animation": "idle"
+      },
+      "transitions": [
+        {
+          "target_state": "has_said_hello",
+          "condition": {
+            "type": "blablalib:equals",
+            "variable" : "has_said_hello",
+            "value" : true
+          }
+        }
+      ]
+    },
+    {
+      "state_name": "has_said_hello",
+      "dialogue" : "blablalib:test_npc_said_hello",
+      "visual_state": {
+        "model": "blablalib:geometry.npc",
+        "texture": "blablalib:textures/entity/npc/default.png",
+        "animation": "talk"
+      },
+      "transitions": [
+
+      ]
+    }
+  ]
+}

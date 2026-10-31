@@ -6,7 +6,6 @@ import io.github.gcjojo.blablalib.client.NPCRenderer;
 import io.github.gcjojo.blablalib.client.NpcModelReloadListener;
 import io.github.gcjojo.blablalib.commands.DialogueCommand;
 import io.github.gcjojo.blablalib.entities.BlablaLibEntityTypes;
-import io.github.gcjojo.blablalib.entities.neoforge.BlablaLibEntityDataSerializersImpl;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -25,8 +24,6 @@ public final class ModEntryNeoForge {
     public ModEntryNeoForge(ModContainer container) {
         // Run our common setup.
         BlablaLib.init();
-
-        BlablaLibEntityDataSerializersImpl.SERIALIZERS.register(container.getEventBus());
 
         container.registerConfig(ModConfig.Type.COMMON, BlablaLibNeoForgeConfig.CONFIG_SPEC);
         container.registerExtensionPoint(IConfigScreenFactory.class, ConfigurationScreen::new);

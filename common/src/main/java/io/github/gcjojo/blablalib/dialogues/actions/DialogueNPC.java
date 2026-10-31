@@ -1,39 +1,58 @@
 package io.github.gcjojo.blablalib.dialogues.actions;
 
 import com.google.gson.JsonObject;
-import dev.architectury.networking.NetworkManager;
+import com.mojang.serialization.JsonOps;
 import io.github.gcjojo.blablalib.BlablaLib;
 import io.github.gcjojo.blablalib.client.gui.DialogueScreen;
 import io.github.gcjojo.blablalib.dialogues.DialogueAction;
 import io.github.gcjojo.blablalib.dialogues.DialogueManager;
-import io.github.gcjojo.blablalib.network.payloads.DialogueSetNPCPayload;
+import io.github.gcjojo.blablalib.entities.NPC;
+import io.github.gcjojo.blablalib.npc.NPCState;
+import io.github.gcjojo.blablalib.npc.VariableType;
 import lombok.Getter;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.RegistryFriendlyByteBuf;
-import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerPlayer;
+import org.jetbrains.annotations.NotNull;
 
+import java.util.Optional;
+import java.util.UUID;
+
+
+// Gemini Slop
 public class DialogueNPC extends DialogueAction {
     @Getter
-    private final int npcId;
+    private final int targetNpcId;
     @Getter
-    private final String newModel;
+    private final String variableName;
     @Getter
-    private final String newTexture;
+    private final VariableType variableType;
     @Getter
-    private final String newAnimation;
-    @Getter
-    private final boolean loopAnimation;
+    private final Object newValue;
 
-    public static final StreamCodec<RegistryFriendlyByteBuf, DialogueNPC> NPC_STREAM_CODEC = StreamCodec.composite(
-            ByteBufCodecs.INT, DialogueNPC::getNpcId,
-            ByteBufCodecs.STRING_UTF8, DialogueNPC::getNewModel,
-            ByteBufCodecs.STRING_UTF8, DialogueNPC::getNewTexture,
-            ByteBufCodecs.STRING_UTF8, DialogueNPC::getNewAnimation,
-            ByteBufCodecs.BOOL, DialogueNPC::isLoopAnimation,
-            DialogueNPC::new
-    );
+    public static final StreamCodec<RegistryFriendlyByteBuf, DialogueNPC> NPC_STREAM_CODEC = new StreamCodec<>() {
+        @Override
+        public @NotNull DialogueNPC decode(RegistryFriendlyByteBuf buf) {
+            int npcId = buf.readVarInt();
+            String varName = buf.readUtf();
+            VariableType varType = VariableType.STREAM_CODEC.decode(buf);
+
+            Object value = varType.getValueStreamCodec().decode(buf);
+
+            return new DialogueNPC(npcId, varName, varType, value);
+        }
+
+        @Override
+        public void encode(RegistryFriendlyByteBuf buf, DialogueNPC action) {
+            buf.writeInt(action.targetNpcId);
+            buf.writeUtf(action.variableName);
+            VariableType.STREAM_CODEC.encode(buf, action.variableType);
+
+            action.variableType.getValueStreamCodec().encode(buf, action.newValue);
+        }
+    };
 
     private static final DialogueManager.DialogueActionType<DialogueNPC> TYPE = DialogueManager.registerActionType(
             ResourceLocation.fromNamespaceAndPath(BlablaLib.MOD_ID, "dialogue_npc"),
@@ -41,54 +60,43 @@ public class DialogueNPC extends DialogueAction {
     );
 
     public DialogueNPC(JsonObject json) {
-        if(json.has("npc"))
-            npcId = json.get("npc").getAsInt();
-        else
-            npcId = -1;
+        targetNpcId = json.has("npc") ? json.get("npc").getAsInt() : -1;
+        variableName = json.get("variable").getAsString();
 
-        if(json.has("model"))
-            newModel = json.get("model").getAsString();
-        else
-            newModel = "";
+        String typeStr = json.get("type").getAsString();
+        variableType = VariableType.CODEC.decode(JsonOps.INSTANCE, JsonOps.INSTANCE.createString(typeStr))
+                .getOrThrow().getFirst();
 
-        if(json.has("texture"))
-            newTexture = json.get("texture").getAsString();
-        else
-            newTexture = "";
-
-        if(json.has("animation")) {
-            newAnimation = json.get("animation").getAsString();
-            if(json.has("loop"))
-                loopAnimation = json.get("loop").getAsBoolean();
-            else
-                loopAnimation = false;
-        }
-        else {
-            newAnimation = "";
-            loopAnimation = false;
-        }
+        newValue = variableType.getValueCodec()
+                .decode(JsonOps.INSTANCE, json.get("value"))
+                .getOrThrow().getFirst();
     }
 
-    public DialogueNPC(int npcId, String newModel, String newTexture, String newAnimation, boolean loopAnimation) {
-        this.npcId = npcId;
-        this.newModel = newModel;
-        this.newTexture = newTexture;
-        this.newAnimation = newAnimation;
-        this.loopAnimation = loopAnimation;
+    public DialogueNPC(int npcId, String variableName, VariableType variableType, Object newValue) {
+        this.targetNpcId = npcId;
+        this.variableName = variableName;
+        this.variableType = variableType;
+        this.newValue = newValue;
     }
 
     @Override
     public void setup(DialogueScreen screen) {
         super.setup(screen);
-        if(npcId == -1)
-        {
-            screen.queueAdvanceDialogue();
-            return;
-        }
-
-        NetworkManager.sendToServer(new DialogueSetNPCPayload(npcId, newModel, newTexture, newAnimation, loopAnimation));
-
         screen.queueAdvanceDialogue();
+    }
+
+    @Override
+    public void actionCompleted(ServerPlayer player) {
+        UUID playerId = player.getUUID();
+        Optional<NPC> npcOptional = BlablaLib.getPlayerNPC(player, targetNpcId);
+
+        npcOptional.ifPresent(npc -> {
+            NPCState state = npc.getCurrentState(player);
+            if(!state.hasVariable(variableName)) return;
+            if(state.getVariableType(variableName) != variableType) return;
+
+            state.setVariableValue(variableName, newValue);
+        });
     }
 
     @Override
