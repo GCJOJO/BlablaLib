@@ -7,6 +7,7 @@ import net.minecraft.util.StringRepresentable;
 
 @Getter
 public enum VariableType implements StringRepresentable {
+    NONE("unknown", Codec.EMPTY.codec()),
     BOOL("bool", Codec.BOOL),
     NUMBER("number", Codec.DOUBLE),
     STRING("string", Codec.STRING),

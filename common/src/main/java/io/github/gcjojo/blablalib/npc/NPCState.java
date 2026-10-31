@@ -6,9 +6,11 @@ import io.github.gcjojo.blablalib.npc.definitions.NPCStateDefinition;
 import io.github.gcjojo.blablalib.npc.definitions.NPCVariableDefinition;
 import net.minecraft.server.level.ServerPlayer;
 
+import javax.swing.text.html.ObjectView;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class NPCState {
     private static final int MAX_TRANSITION_STEPS = 100;
@@ -80,10 +82,40 @@ public class NPCState {
         return null;
     }
 
+    public <T> void setVariableValue(String variable, T value) {
+        if(!hasVariable(variable)) return;
+
+        setVariableValueInternal(variables.get(variable), value);
+    }
+
+    @SuppressWarnings("unchecked")
+    private static <V> void setVariableValueInternal(NPCVariable<V> varDef, Object value) {
+        varDef.setValue((V) value);
+    }
+
     public Optional<Object> getVariableValue(String variable) {
         if(!variables.containsKey(variable))
             return Optional.empty();
 
         return Optional.ofNullable(variables.get(variable).getValue());
+    }
+
+    public boolean hasVariable(String variable) {
+        return variables.containsKey(variable);
+    }
+
+    public Optional<NPCVariableDefinition<?>> getVariableDefinition(String variable) {
+        for(NPCVariableDefinition<?> varDef : definition.variableDefinitions()) {
+            if(varDef.variableName().equals(variable))
+                return Optional.of(varDef);
+        }
+
+        return Optional.empty();
+    }
+
+    public VariableType getVariableType(String variable) {
+        AtomicReference<VariableType> returnValue = new AtomicReference<>(VariableType.NONE);
+        getVariableDefinition(variable).ifPresent(varDef -> returnValue.set(varDef.type()));
+        return returnValue.get();
     }
 }

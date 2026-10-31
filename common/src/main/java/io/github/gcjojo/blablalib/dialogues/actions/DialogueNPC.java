@@ -1,39 +1,65 @@
 package io.github.gcjojo.blablalib.dialogues.actions;
 
 import com.google.gson.JsonObject;
+import com.mojang.serialization.JsonOps;
 import io.github.gcjojo.blablalib.BlablaLib;
 import io.github.gcjojo.blablalib.client.gui.DialogueScreen;
 import io.github.gcjojo.blablalib.dialogues.DialogueAction;
 import io.github.gcjojo.blablalib.dialogues.DialogueManager;
+import io.github.gcjojo.blablalib.entities.NPC;
+import io.github.gcjojo.blablalib.npc.NPCState;
+import io.github.gcjojo.blablalib.npc.VariableType;
 import lombok.Getter;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerPlayer;
+import org.jetbrains.annotations.NotNull;
+
+import java.util.Optional;
+import java.util.UUID;
 
 
-
+// Gemini Slop
 public class DialogueNPC extends DialogueAction {
     @Getter
-    private final ResourceLocation targetNpcDefinition;
+    private final int targetNpcId;
     @Getter
-    private final String newModel;
+    private final String variableName;
     @Getter
-    private final String newTexture;
+    private final VariableType variableType;
     @Getter
-    private final String newAnimation;
-    @Getter
-    private final boolean loopAnimation;
+    private final Object newValue;
 
-    public static final StreamCodec<RegistryFriendlyByteBuf, DialogueNPC> NPC_STREAM_CODEC = StreamCodec.composite(
-            ResourceLocation.STREAM_CODEC, DialogueNPC::getTargetNpcDefinition,
-            ByteBufCodecs.STRING_UTF8, DialogueNPC::getNewModel,
-            ByteBufCodecs.STRING_UTF8, DialogueNPC::getNewTexture,
-            ByteBufCodecs.STRING_UTF8, DialogueNPC::getNewAnimation,
-            ByteBufCodecs.BOOL, DialogueNPC::isLoopAnimation,
-            DialogueNPC::new
-    );
+    public static final StreamCodec<RegistryFriendlyByteBuf, DialogueNPC> NPC_STREAM_CODEC = new StreamCodec<>() {
+        @Override
+        public @NotNull DialogueNPC decode(RegistryFriendlyByteBuf buf) {
+            int npcId = buf.readVarInt();
+            String varName = ByteBufCodecs.STRING_UTF8.decode(buf);
+            VariableType varType = VariableType.CODEC.decode(JsonOps.INSTANCE, JsonOps.INSTANCE.createString(buf.readUtf())).getOrThrow().getFirst();
+
+            Object value = ByteBufCodecs.fromCodecWithRegistries(varType.getValueCodec()).decode(buf);
+
+            return new DialogueNPC(npcId, varName, varType, value);
+        }
+
+        @Override
+        public void encode(RegistryFriendlyByteBuf buf, DialogueNPC action) {
+            buf.writeInt(action.targetNpcId);
+            ByteBufCodecs.STRING_UTF8.encode(buf, action.getVariableName());
+            buf.writeUtf(action.variableType.getSerializedName());
+
+            encodeValue(buf, action.variableType, action.newValue);
+        }
+
+        @SuppressWarnings("unchecked")
+        private <T> void encodeValue(RegistryFriendlyByteBuf buf, VariableType type, Object value) {
+            ((StreamCodec<RegistryFriendlyByteBuf, T>) ByteBufCodecs.fromCodecWithRegistries(type.getValueCodec()))
+                    .encode(buf, (T) value);
+        }
+    };
 
     private static final DialogueManager.DialogueActionType<DialogueNPC> TYPE = DialogueManager.registerActionType(
             ResourceLocation.fromNamespaceAndPath(BlablaLib.MOD_ID, "dialogue_npc"),
@@ -41,46 +67,43 @@ public class DialogueNPC extends DialogueAction {
     );
 
     public DialogueNPC(JsonObject json) {
-        if(json.has("npc"))
-            targetNpcDefinition = ResourceLocation.tryParse(json.get("npc").getAsString());
-        else
-            throw new IllegalStateException("NPC Action need to target a definition");
+        targetNpcId = json.has("npc") ? json.get("npc").getAsInt() : -1;
+        variableName = json.get("variable").getAsString();
 
-        if(json.has("model"))
-            newModel = json.get("model").getAsString();
-        else
-            newModel = "";
+        String typeStr = json.get("type").getAsString();
+        variableType = VariableType.CODEC.decode(JsonOps.INSTANCE, JsonOps.INSTANCE.createString(typeStr))
+                .getOrThrow().getFirst();
 
-        if(json.has("texture"))
-            newTexture = json.get("texture").getAsString();
-        else
-            newTexture = "";
-
-        if(json.has("animation")) {
-            newAnimation = json.get("animation").getAsString();
-            if(json.has("loop"))
-                loopAnimation = json.get("loop").getAsBoolean();
-            else
-                loopAnimation = false;
-        }
-        else {
-            newAnimation = "";
-            loopAnimation = false;
-        }
+        newValue = variableType.getValueCodec()
+                .decode(JsonOps.INSTANCE, json.get("value"))
+                .getOrThrow().getFirst();
     }
 
-    public DialogueNPC(ResourceLocation targetNpcDefinition, String newModel, String newTexture, String newAnimation, boolean loopAnimation) {
-        this.targetNpcDefinition = targetNpcDefinition;
-        this.newModel = newModel;
-        this.newTexture = newTexture;
-        this.newAnimation = newAnimation;
-        this.loopAnimation = loopAnimation;
+    public DialogueNPC(int npcId, String variableName, VariableType variableType, Object newValue) {
+        this.targetNpcId = npcId;
+        this.variableName = variableName;
+        this.variableType = variableType;
+        this.newValue = newValue;
     }
 
     @Override
     public void setup(DialogueScreen screen) {
         super.setup(screen);
         screen.queueAdvanceDialogue();
+    }
+
+    @Override
+    public void actionCompleted(ServerPlayer player) {
+        UUID playerId = player.getUUID();
+        Optional<NPC> npcOptional = BlablaLib.getPlayerNPC(player, targetNpcId);
+
+        npcOptional.ifPresent(npc -> {
+            NPCState state = npc.getCurrentState(player);
+            if(!state.hasVariable(variableName)) return;
+            if(state.getVariableType(variableName) != variableType) return;
+
+
+        });
     }
 
     @Override
