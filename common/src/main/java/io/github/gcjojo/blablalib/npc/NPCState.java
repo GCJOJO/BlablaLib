@@ -1,9 +1,14 @@
 package io.github.gcjojo.blablalib.npc;
 
+import com.mojang.datafixers.util.Pair;
+import com.mojang.serialization.Codec;
 import io.github.gcjojo.blablalib.BlablaLib;
 import io.github.gcjojo.blablalib.npc.definitions.NPCDefinition;
 import io.github.gcjojo.blablalib.npc.definitions.NPCStateDefinition;
 import io.github.gcjojo.blablalib.npc.definitions.NPCVariableDefinition;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtOps;
+import net.minecraft.nbt.Tag;
 import net.minecraft.server.level.ServerPlayer;
 
 import java.util.HashMap;
@@ -116,5 +121,40 @@ public class NPCState {
         AtomicReference<VariableType> returnValue = new AtomicReference<>(VariableType.NONE);
         getVariableDefinition(variable).ifPresent(varDef -> returnValue.set(varDef.type()));
         return returnValue.get();
+    }
+
+    public CompoundTag toNbt() {
+        CompoundTag nbt = new CompoundTag();
+
+        for(Map.Entry<String, NPCVariable<?>> entry : variables.entrySet()) {
+            String varName = entry.getKey();
+            NPCVariable<?> var = entry.getValue();
+
+            VariableType varType = getVariableType(varName);
+
+            encodeValueToNbt(nbt, varName, varType, var);
+        }
+
+        return nbt;
+    }
+
+    @SuppressWarnings("unchecked")
+    private static <T> void encodeValueToNbt(CompoundTag nbt, String varName, VariableType varType, NPCVariable<T> variable) {
+        Codec<T> codec = (Codec<T>) varType.getValueCodec();
+
+        Tag valueTag = codec.encodeStart(NbtOps.INSTANCE, variable.getValue()).getOrThrow();
+
+        nbt.put(varName, valueTag);
+    }
+
+    public void fromNbt(CompoundTag nbt) {
+        for(String varName : nbt.getAllKeys()) {
+            CompoundTag valueTag = nbt.getCompound(varName);
+            VariableType varType = getVariableType(varName);
+
+            Object loadedValue = varType.getValueCodec().decode(NbtOps.INSTANCE, valueTag).map(Pair::getFirst);
+            if(loadedValue != null)
+                setVariableValue(varName, loadedValue);
+        }
     }
 }

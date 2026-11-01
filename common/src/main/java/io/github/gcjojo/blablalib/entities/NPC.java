@@ -119,7 +119,11 @@ public class NPC extends LivingEntity {
     }
 
     public NPCState getCurrentState(Player player) {
-        return stateForPlayers.computeIfAbsent(player.getUUID(), uuid -> new NPCState(npcDefinition));
+        return getCurrentState(player.getUUID());
+    }
+
+    public NPCState getCurrentState(UUID playerId) {
+        return stateForPlayers.computeIfAbsent(playerId, uuid -> new NPCState(npcDefinition));
     }
 
     public NPCStateDefinition getCurrentStateDefinition(Player player) {
@@ -148,6 +152,13 @@ public class NPC extends LivingEntity {
     public void addAdditionalSaveData(CompoundTag compound) {
         super.addAdditionalSaveData(compound);
         compound.putString("Definition", this.entityData.get(NPC_DEFINITION_ID));
+
+        CompoundTag playerDataNbt = new CompoundTag();
+        for(UUID playerId : stateForPlayers.keySet()) {
+            playerDataNbt.put(playerId.toString(), stateForPlayers.get(playerId).toNbt());
+        }
+
+        compound.put("PlayerData", playerDataNbt);
     }
 
     @Override
@@ -155,6 +166,15 @@ public class NPC extends LivingEntity {
         super.readAdditionalSaveData(compound);
         this.entityData.set(NPC_DEFINITION_ID, compound.getString("Definition"));
         refreshDefinition();
+
+        if(compound.contains("PlayerData"))
+        {
+            CompoundTag playerDataNbt = compound.getCompound("PlayerData");
+            for(String playerIdString : playerDataNbt.getAllKeys()) {
+                UUID playerId = UUID.fromString(playerIdString);
+                getCurrentState(playerId).fromNbt(playerDataNbt.getCompound(playerIdString));
+            }
+        }
     }
 
     public void refreshDefinition() {
