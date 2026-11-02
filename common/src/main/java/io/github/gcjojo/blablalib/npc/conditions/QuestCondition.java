@@ -1,5 +1,6 @@
 package io.github.gcjojo.blablalib.npc.conditions;
 
+import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import io.github.gcjojo.blablalib.BlablaLib;
@@ -24,7 +25,7 @@ public class QuestCondition extends TransitionCondition {
             instance.group(
                     ResourceLocation.CODEC.fieldOf("quest").forGetter(QuestCondition::getQuestId),
                     ResourceLocation.CODEC.optionalFieldOf("task").forGetter(QuestCondition::getTaskId),
-                    CODEC.STRING.optionalFieldOf("task").forGetter(QuestCondition::getCompletionState)
+                    Codec.STRING.optionalFieldOf("state").forGetter(QuestCondition::getCompletionState)
             ).apply(instance, QuestCondition::new)
     );
 

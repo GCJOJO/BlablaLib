@@ -12,7 +12,7 @@ public record NPCVariableDefinition<T>(String variableName, VariableType type, T
                 instance.group(
                         Codec.STRING.fieldOf("name").forGetter(NPCVariableDefinition::variableName),
                         VariableType.CODEC.fieldOf("type").forGetter(NPCVariableDefinition::type),
-                        valueCodec.fieldOf("defaultValue").forGetter(NPCVariableDefinition::defaultValue)
+                        valueCodec.fieldOf("default_value").forGetter(NPCVariableDefinition::defaultValue)
                 ).apply(instance, NPCVariableDefinition::new));
     }
 

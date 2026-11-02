@@ -4,22 +4,22 @@
     {
       "type": "bool",
       "name": "has_said_hello",
-      "defaultValue": false
+      "default_value": false
     },
     {
       "type": "number",
       "name": "reputation",
-      "defaultValue": 100.0
+      "default_value": 100.0
     },
     {
       "type": "string",
       "name": "player_dialogue_state",
-      "defaultValue": "greeting"
+      "default_value": "greeting"
     },
     {
       "type": "resource_location",
       "name": "preferred_shop",
-      "defaultValue": "minecraft:emerald"
+      "default_value": "minecraft:emerald"
     }
   ],
   "root_state" : "idle",
