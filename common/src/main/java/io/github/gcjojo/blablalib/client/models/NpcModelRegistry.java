@@ -12,7 +12,7 @@ import java.util.Map;
 public class NpcModelRegistry {
     private static final Map<ResourceLocation, ModelLoader.Geometry> geometries = new HashMap<>();
     private static final Map<ResourceLocation, ModelPart> bakedCache = new HashMap<>();
-    private static final Map<ResourceLocation, EntityModel<NPC>> modelInstanceCache = new HashMap();
+    private static final Map<ResourceLocation, EntityModel<NPC>> modelInstanceCache = new HashMap<>();
 
     public static void register(ResourceLocation geoId, ModelLoader.Geometry geometry){
         geometries.put(geoId, geometry);

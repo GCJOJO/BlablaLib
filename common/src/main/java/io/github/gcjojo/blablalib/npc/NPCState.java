@@ -1,13 +1,14 @@
 package io.github.gcjojo.blablalib.npc;
 
-import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.DataResult;
 import io.github.gcjojo.blablalib.BlablaLib;
 import io.github.gcjojo.blablalib.npc.definitions.NPCDefinition;
 import io.github.gcjojo.blablalib.npc.definitions.NPCStateDefinition;
 import io.github.gcjojo.blablalib.npc.definitions.NPCVariableDefinition;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtOps;
+import net.minecraft.nbt.StringTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.server.level.ServerPlayer;
 
@@ -142,19 +143,28 @@ public class NPCState {
     private static <T> void encodeValueToNbt(CompoundTag nbt, String varName, VariableType varType, NPCVariable<T> variable) {
         Codec<T> codec = (Codec<T>) varType.getValueCodec();
 
-        Tag valueTag = codec.encodeStart(NbtOps.INSTANCE, variable.getValue()).getOrThrow();
+        Object rawValue = variable.getValue();
+        if(rawValue instanceof DataResult<?> dataResult)
+            rawValue = dataResult.result().orElse(null);
+
+
+        if(rawValue == null)
+            rawValue = StringTag.valueOf("");
+
+        T cleanValue = (T) rawValue;
+        Tag valueTag = codec.encodeStart(NbtOps.INSTANCE, cleanValue)
+                .resultOrPartial(errorMessage -> BlablaLib.getLogger().error("Failed to encode NPCState value: {}", errorMessage))
+                .orElse(StringTag.valueOf(""));
 
         nbt.put(varName, valueTag);
     }
 
     public void fromNbt(CompoundTag nbt) {
         for(String varName : nbt.getAllKeys()) {
-            CompoundTag valueTag = nbt.getCompound(varName);
+            Tag valueTag = nbt.get(varName);
             VariableType varType = getVariableType(varName);
 
-            Object loadedValue = varType.getValueCodec().decode(NbtOps.INSTANCE, valueTag).map(Pair::getFirst);
-            if(loadedValue != null)
-                setVariableValue(varName, loadedValue);
+            varType.getValueCodec().decode(NbtOps.INSTANCE, valueTag).resultOrPartial().ifPresent(loadedValue -> setVariableValue(varName, loadedValue.getFirst()));
         }
     }
 }

@@ -20,9 +20,6 @@
     ],
     "client": [
       "io.github.gcjojo.blablalib.fabric.client.ModEntryFabricClient"
-    ],
-    "cardinal-components-entity": [
-      "io.github.gcjojo.blablalib.fabric.data_components.ModComponents"
     ]
   },
   "mixins": [
@@ -30,14 +27,10 @@
   ],
   "depends": {
     "fabricloader": ">=0.19.3",
-    "minecraft": "~1.20.1",
-    "java": ">=17",
+    "minecraft": "~1.21.1",
+    "java": ">=21",
     "architectury": ">=9.2.14",
-    "fabric-api": "*"
-  },
-  "custom": {
-    "cardinal-components": [
-      "blablalib:player_data"
-    ]
+    "fabric-api": "*",
+    "liblib": "~${liblib_version}"
   }
 }

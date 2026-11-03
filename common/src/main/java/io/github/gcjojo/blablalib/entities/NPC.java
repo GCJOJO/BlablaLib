@@ -172,9 +172,26 @@ public class NPC extends LivingEntity {
             CompoundTag playerDataNbt = compound.getCompound("PlayerData");
             for(String playerIdString : playerDataNbt.getAllKeys()) {
                 UUID playerId = UUID.fromString(playerIdString);
-                getCurrentState(playerId).fromNbt(playerDataNbt.getCompound(playerIdString));
+                NPCState playerState = getCurrentState(playerId);
+                playerState.fromNbt(playerDataNbt.getCompound(playerIdString));
+                stateForPlayers.put(playerId, playerState);
             }
+
+            updateVisualStateForAll();
         }
+    }
+
+    public void updateVisualStateForAll() {
+        MinecraftServer server = getServer();
+        if(server == null) return;
+
+        for(ServerPlayer player : server.getPlayerList().getPlayers())
+            updateVisualState(player);
+    }
+
+    public void updateVisualState(ServerPlayer player) {
+        NPCState state = getCurrentState(player);
+        NetworkManager.sendToPlayer(player, new NPCVisualStatePayload(getUUID(), state.currentStateDefinition.visualState()));
     }
 
     public void refreshDefinition() {

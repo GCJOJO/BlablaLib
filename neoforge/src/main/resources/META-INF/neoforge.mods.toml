@@ -34,3 +34,10 @@ versionRange = "[13.0.11,)"
 ordering = "AFTER"
 side = "BOTH"
 
+[[dependencies.liblib]]
+modId = "liblib"
+type = "required"
+versionRange = "[${liblib_version},)"
+ordering = "AFTER"
+side = "BOTH"
+
