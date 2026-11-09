@@ -85,12 +85,11 @@ public class DialogueManager {
 
     public static void playerDialogueAdvanced(ServerPlayer player, int newActionIndex) {
         DialogueManager.getPlayerStatus(player).ifPresent(status -> {
-            int oldActionIndex = status.getActionIndex();
 
             List<DialogueAction> actions = status.getCurrentDialogue().getDialogueActions();
-            for(int i = oldActionIndex; i <= newActionIndex; i++) {
-                DialogueAction action = actions.get(i);
-                action.actionCompleted(player);
+            for(int i = status.getLastCompletedIndex(); i <= newActionIndex; i++) {
+                status.setLastCompletedIndex(i);
+                actions.get(i).actionCompleted(player);
             }
 
             status.setActionIndex(newActionIndex);
@@ -122,6 +121,9 @@ public class DialogueManager {
 
         dialogueActionClasses.put(ResourceLocation.tryBuild(BlablaLib.MOD_ID, "quest_state"),    DialogueQuestStateAction.class);
         dialogueActionClasses.put(ResourceLocation.tryBuild(BlablaLib.MOD_ID, "play_cutscene"),  DialoguePlayCutscene.class);
+
+        dialogueActionClasses.values().forEach(DialogueManager::forceInit);
+        forceInit(DialogueUnknownAction.class);
     }
 
     public static Class<? extends DialogueAction> getActionClass(ResourceLocation action) {
@@ -132,6 +134,7 @@ public class DialogueManager {
 
     public static boolean registerCustomAction(ResourceLocation name, Class<? extends DialogueAction> action) {
         if(dialogueActionClasses.containsKey(name)) return false;
+        forceInit(action);
         var put = dialogueActionClasses.put(name, action);
         return put != null;
     }
@@ -140,6 +143,16 @@ public class DialogueManager {
         var overloadList = dialogueActionOverloads.computeIfAbsent(overloadingNamespace, key -> new HashMap<>());
         var put = overloadList.put(actionName, new ActionOverload<T>(overloadClass));
         return put != null;
+    }
+
+    // Claude Slop
+    public static void forceInit(Class<?> actionClass)
+    {
+        try{
+            Class.forName(actionClass.getName(), true, actionClass.getClassLoader());
+        } catch (ClassNotFoundException e) {
+            BlablaLib.getLogger().error("Class not found : {}", e.getMessage());
+        }
     }
 
     public record ActionOverload<T extends DialogueAction>(Class<? extends T> overloadClass) { }

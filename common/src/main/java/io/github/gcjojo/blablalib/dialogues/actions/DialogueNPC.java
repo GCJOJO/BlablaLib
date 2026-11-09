@@ -46,7 +46,7 @@ public class DialogueNPC extends DialogueAction {
 
         @Override
         public void encode(RegistryFriendlyByteBuf buf, DialogueNPC action) {
-            buf.writeInt(action.targetNpcId);
+            buf.writeVarInt(action.targetNpcId);
             buf.writeUtf(action.variableName);
             VariableType.STREAM_CODEC.encode(buf, action.variableType);
 

@@ -155,7 +155,7 @@ public class DialogueMoveImage extends DialogueAction {
 
     @Override
     public void draw(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
-        if(currentTime >= maxTime())
+        if(currentTime > maxTime())
             return;
 
         Optional<DialogueAction> imageAction = screen.getCurrentActions().stream()
@@ -176,7 +176,8 @@ public class DialogueMoveImage extends DialogueAction {
         image.setRotation(newRot);
         image.setScale(newScale);
         // TODO Change this to a full setColor()
-        image.setAlpha(newColor.alpha);
+        if(color.animatesColor())
+            image.setAlpha(newColor.alpha);
 
         currentTime += partialTick;
     }
@@ -207,13 +208,13 @@ public class DialogueMoveImage extends DialogueAction {
 
         public float lerpX(float currentTime, float imageX) {
             if(!animatesX()) return imageX;
-            float progress = easing.apply(currentTime / time);
+            float progress = easing.apply(Math.min(1f, currentTime / time));
             return MathUtils.lerp(xStart.get(), xEnd.get(), progress);
         }
 
         public float lerpY(float currentTime, float imageY) {
             if(!animatesY()) return imageY;
-            float progress = easing.apply(currentTime / time);
+            float progress = easing.apply(Math.min(1f, currentTime / time));
             return MathUtils.lerp(yStart.get(), yEnd.get(), progress);
         }
     }
@@ -233,7 +234,7 @@ public class DialogueMoveImage extends DialogueAction {
 
         public float lerpRotation(float currentTime, float imageRotation) {
             if(!animatesRotation()) return imageRotation;
-            float progress = easing.apply(currentTime / time);
+            float progress = easing.apply(Math.min(1f, currentTime / time));
             return MathUtils.lerp(angleStart.get(), angleEnd.get(), progress);
         }
     }
@@ -253,7 +254,7 @@ public class DialogueMoveImage extends DialogueAction {
 
         public float lerpScale(float currentTime, float imageScale) {
             if(!animatesScale()) return imageScale;
-            float progress = easing.apply(currentTime / time);
+            float progress = easing.apply(Math.min(1f, currentTime / time));
             return MathUtils.lerp(scaleStart.get(), scaleEnd.get(), progress);
         }
     }
@@ -273,7 +274,7 @@ public class DialogueMoveImage extends DialogueAction {
 
         public Color lerpColor(float currentTime, Color imageColor) {
             if(!animatesColor()) return imageColor;
-            float progress = easing.apply(currentTime / time);
+            float progress = easing.apply(Math.min(1f, currentTime / time));
             return MathUtils.lerp(colorStart.get(), colorEnd.get(), progress);
         }
     }

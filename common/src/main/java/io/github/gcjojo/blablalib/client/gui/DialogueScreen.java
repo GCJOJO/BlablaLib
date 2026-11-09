@@ -74,8 +74,12 @@ public class DialogueScreen extends GuiScreen {
     }
 
     public void receiveActions(List<DialogueAction> newActions) {
+        boolean first = dialogueActions.isEmpty();
         dialogueActions.addAll(newActions);
-        refreshActions();
+        if(first && !dialogueActions.isEmpty()) {
+            refreshActions();
+            NetworkManager.sendToServer(new DialogueAdvancedPayload(actionIndex));
+        }
     }
 
     @Override
@@ -175,8 +179,8 @@ public class DialogueScreen extends GuiScreen {
 
             if(currentAction instanceof DialogueUnknownAction){
                 switch(((DialogueUnknownAction) currentAction).getRawAction()){
-                    case "hide_ui" -> hideGui();
-                    case "show_ui" -> showGui();
+                    case "hide_ui", "blablalib:hide_ui" -> hideGui();
+                    case "show_ui", "blablalib:show_ui" -> showGui();
                 }
                 continue;
             }
@@ -186,9 +190,12 @@ public class DialogueScreen extends GuiScreen {
             if(currentAction.isBlocking())
             {
                 actionIndex = i;
-                break;
+                return;
             }
         }
+
+        actionIndex = dialogueActions.size() - 1;
+        queueAdvanceDialogue();
     }
 
     public DialogueSpeaker getDialogueSpeaker(ResourceLocation id) {
@@ -216,7 +223,10 @@ public class DialogueScreen extends GuiScreen {
 
     public void skipDialogue(){
         while(actionIndex < dialogueActions.size() && dialogueActions.get(actionIndex).isSkippable())
+        {
+            advanceDialogueAtTickEnd = false;
             advanceDialogue();
+        }
     }
 
     public void queueEndDialogue() { queueEndDialogue = true; }

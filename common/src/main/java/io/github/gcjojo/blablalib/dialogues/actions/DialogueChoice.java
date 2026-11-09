@@ -11,6 +11,7 @@ import io.github.gcjojo.blablalib.network.payloads.DialogueChoicePayload;
 import io.github.gcjojo.liblib.client.gui.elements.GuiBoxContainer;
 import io.github.gcjojo.liblib.client.gui.elements.GuiButton;
 import io.github.gcjojo.liblib.client.gui.elements.GuiScrollbarContainer;
+import it.unimi.dsi.fastutil.bytes.ByteBidirectionalIterable;
 import lombok.Getter;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.RegistryFriendlyByteBuf;
@@ -22,6 +23,7 @@ import net.minecraft.world.phys.Vec2;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 public class DialogueChoice extends DialogueAction {
     private static final int buttonWidth = 140;
@@ -67,8 +69,8 @@ public class DialogueChoice extends DialogueAction {
             String action2              = object.get("action2").getAsString();
 
 
-            options.add(new Option(choice1, nextSet1, saveSet1, action1));
-            options.add(new Option(choice2, nextSet2, saveSet2, action2));
+            options.add(new Option(choice1, Optional.ofNullable(nextSet1), Optional.ofNullable(saveSet1), action1));
+            options.add(new Option(choice2, Optional.ofNullable(nextSet2), Optional.ofNullable(saveSet2), action2));
         }
 
         if(object.has("choices") && object.get("choices").isJsonArray())
@@ -93,7 +95,7 @@ public class DialogueChoice extends DialogueAction {
                 if(choiceObject.has("action"))
                     action = choiceObject.get("action").getAsString();
 
-                options.add(new Option(name, nextDialogue, saveDialogue, action));
+                options.add(new Option(name, Optional.ofNullable(nextDialogue), Optional.ofNullable(saveDialogue), action));
             });
         }
     }
@@ -123,9 +125,9 @@ public class DialogueChoice extends DialogueAction {
     }
 
     public void handleButtonClick(Option option) {
-        if(option.nextDialogue() != null && option.saveDialogue() != null)
+        if(option.nextDialogue().isPresent() && option.saveDialogue().isPresent())
             //screen.handleChoiceSelection(option.nextDialogue(), option.saveDialogue(), option.action());
-            NetworkManager.sendToServer(new DialogueChoicePayload(option.nextDialogue(), option.saveDialogue(), option.action()));
+            NetworkManager.sendToServer(new DialogueChoicePayload(option.nextDialogue().get(), option.saveDialogue().get(), option.action()));
         screen.queueEndDialogue();
     }
 
@@ -163,11 +165,11 @@ public class DialogueChoice extends DialogueAction {
     @Override
     public boolean isSkippable() { return false; }
 
-    public record Option(String name, ResourceLocation nextDialogue, ResourceLocation saveDialogue, String action) {
+    public record Option(String name, Optional<ResourceLocation> nextDialogue, Optional<ResourceLocation> saveDialogue, String action) {
         public static final StreamCodec<RegistryFriendlyByteBuf, Option> STREAM_CODEC = StreamCodec.composite(
                 ByteBufCodecs.STRING_UTF8, Option::name,
-                ResourceLocation.STREAM_CODEC, Option::nextDialogue,
-                ResourceLocation.STREAM_CODEC, Option::saveDialogue,
+                ByteBufCodecs.optional(ResourceLocation.STREAM_CODEC), Option::nextDialogue,
+                ByteBufCodecs.optional(ResourceLocation.STREAM_CODEC), Option::saveDialogue,
                 ByteBufCodecs.STRING_UTF8, Option::action,
                 Option::new);
     }

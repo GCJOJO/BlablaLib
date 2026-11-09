@@ -31,6 +31,8 @@ public class DialogueLoader extends SimpleJsonResourceReloadListener {
         loadSpeakers(json);
 
         json.keySet().forEach(dialogueName -> {
+            if(dialogueName.equals(SPEAKERS_KEY)) return;
+
             ResourceLocation dialogueId = ResourceLocation.fromNamespaceAndPath(namespace, dialogueName);
             try{
                 JsonElement dialogueJson = json.get(dialogueName);
@@ -93,7 +95,10 @@ public class DialogueLoader extends SimpleJsonResourceReloadListener {
     }
 
     public static void loadSpeakers(JsonObject json) {
-        json.getAsJsonArray(SPEAKERS_KEY).forEach(element -> {
+        JsonArray array = json.getAsJsonArray(SPEAKERS_KEY);
+        if(array == null) return;
+
+        array.forEach(element -> {
             JsonObject obj = element.getAsJsonObject();
             DialogueSpeaker speaker = new DialogueSpeaker(obj);
             if(speaker.isValid())
@@ -104,6 +109,7 @@ public class DialogueLoader extends SimpleJsonResourceReloadListener {
     @Override
     protected void apply(Map<ResourceLocation, JsonElement> files, ResourceManager resourceManager, ProfilerFiller profiler) {
         dialogues.clear();
+        speakers.clear();
         Map<ResourceLocation, Dialogue> newDialogues = new LinkedHashMap<>();
 
         files.entrySet().stream()

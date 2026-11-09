@@ -3,6 +3,7 @@ package io.github.gcjojo.blablalib.dialogues.actions;
 import com.google.gson.JsonObject;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.math.Axis;
 import io.github.gcjojo.blablalib.BlablaLib;
 import io.github.gcjojo.blablalib.dialogues.DialogueAction;
 import io.github.gcjojo.blablalib.dialogues.DialogueManager;
@@ -22,6 +23,18 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.phys.Vec2;
 
 public class DialogueText extends DialogueAction {
+    enum DisplayState {
+        FADE_IN,
+        HOLD,
+        FADE_OUT,
+        TRANSPARENT
+    }
+    enum TextAlignment {
+        LEFT,
+        CENTER,
+        RIGHT
+    }
+
     @Getter
     private String text;
     public static final StreamCodec<RegistryFriendlyByteBuf, DialogueText> TEXT_STREAM_CODEC = StreamCodec.composite(
@@ -42,6 +55,12 @@ public class DialogueText extends DialogueAction {
     @Getter
     private TextTransforms transforms;
 
+    private DisplayState state = DisplayState.FADE_IN;
+    private TextAlignment alignment = TextAlignment.CENTER;
+
+    private int alpha = 0;
+    private float currentTime = 0.0f;
+
     public DialogueText(String text, float fadeInTime, float holdTime, float fadeOutTime, float x, float y, float rotation, float scale, String color){
         this.text = text;
         this.timings = new TextTimings(fadeInTime, holdTime, fadeOutTime);
@@ -55,19 +74,6 @@ public class DialogueText extends DialogueAction {
         this.alpha = 0;
         state = DisplayState.FADE_IN;
     }
-    enum DisplayState {
-        FADE_IN,
-        HOLD,
-        FADE_OUT,
-        TRANSPARENT
-    }
-    enum TextAlignment {
-        LEFT,
-        CENTER,
-        RIGHT
-    }
-    private TextAlignment alignment;
-
 
     public DialogueText(String text, TextTransforms transforms, TextTimings timings, Color color) {
         this.text = text;
@@ -121,14 +127,10 @@ public class DialogueText extends DialogueAction {
         }
     }
 
-    private DisplayState state;
-    private static final Font font = Minecraft.getInstance().font;
-
-    private int alpha = 0;
-    private float currentTime = 0.0f;
-
     @Override
     public void draw(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
+        final Font font = Minecraft.getInstance().font;
+
         if(state == DisplayState.TRANSPARENT)
             return;
 
@@ -165,26 +167,24 @@ public class DialogueText extends DialogueAction {
             }
         }
 
-        if(this.alpha >= 8)
+        MutableComponent textComponent = Component.translatable(this.text);
+
+        int xPos;
+        switch(this.alignment)
         {
-            MutableComponent textComponent = Component.translatable(this.text);
-
-            //ModEntry.getLogger().info("Alpha : %d, Red : %d, Green : %d, Blue : %d".formatted(this.alpha, this.color.getX(), this.color.getY(), this.color.getZ()));
-
-            int xPos;
-            switch(this.alignment)
-            {
-                case LEFT       -> xPos = (int)(screen.width * (this.transforms.position.x * 0.01f));
-                case RIGHT      -> xPos = (int)(screen.width * (this.transforms.position.x * 0.01f) - (font.width(textComponent) * this.transforms.scale));
-                default         -> xPos = (int)(screen.width * (this.transforms.position.x * 0.01f) - (font.width(textComponent) * this.transforms.scale * 0.5f));    // CENTER ALIGNMENT
-            }
-
-            int yPos = (int)(screen.height * (this.transforms.position.y * 0.01f));
-
-            pose.translate(xPos, yPos, 1.0f);
-            pose.scale(this.transforms.scale, this.transforms.scale, 1.0f);
-            graphics.drawString(font, textComponent, 0, 0, color.getColorInt());
+            case LEFT       -> xPos = (int)(screen.width * (this.transforms.position.x * 0.01f));
+            case RIGHT      -> xPos = (int)(screen.width * (this.transforms.position.x * 0.01f) - (font.width(textComponent) * this.transforms.scale));
+            default         -> xPos = (int)(screen.width * (this.transforms.position.x * 0.01f) - (font.width(textComponent) * this.transforms.scale * 0.5f));    // CENTER ALIGNMENT
         }
+
+        int yPos = (int)(screen.height * (this.transforms.position.y * 0.01f));
+
+        pose.translate(xPos, yPos, 1.0f);
+        pose.mulPose(Axis.ZP.rotationDegrees(transforms.rotation()));
+        pose.scale(transforms.scale, transforms.scale, 1.0f);
+        int a = this.alpha * color.alpha / 255;
+        if (a >= 8) graphics.drawString(font, textComponent, 0, 0, (a << 24) | (color.getColorInt() & 0xFFFFFF));
+
         pose.popPose();
 
         currentTime += partialTick;
@@ -245,6 +245,6 @@ public class DialogueText extends DialogueAction {
         public TextTransforms withRotation(float newRotation) { return new TextTransforms(position(), newRotation, scale()); }
         public TextTransforms withScale(float newScale) { return new TextTransforms(position(), rotation(), newScale); }
 
-        public static final TextTransforms DEFAULT = new TextTransforms(new Vec2(0.5f, 0.5f), 0f, 1.0f);
+        public static final TextTransforms DEFAULT = new TextTransforms(new Vec2(50f, 50f), 0f, 1.0f);
     }
 }

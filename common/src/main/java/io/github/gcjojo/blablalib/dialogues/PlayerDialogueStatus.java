@@ -15,6 +15,9 @@ public class PlayerDialogueStatus {
     private int actionIndex = 0;
     @Getter
     @Setter
+    private int lastCompletedIndex = -1;
+    @Getter
+    @Setter
     private int lastReceivedActionIndex = 0;
 
     public PlayerDialogueStatus(UUID newPlayerId) {

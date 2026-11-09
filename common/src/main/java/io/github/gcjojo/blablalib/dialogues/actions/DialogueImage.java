@@ -24,6 +24,7 @@ public class DialogueImage extends DialogueAction {
             ByteBufCodecs.INT, DialogueImage::getInitialWidth,
             ByteBufCodecs.INT, DialogueImage::getInitialHeight,
             ImageTransforms.STREAM_CODEC, DialogueImage::getTransforms,
+            ByteBufCodecs.INT, DialogueImage::getAlpha,
             DialogueImage::new
     );
     private static final DialogueManager.DialogueActionType<DialogueImage> TYPE = DialogueManager.registerActionType(
@@ -59,6 +60,15 @@ public class DialogueImage extends DialogueAction {
         this.initialWidth = initialWidth;
         this.initialHeight = initialHeight;
         this.transforms = transforms;
+    }
+
+    public DialogueImage(int imageId, ResourceLocation imagePath, int initialWidth, int initialHeight, ImageTransforms transforms, int alpha) {
+        this.imageId = imageId;
+        this.image = imagePath;
+        this.initialWidth = initialWidth;
+        this.initialHeight = initialHeight;
+        this.transforms = transforms;
+        this.alpha = alpha;
     }
 
     public DialogueImage(JsonObject object){
@@ -110,15 +120,11 @@ public class DialogueImage extends DialogueAction {
         //pose.translate(screen.width / 2f,screen.height / 2f, 0);
         float xPos = screen.width * transforms.position().x * 0.01f;
         float yPos = screen.height * transforms.position().y * 0.01f;
+
+        float base = (screen.height * 0.5f) / initialHeight * transforms.scale();
         pose.translate(xPos, yPos, 1);
-
-        double imageHeight = ((double) screen.height * 0.5d) / initialHeight;
-        double imageWidth = (double)initialWidth * (imageHeight / (double)initialHeight);
-
-        //image, topPos, leftPos, uvX, uvY, width, height
-        pose.scale((float) imageHeight * transforms.scale(), (float) imageWidth * transforms.scale(), 1);
-
-        pose.rotateAround(Axis.ZP.rotationDegrees(transforms.rotation()), (int)(imageWidth * 0.5f), (int)(imageHeight * 0.5f), 0.0f);
+        pose.mulPose(Axis.ZP.rotationDegrees(transforms.rotation()));
+        pose.scale(base, base, 1);
 
         // Merci copislop AKA copiflop >:(
         RenderSystem.enableBlend();

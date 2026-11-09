@@ -22,6 +22,8 @@ public class DialoguePlayCutscene extends DialogueAction {
     @Getter
     private boolean waitingForEnd;
 
+    private CutsceneLibAPI.CutsceneCompleted callback;
+
     public static final StreamCodec<RegistryFriendlyByteBuf, DialoguePlayCutscene> PLAY_CUTSCENE_STREAM_CODEC = StreamCodec.composite(
             ResourceLocation.STREAM_CODEC, DialoguePlayCutscene::getCutsceneId,
             ByteBufCodecs.BOOL, DialoguePlayCutscene::isWaitingForEnd,
@@ -57,13 +59,15 @@ public class DialoguePlayCutscene extends DialogueAction {
             return;
         }
 
-        CutsceneLibAPI.CUTSCENE_COMPLETED.register(this::onCutsceneCompleted);
+        callback = this::onCutsceneCompleted;
+
+        CutsceneLibAPI.CUTSCENE_COMPLETED.register(callback);
     }
 
     public void onCutsceneCompleted(ResourceLocation cutsceneId) {
         if(!cutsceneId.equals(getCutsceneId())) return;
 
-        CutsceneLibAPI.CUTSCENE_COMPLETED.unregister(this::onCutsceneCompleted);
+        CutsceneLibAPI.CUTSCENE_COMPLETED.unregister(callback);
         screen.queueAdvanceDialogue();
     }
 
@@ -89,7 +93,7 @@ public class DialoguePlayCutscene extends DialogueAction {
 
     @Override
     public boolean isBlocking() {
-        return false;
+        return isWaitingForEnd();
     }
 
     @Override

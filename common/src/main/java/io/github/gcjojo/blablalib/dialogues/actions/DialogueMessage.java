@@ -26,7 +26,6 @@ import java.util.Random;
 
 public class DialogueMessage extends DialogueAction
 {
-    private static final Font font = Minecraft.getInstance().font;
     public static final StreamCodec<RegistryFriendlyByteBuf, DialogueMessage> MESSAGE_STREAM_CODEC = StreamCodec.composite(
             ResourceLocation.STREAM_CODEC, DialogueMessage::getSpeakerId,
             ByteBufCodecs.STRING_UTF8, DialogueMessage::getDialogueLine,
@@ -48,6 +47,9 @@ public class DialogueMessage extends DialogueAction
     @Getter
     private final String dialogueLine;
 
+    private int lastCharIndex() { return richText.getStyledCharacters().size() - 1; }
+    private boolean isFullyDrawn() { return charIndex >= lastCharIndex(); }
+
     public DialogueMessage(ResourceLocation speakerId, String dialogueLine) {
         this.speakerId = speakerId;
         this.dialogueLine = dialogueLine;
@@ -59,15 +61,16 @@ public class DialogueMessage extends DialogueAction
         else
             this.speakerId = null;
 
-        this.dialogueLine = object.has("text") ? Component.translatable(object.get("text").getAsString()).getString() : "";
+        this.dialogueLine = object.has("text") ? object.get("text").getAsString() : "";
     }
 
     @Override
     public void setup(DialogueScreen screen) {
         super.setup(screen);
-        richText = new GuiRichText(screen, Component.literal(dialogueLine));
+        richText = new GuiRichText(screen, Component.translatable(dialogueLine));
 
         richText.setDrawnCharacters(0);
+        richText.setTextWidth(270);
 
         if(this.dialogueLine.isEmpty())
             screen.queueAdvanceDialogue();
@@ -83,7 +86,7 @@ public class DialogueMessage extends DialogueAction
         }
 
         if(++characterTimer < screen.getDialogueSpeed()) return;
-        if (charIndex >= dialogueLine.length()) return;
+        if (isFullyDrawn()) return;
 
         characterTimer = 0;
         charIndex++;
@@ -94,12 +97,14 @@ public class DialogueMessage extends DialogueAction
 
         char currentChar = richText.getLastDrawCharacter();
         if (currentChar == '.' || currentChar == '!' || currentChar == '?') {
-            pauseTimer = characterTimer * screen.getWaitMultiplier();
+            pauseTimer = screen.getDialogueSpeed() * screen.getWaitMultiplier();
         }
     }
 
     @Override
     public void draw(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
+        final Font font = Minecraft.getInstance().font;
+
         int boxWidth = 300;
         int boxHeight = 80;
         int boxX = (screen.width - boxWidth) / 2;
@@ -117,7 +122,7 @@ public class DialogueMessage extends DialogueAction
 
             richText.draw(graphics, mouseX, mouseY, partialTick, Vec2.ZERO);
 
-            if (charIndex >= dialogueLine.length() && (tickCount % 20 < 10)) {
+            if (isFullyDrawn() && (tickCount % 20 < 10)) {
                 graphics.drawString(font, "▼", boxX + boxWidth - 15, boxY + boxHeight - 15, 0xFFFFFF, false);
             }
         }
@@ -127,10 +132,10 @@ public class DialogueMessage extends DialogueAction
 
     @Override
     public void mouseClicked(double mouseX, double mouseY, int button) {
-        if(charIndex >= dialogueLine.length())
+        if(isFullyDrawn())
             screen.queueAdvanceDialogue();
         else {
-            charIndex = dialogueLine.length();
+            charIndex = lastCharIndex();
             richText.setDrawnCharacters(charIndex);
         }
     }
@@ -140,10 +145,10 @@ public class DialogueMessage extends DialogueAction
         if (keyCode != 257 && keyCode != 32)
             return;
 
-        if(charIndex >= dialogueLine.length())
+        if(isFullyDrawn())
             screen.queueAdvanceDialogue();
         else {
-            charIndex = dialogueLine.length();
+            charIndex = lastCharIndex();
             richText.setDrawnCharacters(charIndex);
         }
     }

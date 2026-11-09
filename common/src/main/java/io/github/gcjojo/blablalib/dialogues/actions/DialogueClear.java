@@ -41,7 +41,7 @@ public class DialogueClear extends DialogueAction {
     public void setup(DialogueScreen screen) {
         super.setup(screen);
         clearedClass.ifPresentOrElse(screen::clearActions, screen::clearActions);
-        screen.advanceDialogue();
+        screen.queueAdvanceDialogue();
     }
 
     @Override

@@ -47,14 +47,15 @@ public class DialogueExecuteCommand extends DialogueAction {
     @Override
     public void actionCompleted(ServerPlayer player) {
         if(this.command != null) {
-            if (this.command.contains("<PLAYER>"))
-                this.command = this.command.replace("<PLAYER>", player.getName().getString());
+            String playerCommand = this.command;
+            if (playerCommand.contains("<PLAYER>"))
+                playerCommand = playerCommand.replace("<PLAYER>", player.getName().getString());
 
             MinecraftServer server = player.getServer();
 
             if (server == null) return;
 
-            String formattedCommand = "execute positioned as %s rotated as %s run %s".formatted(player.getName().getString(), player.getName().getString(), command);
+            String formattedCommand = "execute positioned as %s rotated as %s run %s".formatted(player.getName().getString(), player.getName().getString(), playerCommand);
             try {
                 int success = server.getCommands().getDispatcher().execute(formattedCommand, server.createCommandSourceStack().withEntity(player).withLevel((ServerLevel) player.level()));
                 BlablaLib.getLogger().warn(String.valueOf(success));
