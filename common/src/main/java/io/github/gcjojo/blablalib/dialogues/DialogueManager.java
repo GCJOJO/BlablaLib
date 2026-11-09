@@ -118,6 +118,7 @@ public class DialogueManager {
         dialogueActionClasses.put(ResourceLocation.tryBuild(BlablaLib.MOD_ID, "sound"),          DialogueSound.class);
         dialogueActionClasses.put(ResourceLocation.tryBuild(BlablaLib.MOD_ID, "timings"),        DialogueTimings.class);
         dialogueActionClasses.put(ResourceLocation.tryBuild(BlablaLib.MOD_ID, "npc"),            DialogueNPC.class);
+        dialogueActionClasses.put(ResourceLocation.tryBuild(BlablaLib.MOD_ID, "press_enter"),    DialoguePressEnter.class);
 
         dialogueActionClasses.put(ResourceLocation.tryBuild(BlablaLib.MOD_ID, "quest_state"),    DialogueQuestStateAction.class);
         dialogueActionClasses.put(ResourceLocation.tryBuild(BlablaLib.MOD_ID, "play_cutscene"),  DialoguePlayCutscene.class);

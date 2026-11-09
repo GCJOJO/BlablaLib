@@ -60,7 +60,7 @@ public class DialogueNPC extends DialogueAction {
     );
 
     public DialogueNPC(JsonObject json) {
-        targetNpcId = json.has("npc") ? json.get("npc").getAsInt() : -1;
+        targetNpcId = json.has("npc") ? json.get("npc").getAsInt() : 0;
         variableName = json.get("variable").getAsString();
 
         String typeStr = json.get("type").getAsString();
